@@ -28,15 +28,23 @@
         <div id="countdown" class="countdown" aria-label="Time remaining in block">0:00</div>
         <p id="clock-caption" class="clock-caption">BLOCK REMAINING</p>
         <div class="metrics"><div><span class="metric-title">CADENCE <small>RPM</small></span><strong id="cadence">—</strong></div><div><span class="metric-title">RESISTANCE</span><strong id="resistance">—</strong></div><div><span class="metric-title">POWER <small>W</small></span><strong id="watts">—</strong></div></div>
-        <p class="target-note">Targets · power is estimated, not live bike telemetry</p>
         <div class="block-track"><div id="block-progress"></div></div>
+      </div>
+      <div class="next-panel stage upcoming" aria-label="Next block">
+        <div class="stage-top"><span class="phase">UP NEXT</span></div>
+        <h2 id="next-name"></h2>
+        <div id="next-duration" class="countdown" aria-label="Next block duration"></div>
+        <p class="clock-caption">BLOCK DURATION</p>
+        <div id="next-targets" class="metrics"></div>
+      </div>
+      <div class="ride-controls">
         <div class="transport"><button id="previous" class="outline" aria-label="Previous block">← Previous</button><button id="toggle" class="primary">Start workout ▶</button><button id="next" class="outline" aria-label="Next block">Next →</button></div>
         <div class="options"><label><input id="sound" type="checkbox" checked> Sound cues</label><label><input id="voice" type="checkbox"> Spoken cues</label><button id="restart" class="quiet">Restart</button></div>
       </div>
-      <aside class="ride-side"><div class="next-panel"><p class="eyebrow">UP NEXT</p><h3 id="next-name"></h3><p id="next-duration"></p><div id="next-targets"></div></div><div class="session-panel"><div><span>RIDE ELAPSED</span><strong id="elapsed">0:00</strong></div><div><span>RIDE REMAINING</span><strong id="ride-remaining">0:00</strong></div><div class="session-track"><div id="session-progress"></div></div></div><p id="ride-description" class="subtle"></p><p class="keyboard-hint">Space: start / pause<br>← →: change block · F: fullscreen</p><p id="sleep-status" class="subtle"></p></aside>
+      <aside class="ride-side"><div class="session-panel"><div><span>RIDE ELAPSED</span><strong id="elapsed">0:00</strong></div><div><span>RIDE REMAINING</span><strong id="ride-remaining">0:00</strong></div><div class="session-track"><div id="session-progress"></div></div></div><p id="ride-description" class="subtle"></p><p class="keyboard-hint">Space: start / pause<br>← →: change block · F: fullscreen</p><p id="sleep-status" class="subtle"></p></aside>
     </div>
-    <div class="schedule-heading"><h2>The route ahead</h2><span id="total-label"></span></div><div id="timeline" class="timeline" aria-label="Workout profile"></div>
-    <div id="schedule" class="schedule" aria-label="Workout blocks"></div>
+    <section class="route-panel" aria-label="Program blocks"><div class="schedule-heading"><h2>The route ahead</h2><span id="total-label"></span></div><div id="timeline" class="timeline" aria-label="Workout profile"></div>
+    <div id="schedule" class="schedule" aria-label="Workout blocks"></div></section>
     <p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
   </section>
 </main>

@@ -89,11 +89,12 @@ function showCards(items) {
 }
 function buildSchedule() {
   $('timeline').replaceChildren(); $('schedule').replaceChildren();
-  const head = el('div', null, 'schedule-head'); for (const label of ['START', 'BLOCK', 'LENGTH', 'RPM', 'RESISTANCE', 'WATTS']) head.append(el('span', label)); $('schedule').append(head);
+  const head = el('div', null, 'schedule-head'); for (const label of ['BLOCK', 'DURATION / LEFT', 'RPM', 'RESISTANCE', 'WATTS']) head.append(el('span', label)); $('schedule').append(head);
   selected.intervals.forEach((step, index) => {
-    const bar = el('button'); bar.dataset.kind = step.kind; bar.style.flexGrow = step.durationSeconds; bar.style.height = height(step); bar.title = `${formatTime(step.startSeconds)} · ${step.label}`; bar.setAttribute('aria-label', `Go to ${step.label}`); bar.onclick = () => jump(index); $('timeline').append(bar);
+    const bar = el('button'); bar.dataset.kind = step.kind; bar.style.flexGrow = step.durationSeconds; bar.style.height = height(step); bar.title = `${step.label} · ${formatTime(step.durationSeconds)}`; bar.setAttribute('aria-label', `Go to ${step.label}`); bar.onclick = () => jump(index); $('timeline').append(bar);
     const row = el('button'); row.dataset.index = index; row.setAttribute('aria-label', `Go to ${step.label}, ${formatTime(step.durationSeconds)}`);
-    row.append(el('small', formatTime(step.startSeconds)), el('strong', step.label), el('span', formatTime(step.durationSeconds)), el('span', displayTarget(step.cadence)), el('span', displayTarget(step.resistance)), el('span', step.watts == null ? '—' : Math.round(step.watts)));
+    const duration = el('span', formatTime(step.durationSeconds), 'block-duration');
+    row.append(el('strong', step.label), duration, el('span', displayTarget(step.cadence)), el('span', displayTarget(step.resistance)), el('span', step.watts == null ? '—' : Math.round(step.watts)));
     row.onclick = () => jump(index); $('schedule').append(row);
   });
 }
@@ -101,7 +102,7 @@ async function selectWorkout(raw, elapsed = 0) {
   if (clock?.running) { clock.pause(); saveSession(); await releaseWake(); }
   try { selected = compileWorkout(raw); } catch (e) { $('notice').textContent = e.message; return; }
   rawSelected = { ...raw, tags: selected.tags }; clock = new WorkoutClock(selected.totalSeconds); clock.seek(elapsed); currentIndex = -1; completed = elapsed >= selected.totalSeconds; lastCue = '';
-  $('library').hidden = true; $('player').hidden = false; $('ride-name').textContent = selected.name; $('ride-description').textContent = selected.description || ''; $('total-label').textContent = `${formatTime(selected.totalSeconds)} total · ${selected.intervals.length} blocks`;
+  $('library').hidden = true; $('player').hidden = false; document.body.classList.add('workout-open'); $('ride-name').textContent = selected.name; $('ride-description').textContent = selected.description || ''; $('total-label').textContent = `${formatTime(selected.totalSeconds)} total · ${selected.intervals.length} blocks`;
   buildSchedule(); render(); saveSession(); window.scrollTo({ top: 0 });
 }
 async function jump(index) {
@@ -126,7 +127,13 @@ function render() {
   if (changed) {
     currentIndex = p.index;
     for (const [index, node] of [...$('timeline').children].entries()) { node.classList.toggle('active', index === p.index); node.setAttribute('aria-current', index === p.index ? 'step' : 'false'); }
-    for (const node of $('schedule').querySelectorAll('[data-index]')) { node.classList.toggle('active', Number(node.dataset.index) === p.index); node.setAttribute('aria-current', Number(node.dataset.index) === p.index ? 'step' : 'false'); }
+    for (const node of $('schedule').querySelectorAll('[data-index]')) { node.classList.toggle('active', Number(node.dataset.index) === p.index); node.setAttribute('aria-current', Number(node.dataset.index) === p.index ? 'step' : 'false'); node.querySelector('.block-duration').removeAttribute('aria-label'); node.querySelector('.block-duration').textContent = formatTime(selected.intervals[Number(node.dataset.index)].durationSeconds); }
+    // Move only the block list, keeping the timer and page stationary.
+    const activeRow = $('schedule').querySelector('[aria-current="step"]');
+    if (activeRow) {
+      const list = $('schedule'), header = list.querySelector('.schedule-head');
+      list.scrollTop = Math.max(0, activeRow.getBoundingClientRect().top - list.getBoundingClientRect().top + list.scrollTop - header.offsetHeight - list.clientTop);
+    }
     if (clock.running && p.index >= 0) { tone(880, .25); announce(selected.intervals[p.index]); }
   }
   const step = selected.intervals[p.index], next = selected.intervals[p.index + 1];
@@ -134,20 +141,33 @@ function render() {
   $('phase').textContent = p.done ? 'COMPLETE' : clock.running ? ({ warmup: 'WARM UP', work: 'WORK', recovery: 'RECOVERY', cooldown: 'COOL DOWN' }[step.kind]) : clock.read() === 0 ? 'READY TO RIDE' : 'PAUSED';
   $('step-count').textContent = `${p.done ? selected.intervals.length : p.index + 1} / ${selected.intervals.length} BLOCKS`;
   $('interval-label').textContent = p.done ? 'Workout complete. Nice ride.' : step.label;
+  const activeDuration = $('schedule').querySelector('[aria-current="step"] .block-duration');
+  if (activeDuration) {
+    activeDuration.textContent = `${formatTime(p.remaining)} left`;
+    activeDuration.setAttribute('aria-label', `${formatTime(p.remaining)} remaining in block`);
+  }
   $('countdown').textContent = formatTime(p.remaining); $('clock-caption').textContent = p.done ? 'YOU MADE THE TIME.' : 'BLOCK REMAINING';
   for (const id of ['cadence', 'resistance', 'watts']) $(id).textContent = step ? displayTarget(id === 'watts' && step[id] != null ? Math.round(step[id]) : step[id]) : '—';
   $('elapsed').textContent = formatTime(Math.floor(p.elapsed)); $('ride-remaining').textContent = formatTime(selected.totalSeconds - p.elapsed);
   $('session-progress').style.width = `${p.elapsed / selected.totalSeconds * 100}%`; $('block-progress').style.width = p.done ? '100%' : `${(step.durationSeconds - p.remaining) / step.durationSeconds * 100}%`;
   $('toggle').textContent = p.done ? 'Ride again ↻' : clock.running ? 'Pause Ⅱ' : clock.read() === 0 ? 'Start workout ▶' : 'Resume ▶';
   $('previous').disabled = p.index === 0; $('next').disabled = p.done || p.index >= selected.intervals.length - 1;
-  $('next-name').textContent = p.done ? 'Time to recover.' : next?.label || 'Finish line'; $('next-duration').textContent = p.done ? 'Workout finished' : next ? `${formatTime(next.durationSeconds)} next block` : 'Your last block';
-  $('next-targets').replaceChildren(); if (next && !p.done) for (const [v, unit] of [[next.cadence, 'rpm'], [next.resistance, 'resistance'], [next.watts, 'W']]) if (v != null) $('next-targets').append(el('div', `${Math.round(v * 10) / 10} ${unit}`));
+  $('next-name').textContent = p.done ? 'Time to recover.' : next?.label || 'Finish line';
+  $('next-duration').textContent = next && !p.done ? formatTime(next.durationSeconds) : '—';
+  document.querySelector('.upcoming').dataset.kind = next?.kind || 'cooldown';
+  $('next-targets').replaceChildren();
+  for (const [key, label, unit] of [['cadence', 'CADENCE', 'RPM'], ['resistance', 'RESISTANCE', ''], ['watts', 'POWER', 'W']]) {
+    const metric = el('div'), title = el('span', null, 'metric-title');
+    title.append(document.createTextNode(label + ' '), el('small', unit));
+    metric.append(title, el('strong', next && !p.done ? displayTarget(key === 'watts' && next[key] != null ? Math.round(next[key]) : next[key]) : '—'));
+    $('next-targets').append(metric);
+  }
   const cue = Math.ceil(p.remaining);
   if (clock.running && cue >= 1 && cue <= 3 && lastCue !== `${p.index}:${cue}`) { lastCue = `${p.index}:${cue}`; tone(600, .09); }
 }
 $('toggle').onclick = toggle; $('previous').onclick = () => jump(currentIndex === -1 ? selected.intervals.length - 1 : currentIndex - 1); $('next').onclick = () => jump(currentIndex + 1);
 $('restart').onclick = async () => { if (!clock) return; clock.pause(); render(); releaseWake(); if (await ask('Restart this ride?', 'Return to the beginning? Your current progress will be replaced.')) { clock.seek(0); currentIndex = -1; completed = false; render(); saveSession(); } };
-$('back').onclick = () => { clock?.pause(); saveSession(); releaseWake(); if ('speechSynthesis' in window) speechSynthesis.cancel(); $('player').hidden = true; $('library').hidden = false; document.title = 'PelotonicReaction · Workout player'; };
+$('back').onclick = () => { clock?.pause(); saveSession(); releaseWake(); if ('speechSynthesis' in window) speechSynthesis.cancel(); $('player').hidden = true; $('library').hidden = false; document.body.classList.remove('workout-open'); document.title = 'PelotonicReaction · Workout player'; };
 $('fullscreen').onclick = async () => { try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); } catch { $('sleep-status').textContent = 'Fullscreen is unavailable in this browser.'; } };
 $('download').onclick = () => { const blob = new Blob([JSON.stringify(tagControls.exportProgram(rawSelected), null, 2) + '\n'], { type: 'application/json' }); const url = URL.createObjectURL(blob), link = el('a'); link.href = url; link.download = `${selected.id || 'workout'}.json`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); };
 $('import-open').onclick = () => $('import-file').click();

@@ -34,7 +34,7 @@ On the other device, open `http://YOUR-COMPUTER-LAN-IP:8080`. Allow the server t
 2. Try **One-minute sound check** first; enable **Sound cues** and optionally **Spoken cues**.
 3. Press **Start workout**. A short tone sounds at 3, 2 and 1 seconds remaining and a longer tone marks each new block.
 4. Pause/resume any time. Previous, next and schedule/profile clicks let you move between blocks. A running ride pauses for confirmation before jumping.
-5. Fullscreen enlarges the display. `Space` starts/pauses when the page has focus; arrow keys change blocks; `F` toggles fullscreen. Focused buttons keep their normal Space behavior.
+5. On landscape tablet screens (at least 800 × 560 browser pixels), the timer and program blocks sit side by side in a dashboard that fits the viewport. The block list follows the current interval automatically; you can also scroll that list independently to inspect other blocks. Smaller screens retain the stacked layout. Fullscreen enlarges the display. `Space` starts/pauses when the page has focus; arrow keys change blocks; `F` toggles fullscreen. Focused buttons keep their normal Space behavior.
 
 The clock uses elapsed wall time, so delayed browser callbacks don't stretch an interval. If a tab was suspended, it catches up to the current block without replaying all missed cues. Keep the browser visible for dependable audio; browsers and operating systems can silence background tabs or sleeping devices. Speech depends on browser/device voice availability. The app requests a screen wake lock where supported (usually localhost or HTTPS); for plain HTTP over a LAN, disable automatic device sleep manually if needed.
 
