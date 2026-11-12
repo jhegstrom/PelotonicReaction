@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "3-by-20-5-at-130",
+  "name": "3 by 20-5 at 130",
+  "description": "Three 20-minute climbs with easy resets. The source has timings only; cadence, resistance and power are intentionally unspecified. Total source duration is 85 minutes.",
+  "tags": [
+    "Endurance"
+  ],
+  "source": {
+    "workbook": "Grupetto Workouts.xlsx",
+    "sheet": "3 by 20-5 at 130",
+    "convertedOn": "2026-11-11",
+    "power": "Workbook estimate; not live or measured power"
+  },
+  "steps": [
+    {
+      "label": "Warm-up",
+      "durationSeconds": 600,
+      "kind": "warmup",
+      "sourceRow": 2
+    },
+    {
+      "label": "Climb",
+      "durationSeconds": 1200,
+      "kind": "work",
+      "sourceRow": 3
+    },
+    {
+      "label": "Rest",
+      "durationSeconds": 300,
+      "kind": "recovery",
+      "sourceRow": 4
+    },
+    {
+      "label": "Climb",
+      "durationSeconds": 1200,
+      "kind": "work",
+      "sourceRow": 5
+    },
+    {
+      "label": "Rest",
+      "durationSeconds": 300,
+      "kind": "recovery",
+      "sourceRow": 6
+    },
+    {
+      "label": "Climb",
+      "durationSeconds": 1200,
+      "kind": "work",
+      "sourceRow": 7
+    },
+    {
+      "label": "Cool-down",
+      "durationSeconds": 300,
+      "kind": "cooldown",
+      "sourceRow": 8
+    }
+  ]
+}

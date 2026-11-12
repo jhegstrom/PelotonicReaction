@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#11171c"><title>PelotonicReaction · Workout player</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+<header class="topbar"><a class="brand" href="/" aria-label="PelotonicReaction home"><span class="brand-mark">P<span>R</span></span><span>PELOTONIC<span class="light">REACTION</span></span></a><span class="local-label"><i></i> YOUR RIDE. YOUR RHYTHM.</span><button id="fullscreen" class="quiet">Fullscreen ↗</button></header>
+<main>
+  <section id="library" aria-labelledby="library-title">
+    <div class="library-heading"><div><p class="eyebrow">THE WORKOUT ROOM</p><h1 id="library-title">Pick your next ride.</h1><p class="subtle">A clear plan. A big clock. One block at a time.</p></div><button id="import-open" class="outline">＋ Import workout</button><input id="import-file" type="file" accept=".json,application/json" hidden></div>
+    <div id="notice" role="status"></div><div id="workout-cards" class="cards"><p>Loading workouts…</p></div>
+    <p class="library-note">Make it yours: edit a workout’s JSON file, then refresh the library. No account required.</p>
+  </section>
+  <section id="player" hidden aria-label="Workout player">
+    <div class="ride-heading"><button id="back" class="quiet">← Workouts</button><h1 id="ride-name"></h1><button id="download" class="quiet">Export JSON ↓</button></div>
+    <div class="player-grid">
+      <div class="stage" id="stage">
+        <div class="stage-top"><span id="phase" class="phase">READY</span><span id="step-count"></span></div>
+        <h2 id="interval-label"></h2>
+        <div id="countdown" class="countdown" aria-label="Time remaining in block">0:00</div>
+        <p id="clock-caption" class="clock-caption">BLOCK REMAINING</p>
+        <div class="metrics"><div><span class="metric-title">CADENCE <small>RPM</small></span><strong id="cadence">—</strong></div><div><span class="metric-title">RESISTANCE</span><strong id="resistance">—</strong></div><div><span class="metric-title">POWER <small>W</small></span><strong id="watts">—</strong></div></div>
+        <p class="target-note">Targets · power is estimated, not live bike telemetry</p>
+        <div class="block-track"><div id="block-progress"></div></div>
+        <div class="transport"><button id="previous" class="outline" aria-label="Previous block">← Previous</button><button id="toggle" class="primary">Start workout ▶</button><button id="next" class="outline" aria-label="Next block">Next →</button></div>
+        <div class="options"><label><input id="sound" type="checkbox" checked> Sound cues</label><label><input id="voice" type="checkbox"> Spoken cues</label><button id="restart" class="quiet">Restart</button></div>
+      </div>
+      <aside class="ride-side"><div class="next-panel"><p class="eyebrow">UP NEXT</p><h3 id="next-name"></h3><p id="next-duration"></p><div id="next-targets"></div></div><div class="session-panel"><div><span>RIDE ELAPSED</span><strong id="elapsed">0:00</strong></div><div><span>RIDE REMAINING</span><strong id="ride-remaining">0:00</strong></div><div class="session-track"><div id="session-progress"></div></div></div><p id="ride-description" class="subtle"></p><p class="keyboard-hint">Space: start / pause<br>← →: change block · F: fullscreen</p><p id="sleep-status" class="subtle"></p></aside>
+    </div>
+    <div class="schedule-heading"><h2>The route ahead</h2><span id="total-label"></span></div><div id="timeline" class="timeline" aria-label="Workout profile"></div>
+    <div id="schedule" class="schedule" aria-label="Workout blocks"></div>
+    <p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
+  </section>
+</main>
+<dialog id="confirm-dialog"><h2 id="dialog-title"></h2><p id="dialog-copy"></p><div class="dialog-actions"><button id="dialog-cancel" class="outline">Cancel</button><button id="dialog-ok" class="primary">Continue</button></div></dialog>
+<footer>PELOTONICREACTION <span>Built for the view from your bike.</span></footer>
+<script type="module" src="/app.js"></script>
+</body></html>

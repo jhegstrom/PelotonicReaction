@@ -1,0 +1,224 @@
+{
+  "schemaVersion": 1,
+  "id": "mt-peloton-90-minute-climb",
+  "name": "Mt Peloton 90 minute climb",
+  "description": "Converted planned cadence, resistance and estimated watts from the workbook. Actual ride averages are not targets.",
+  "tags": [
+    "Climbing"
+  ],
+  "source": {
+    "workbook": "Grupetto Workouts.xlsx",
+    "sheet": "Mt Peloton 90 minute climb",
+    "convertedOn": "2026-11-11",
+    "power": "Workbook estimate; not live or measured power"
+  },
+  "steps": [
+    {
+      "label": "Warm-up 1",
+      "durationSeconds": 300,
+      "kind": "warmup",
+      "cadence": 80.0,
+      "resistance": 30.0,
+      "watts": 53.2,
+      "sourceRow": 2
+    },
+    {
+      "label": "Warm-up 2",
+      "durationSeconds": 300,
+      "kind": "warmup",
+      "cadence": 90.0,
+      "resistance": 30.0,
+      "watts": 65.1,
+      "sourceRow": 3
+    },
+    {
+      "label": "Warm-up 3",
+      "durationSeconds": 300,
+      "kind": "warmup",
+      "cadence": 70.0,
+      "resistance": 40.0,
+      "watts": 85.0,
+      "sourceRow": 4
+    },
+    {
+      "label": "Climb 1",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 85.0,
+      "resistance": 40.0,
+      "watts": 121.4,
+      "sourceRow": 5
+    },
+    {
+      "label": "Climb 2",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 82.0,
+      "resistance": 43.3,
+      "watts": 139.2,
+      "sourceRow": 6
+    },
+    {
+      "label": "Climb 3",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 79.0,
+      "resistance": 46.6,
+      "watts": 156.5,
+      "sourceRow": 7
+    },
+    {
+      "label": "Climb 4",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 76.0,
+      "resistance": 49.9,
+      "watts": 173.1,
+      "sourceRow": 8
+    },
+    {
+      "label": "Climb 5",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 73.0,
+      "resistance": 53.2,
+      "watts": 188.3,
+      "sourceRow": 9
+    },
+    {
+      "label": "Climb 6",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 70.0,
+      "resistance": 56.5,
+      "watts": 201.6,
+      "sourceRow": 10
+    },
+    {
+      "label": "Climb 7",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 67.0,
+      "resistance": 59.8,
+      "watts": 212.4,
+      "sourceRow": 11
+    },
+    {
+      "label": "Climb 8",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 64.0,
+      "resistance": 63.1,
+      "watts": 220.1,
+      "sourceRow": 12
+    },
+    {
+      "label": "Climb 9",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 61.0,
+      "resistance": 66.4,
+      "watts": 224.2,
+      "sourceRow": 13
+    },
+    {
+      "label": "Recover",
+      "durationSeconds": 300,
+      "kind": "recovery",
+      "cadence": 80.0,
+      "resistance": 35.0,
+      "watts": 78.3,
+      "sourceRow": 14
+    },
+    {
+      "label": "Switchback 1",
+      "durationSeconds": 180,
+      "kind": "work",
+      "cadence": 80.0,
+      "resistance": 45.0,
+      "watts": 146.7,
+      "sourceRow": 15
+    },
+    {
+      "label": "Recover",
+      "durationSeconds": 120,
+      "kind": "recovery",
+      "cadence": 80.0,
+      "resistance": 35.0,
+      "watts": 78.3,
+      "sourceRow": 16
+    },
+    {
+      "label": "Switchback 2",
+      "durationSeconds": 180,
+      "kind": "work",
+      "cadence": 80.0,
+      "resistance": 50.0,
+      "watts": 190.9,
+      "sourceRow": 17
+    },
+    {
+      "label": "Recover",
+      "durationSeconds": 120,
+      "kind": "recovery",
+      "cadence": 80.0,
+      "resistance": 35.0,
+      "watts": 78.3,
+      "sourceRow": 18
+    },
+    {
+      "label": "Switchback 3",
+      "durationSeconds": 180,
+      "kind": "work",
+      "cadence": 80.0,
+      "resistance": 55.0,
+      "watts": 242.3,
+      "sourceRow": 19
+    },
+    {
+      "label": "Recover",
+      "durationSeconds": 120,
+      "kind": "recovery",
+      "cadence": 80.0,
+      "resistance": 35.0,
+      "watts": 78.3,
+      "sourceRow": 20
+    },
+    {
+      "label": "Switchback 4",
+      "durationSeconds": 180,
+      "kind": "work",
+      "cadence": 80.0,
+      "resistance": 60.0,
+      "watts": 301.2,
+      "sourceRow": 21
+    },
+    {
+      "label": "Recover",
+      "durationSeconds": 120,
+      "kind": "recovery",
+      "cadence": 80.0,
+      "resistance": 35.0,
+      "watts": 78.3,
+      "sourceRow": 22
+    },
+    {
+      "label": "Switchback 5",
+      "durationSeconds": 180,
+      "kind": "work",
+      "cadence": 80.0,
+      "resistance": 65.0,
+      "watts": 367.9,
+      "sourceRow": 23
+    },
+    {
+      "label": "Recover",
+      "durationSeconds": 120,
+      "kind": "recovery",
+      "cadence": 80.0,
+      "resistance": 30.0,
+      "watts": 53.2,
+      "sourceRow": 24
+    }
+  ]
+}
