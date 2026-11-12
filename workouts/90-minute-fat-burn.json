@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "id": "90-minute-fat-burn",
+  "name": "90-minute fat burn",
+  "description": "Converted planned cadence, resistance and estimated watts from the workbook. Actual ride averages are not targets.",
+  "tags": [
+    "Endurance"
+  ],
+  "source": {
+    "workbook": "Grupetto Workouts.xlsx",
+    "sheet": "90-minute fat burn",
+    "convertedOn": "2026-11-11",
+    "power": "Workbook estimate; not live or measured power"
+  },
+  "steps": [
+    {
+      "label": "Warm-up",
+      "durationSeconds": 600,
+      "kind": "warmup",
+      "cadence": 80.0,
+      "resistance": 35.0,
+      "watts": 78.3,
+      "sourceRow": 2
+    },
+    {
+      "label": "Block 1A",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 90.0,
+      "resistance": 40.0,
+      "watts": 133.6,
+      "sourceRow": 3
+    },
+    {
+      "label": "Block 1B",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 85.0,
+      "resistance": 42.0,
+      "watts": 137.2,
+      "sourceRow": 4
+    },
+    {
+      "label": "Block 1C",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 80.0,
+      "resistance": 44.0,
+      "watts": 138.7,
+      "sourceRow": 5
+    },
+    {
+      "label": "Recovery",
+      "durationSeconds": 300,
+      "kind": "recovery",
+      "cadence": 75.0,
+      "resistance": 35.0,
+      "watts": 69.6,
+      "sourceRow": 6
+    },
+    {
+      "label": "Block 2A",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 90.0,
+      "resistance": 40.0,
+      "watts": 133.6,
+      "sourceRow": 7
+    },
+    {
+      "label": "Block 2B",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 85.0,
+      "resistance": 42.0,
+      "watts": 137.2,
+      "sourceRow": 8
+    },
+    {
+      "label": "Block 2C",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 80.0,
+      "resistance": 44.0,
+      "watts": 138.7,
+      "sourceRow": 9
+    },
+    {
+      "label": "Recovery",
+      "durationSeconds": 300,
+      "kind": "recovery",
+      "cadence": 75.0,
+      "resistance": 35.0,
+      "watts": 69.6,
+      "sourceRow": 10
+    },
+    {
+      "label": "Block 3A",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 90.0,
+      "resistance": 40.0,
+      "watts": 133.6,
+      "sourceRow": 11
+    },
+    {
+      "label": "Block 3B",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 85.0,
+      "resistance": 42.0,
+      "watts": 137.2,
+      "sourceRow": 12
+    },
+    {
+      "label": "Block 3C",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 80.0,
+      "resistance": 44.0,
+      "watts": 138.7,
+      "sourceRow": 13
+    },
+    {
+      "label": "Recovery",
+      "durationSeconds": 300,
+      "kind": "recovery",
+      "cadence": 75.0,
+      "resistance": 35.0,
+      "watts": 69.6,
+      "sourceRow": 14
+    },
+    {
+      "label": "Block 4A",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 90.0,
+      "resistance": 40.0,
+      "watts": 133.6,
+      "sourceRow": 15
+    },
+    {
+      "label": "Block 4B",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 85.0,
+      "resistance": 42.0,
+      "watts": 137.2,
+      "sourceRow": 16
+    },
+    {
+      "label": "Block 4C",
+      "durationSeconds": 300,
+      "kind": "work",
+      "cadence": 80.0,
+      "resistance": 44.0,
+      "watts": 138.7,
+      "sourceRow": 17
+    },
+    {
+      "label": "Recovery",
+      "durationSeconds": 300,
+      "kind": "recovery",
+      "cadence": 75.0,
+      "resistance": 35.0,
+      "watts": 69.6,
+      "sourceRow": 18
+    }
+  ]
+}

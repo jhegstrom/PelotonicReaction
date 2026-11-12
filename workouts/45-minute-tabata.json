@@ -1,0 +1,890 @@
+{
+  "schemaVersion": 1,
+  "id": "45-minute-tabata",
+  "name": "45-minute Tabata",
+  "description": "Converted planned cadence, resistance and estimated watts from the workbook. Actual ride averages are not targets.",
+  "tags": [
+    "Tabata"
+  ],
+  "source": {
+    "workbook": "Grupetto Workouts.xlsx",
+    "sheet": "45-minute Tabata",
+    "convertedOn": "2026-11-11",
+    "power": "Workbook estimate; not live or measured power"
+  },
+  "steps": [
+    {
+      "label": "Warm-up 1",
+      "durationSeconds": 180,
+      "kind": "warmup",
+      "cadence": 80.0,
+      "resistance": 30.0,
+      "watts": 53.2,
+      "sourceRow": 2
+    },
+    {
+      "label": "Warm-up 2",
+      "durationSeconds": 180,
+      "kind": "warmup",
+      "cadence": 90.0,
+      "resistance": 35.0,
+      "watts": 95.7,
+      "sourceRow": 3
+    },
+    {
+      "label": "Warm-up 3",
+      "durationSeconds": 120,
+      "kind": "warmup",
+      "cadence": 90.0,
+      "resistance": 38.0,
+      "watts": 117.5,
+      "sourceRow": 4
+    },
+    {
+      "label": "Tabata 1.1 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 5
+    },
+    {
+      "label": "Tabata 1.1 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 6
+    },
+    {
+      "label": "Tabata 1.2 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 7
+    },
+    {
+      "label": "Tabata 1.2 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 8
+    },
+    {
+      "label": "Tabata 1.3 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 9
+    },
+    {
+      "label": "Tabata 1.3 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 10
+    },
+    {
+      "label": "Tabata 1.4 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 11
+    },
+    {
+      "label": "Tabata 1.4 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 12
+    },
+    {
+      "label": "Tabata 1.5 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 13
+    },
+    {
+      "label": "Tabata 1.5 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 14
+    },
+    {
+      "label": "Tabata 1.6 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 15
+    },
+    {
+      "label": "Tabata 1.6 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 16
+    },
+    {
+      "label": "Tabata 1.7 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 17
+    },
+    {
+      "label": "Tabata 1.7 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 18
+    },
+    {
+      "label": "Tabata 1.8 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 19
+    },
+    {
+      "label": "Tabata 1.8 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 20
+    },
+    {
+      "label": "Recovery 1 easy",
+      "durationSeconds": 90,
+      "kind": "recovery",
+      "cadence": 85.0,
+      "resistance": 30.2,
+      "watts": 60.0,
+      "sourceRow": 21
+    },
+    {
+      "label": "Recovery 1 build",
+      "durationSeconds": 60,
+      "kind": "recovery",
+      "cadence": 90.0,
+      "resistance": 34.2,
+      "watts": 90.0,
+      "sourceRow": 22
+    },
+    {
+      "label": "Recovery 1 ready",
+      "durationSeconds": 30,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 37.0,
+      "watts": 120.0,
+      "sourceRow": 23
+    },
+    {
+      "label": "Tabata 2.1 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 24
+    },
+    {
+      "label": "Tabata 2.1 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 25
+    },
+    {
+      "label": "Tabata 2.2 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 26
+    },
+    {
+      "label": "Tabata 2.2 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 27
+    },
+    {
+      "label": "Tabata 2.3 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 28
+    },
+    {
+      "label": "Tabata 2.3 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 29
+    },
+    {
+      "label": "Tabata 2.4 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 30
+    },
+    {
+      "label": "Tabata 2.4 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 31
+    },
+    {
+      "label": "Tabata 2.5 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 32
+    },
+    {
+      "label": "Tabata 2.5 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 33
+    },
+    {
+      "label": "Tabata 2.6 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 34
+    },
+    {
+      "label": "Tabata 2.6 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 35
+    },
+    {
+      "label": "Tabata 2.7 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 36
+    },
+    {
+      "label": "Tabata 2.7 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 37
+    },
+    {
+      "label": "Tabata 2.8 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 38
+    },
+    {
+      "label": "Tabata 2.8 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 39
+    },
+    {
+      "label": "Recovery 2 easy",
+      "durationSeconds": 90,
+      "kind": "recovery",
+      "cadence": 85.0,
+      "resistance": 30.2,
+      "watts": 60.0,
+      "sourceRow": 40
+    },
+    {
+      "label": "Recovery 2 build",
+      "durationSeconds": 60,
+      "kind": "recovery",
+      "cadence": 90.0,
+      "resistance": 34.2,
+      "watts": 90.0,
+      "sourceRow": 41
+    },
+    {
+      "label": "Recovery 2 ready",
+      "durationSeconds": 30,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 37.0,
+      "watts": 120.0,
+      "sourceRow": 42
+    },
+    {
+      "label": "Tabata 3.1 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 43
+    },
+    {
+      "label": "Tabata 3.1 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 44
+    },
+    {
+      "label": "Tabata 3.2 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 45
+    },
+    {
+      "label": "Tabata 3.2 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 46
+    },
+    {
+      "label": "Tabata 3.3 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 47
+    },
+    {
+      "label": "Tabata 3.3 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 48
+    },
+    {
+      "label": "Tabata 3.4 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 49
+    },
+    {
+      "label": "Tabata 3.4 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 50
+    },
+    {
+      "label": "Tabata 3.5 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 51
+    },
+    {
+      "label": "Tabata 3.5 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 52
+    },
+    {
+      "label": "Tabata 3.6 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 53
+    },
+    {
+      "label": "Tabata 3.6 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 54
+    },
+    {
+      "label": "Tabata 3.7 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 55
+    },
+    {
+      "label": "Tabata 3.7 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 56
+    },
+    {
+      "label": "Tabata 3.8 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 57
+    },
+    {
+      "label": "Tabata 3.8 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 58
+    },
+    {
+      "label": "Recovery 3 easy",
+      "durationSeconds": 90,
+      "kind": "recovery",
+      "cadence": 85.0,
+      "resistance": 30.2,
+      "watts": 60.0,
+      "sourceRow": 59
+    },
+    {
+      "label": "Recovery 3 build",
+      "durationSeconds": 60,
+      "kind": "recovery",
+      "cadence": 90.0,
+      "resistance": 34.2,
+      "watts": 90.0,
+      "sourceRow": 60
+    },
+    {
+      "label": "Recovery 3 ready",
+      "durationSeconds": 30,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 37.0,
+      "watts": 120.0,
+      "sourceRow": 61
+    },
+    {
+      "label": "Tabata 4.1 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 62
+    },
+    {
+      "label": "Tabata 4.1 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 63
+    },
+    {
+      "label": "Tabata 4.2 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 64
+    },
+    {
+      "label": "Tabata 4.2 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 65
+    },
+    {
+      "label": "Tabata 4.3 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 66
+    },
+    {
+      "label": "Tabata 4.3 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 67
+    },
+    {
+      "label": "Tabata 4.4 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 68
+    },
+    {
+      "label": "Tabata 4.4 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 69
+    },
+    {
+      "label": "Tabata 4.5 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 70
+    },
+    {
+      "label": "Tabata 4.5 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 71
+    },
+    {
+      "label": "Tabata 4.6 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 72
+    },
+    {
+      "label": "Tabata 4.6 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 73
+    },
+    {
+      "label": "Tabata 4.7 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 74
+    },
+    {
+      "label": "Tabata 4.7 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 75
+    },
+    {
+      "label": "Tabata 4.8 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 76
+    },
+    {
+      "label": "Tabata 4.8 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 77
+    },
+    {
+      "label": "Recovery 4 easy",
+      "durationSeconds": 90,
+      "kind": "recovery",
+      "cadence": 85.0,
+      "resistance": 30.2,
+      "watts": 60.0,
+      "sourceRow": 78
+    },
+    {
+      "label": "Recovery 4 build",
+      "durationSeconds": 60,
+      "kind": "recovery",
+      "cadence": 90.0,
+      "resistance": 34.2,
+      "watts": 90.0,
+      "sourceRow": 79
+    },
+    {
+      "label": "Recovery 4 ready",
+      "durationSeconds": 30,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 37.0,
+      "watts": 120.0,
+      "sourceRow": 80
+    },
+    {
+      "label": "Tabata 5.1 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 81
+    },
+    {
+      "label": "Tabata 5.1 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 82
+    },
+    {
+      "label": "Tabata 5.2 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 83
+    },
+    {
+      "label": "Tabata 5.2 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 84
+    },
+    {
+      "label": "Tabata 5.3 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 85
+    },
+    {
+      "label": "Tabata 5.3 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 86
+    },
+    {
+      "label": "Tabata 5.4 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 87
+    },
+    {
+      "label": "Tabata 5.4 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 88
+    },
+    {
+      "label": "Tabata 5.5 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 89
+    },
+    {
+      "label": "Tabata 5.5 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 90
+    },
+    {
+      "label": "Tabata 5.6 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 91
+    },
+    {
+      "label": "Tabata 5.6 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 92
+    },
+    {
+      "label": "Tabata 5.7 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 93
+    },
+    {
+      "label": "Tabata 5.7 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 94
+    },
+    {
+      "label": "Tabata 5.8 work",
+      "durationSeconds": 20,
+      "kind": "work",
+      "cadence": 75.0,
+      "resistance": 49.0,
+      "watts": 161.3,
+      "sourceRow": 95
+    },
+    {
+      "label": "Tabata 5.8 rest",
+      "durationSeconds": 10,
+      "kind": "recovery",
+      "cadence": 95.0,
+      "resistance": 30.0,
+      "watts": 71.0,
+      "sourceRow": 96
+    },
+    {
+      "label": "Ending recovery",
+      "durationSeconds": 240,
+      "kind": "recovery",
+      "cadence": 90.0,
+      "resistance": 32.6,
+      "watts": 80.0,
+      "sourceRow": 97
+    },
+    {
+      "label": "Cool-down",
+      "durationSeconds": 60,
+      "kind": "cooldown",
+      "cadence": 85.0,
+      "resistance": 25.0,
+      "watts": 37.5,
+      "sourceRow": 98
+    }
+  ]
+}

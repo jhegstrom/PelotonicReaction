@@ -1,0 +1,9 @@
+{
+  "name": "pelotonic-reaction",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A readable, local-first cycling workout player",
+  "engines": { "node": ">=18" },
+  "scripts": { "start": "node server.mjs", "test": "node --test" }
+}
