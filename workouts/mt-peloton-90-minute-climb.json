@@ -4,7 +4,8 @@
   "name": "Mt Peloton 90 minute climb",
   "description": "Converted planned cadence, resistance and estimated watts from the workbook. Actual ride averages are not targets.",
   "tags": [
-    "Climbing"
+    "Climb",
+    "Intervals"
   ],
   "source": {
     "workbook": "Grupetto Workouts.xlsx",

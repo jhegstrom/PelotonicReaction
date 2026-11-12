@@ -7,6 +7,12 @@ import xml.etree.ElementTree as ET
 N = {'m': 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}
 R = '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id'
 SHEETS = ['3 by 20-5 at 130', 'Mt Peloton 90 minute climb', '90-minute fat burn', '45-minute Tabata']
+SHEET_TAGS = {
+    '3 by 20-5 at 130': ['Climb', 'Endurance'],
+    'Mt Peloton 90 minute climb': ['Climb', 'Intervals'],
+    '90-minute fat burn': ['Endurance', 'Intervals'],
+    '45-minute Tabata': ['Tabata', 'Intervals'],
+}
 
 def convert(source, output):
     output.mkdir(parents=True, exist_ok=True)
@@ -53,7 +59,11 @@ def convert(source, output):
             slug = re.sub(r'[^a-z0-9]+','-',name.lower()).strip('-')
             notes = 'Converted planned cadence, resistance and estimated watts from the workbook. Actual ride averages are not targets.'
             if name == '3 by 20-5 at 130': notes = 'Three 20-minute climbs with easy resets. The source has timings only; cadence, resistance and power are intentionally unspecified. Total source duration is 85 minutes.'
-            workout = {'schemaVersion':1, 'id':slug, 'name':name, 'description':notes, 'tags':['Tabata' if 'Tabata' in name else 'Endurance' if 'burn' in name or '130' in name else 'Climbing'], 'source':{'workbook':source.name,'sheet':name,'convertedOn':datetime.date.today().isoformat(),'power':'Workbook estimate; not live or measured power'}, 'steps':steps}
+            # Preserve tags assigned by the program's author, including an intentional empty list.
+            destination = output/(slug+'.json')
+            existing = json.loads(destination.read_text()) if destination.exists() else {}
+            tags = existing.get('tags', SHEET_TAGS[name])
+            workout = {'schemaVersion':1, 'id':slug, 'name':name, 'description':notes, 'tags':tags, 'source':{'workbook':source.name,'sheet':name,'convertedOn':datetime.date.today().isoformat(),'power':'Workbook estimate; not live or measured power'}, 'steps':steps}
             (output/(slug+'.json')).write_text(json.dumps(workout,indent=2)+'\n')
             print(f'{name}: {len(steps)} intervals, {sum(s["durationSeconds"] for s in steps)/60:g} min -> {slug}.json')
 

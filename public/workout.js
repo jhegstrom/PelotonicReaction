@@ -1,9 +1,12 @@
+import { normalizeTags } from './tags.js';
+
 export function compileWorkout(input) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw Error('A workout must be a JSON object.');
   if (input.schemaVersion !== 1) throw Error('schemaVersion must be 1.');
   if (typeof input.name !== 'string' || !input.name.trim() || input.name.length > 160) throw Error('Give the workout a name (1–160 characters).');
   if (input.description != null && typeof input.description !== 'string') throw Error('description must be text.');
-  if (input.tags != null && (!Array.isArray(input.tags) || input.tags.length > 20 || input.tags.some(t => typeof t !== 'string' || t.length > 60))) throw Error('tags must be an array of short text labels.');
+  const tags = normalizeTags(input.tags);
+  normalizeTags(input.userTags); // Validate portable user-tag labels on browser imports.
   if (input.id != null && typeof input.id !== 'string') throw Error('id must be text.');
   const intervals = [];
   function visit(steps, prefix = '', depth = 0) {
@@ -33,7 +36,7 @@ export function compileWorkout(input) {
   let totalSeconds = 0;
   for (const interval of intervals) { interval.startSeconds = totalSeconds; totalSeconds += interval.durationSeconds; interval.endSeconds = totalSeconds; }
   if (totalSeconds > 86400) throw Error('A workout must be no longer than 24 hours.');
-  return { ...input, name: input.name.trim(), intervals, totalSeconds };
+  return { ...input, name: input.name.trim(), tags, intervals, totalSeconds };
 }
 
 export function positionAt(workout, seconds) {
