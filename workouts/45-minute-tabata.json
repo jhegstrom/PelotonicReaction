@@ -4,7 +4,8 @@
   "name": "45-minute Tabata",
   "description": "Converted planned cadence, resistance and estimated watts from the workbook. Actual ride averages are not targets.",
   "tags": [
-    "Tabata"
+    "Tabata",
+    "Intervals"
   ],
   "source": {
     "workbook": "Grupetto Workouts.xlsx",

@@ -6,8 +6,18 @@
 <main>
   <section id="library" aria-labelledby="library-title">
     <div class="library-heading"><div><p class="eyebrow">THE WORKOUT ROOM</p><h1 id="library-title">Pick your next ride.</h1><p class="subtle">A clear plan. A big clock. One block at a time.</p></div><button id="import-open" class="outline">＋ Import workout</button><input id="import-file" type="file" accept=".json,application/json" hidden></div>
-    <div id="notice" role="status"></div><div id="workout-cards" class="cards"><p>Loading workouts…</p></div>
-    <p class="library-note">Make it yours: edit a workout’s JSON file, then refresh the library. No account required.</p>
+    <div id="notice" role="status"></div>
+    <section class="program-filters" aria-labelledby="filter-heading">
+      <div class="filter-heading"><h2 id="filter-heading">Find a Program</h2><label class="match-mode" for="tag-match">Match <select id="tag-match"><option value="any">any selected tag</option><option value="all">all selected tags</option></select></label><button id="clear-tags" class="quiet" disabled>Clear filters</button></div>
+      <h3 class="tag-section-title">Admin tags <small>Managed at deployment · read-only</small></h3>
+      <div id="admin-tag-filters" class="tag-filters" role="group" aria-label="Admin tag filters"></div>
+      <div class="filter-heading"><h3 class="tag-section-title">My tags</h3><button id="manage-user-tags" class="outline">Manage my tags</button></div>
+      <div id="user-tag-filters" class="tag-filters" role="group" aria-label="User tag filters"></div>
+      <p id="profile-storage-status" class="subtle" role="status"></p>
+      <p id="filter-status" class="filter-status" role="status" aria-live="polite"></p>
+    </section>
+    <div id="workout-cards" class="cards"><p>Loading workouts…</p></div>
+    <p class="library-note">Use Edit my tags on a Program to add or remove your labels. Admin tags are part of the deployed Program catalog.</p>
   </section>
   <section id="player" hidden aria-label="Workout player">
     <div class="ride-heading"><button id="back" class="quiet">← Workouts</button><h1 id="ride-name"></h1><button id="download" class="quiet">Export JSON ↓</button></div>
@@ -31,6 +41,16 @@
   </section>
 </main>
 <dialog id="confirm-dialog"><h2 id="dialog-title"></h2><p id="dialog-copy"></p><div class="dialog-actions"><button id="dialog-cancel" class="outline">Cancel</button><button id="dialog-ok" class="primary">Continue</button></div></dialog>
+<dialog id="user-tags-dialog" aria-labelledby="user-tags-title">
+<h2 id="user-tags-title">Manage my tags</h2><h3>Admin tags · read-only</h3><div id="admin-tag-list" class="program-tags"></div>
+<h3>My tags</h3><div id="my-tag-list"></div>
+<form id="user-tag-form"><label for="user-tag-name">Tag name</label><div class="tag-form-row"><input id="user-tag-name" required maxlength="60" autocomplete="off"><button id="user-tag-submit" class="primary" type="submit">Create tag</button><button id="cancel-tag-rename" type="button" class="quiet" hidden>Cancel rename</button></div></form>
+<p id="user-tags-message" role="status" aria-live="polite"></p><div class="dialog-actions"><button id="user-tags-close" class="outline">Done</button></div>
+</dialog>
+<dialog id="program-tags-dialog" aria-labelledby="program-tags-title"><h2 id="program-tags-title">My tags</h2>
+<h3>Admin tags · read-only</h3><div id="program-admin-tags" class="program-tags"></div><h3>My tags</h3><div id="program-user-tags" class="assignment-tags"></div>
+<form id="program-new-tag-form"><label for="program-new-tag-name">Create and add a new tag</label><div class="tag-form-row"><input id="program-new-tag-name" required maxlength="60" autocomplete="off"><button type="submit" class="outline">Create &amp; select</button></div></form>
+<p id="program-tags-message" role="status" aria-live="polite"></p><div class="dialog-actions"><button id="program-tags-cancel" class="outline">Cancel</button><button id="program-tags-save" class="primary">Save tags</button></div></dialog>
 <footer>PELOTONICREACTION <span>Built for the view from your bike.</span></footer>
 <script type="module" src="/app.js"></script>
 </body></html>

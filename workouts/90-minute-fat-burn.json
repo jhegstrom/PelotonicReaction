@@ -4,7 +4,8 @@
   "name": "90-minute fat burn",
   "description": "Converted planned cadence, resistance and estimated watts from the workbook. Actual ride averages are not targets.",
   "tags": [
-    "Endurance"
+    "Endurance",
+    "Intervals"
   ],
   "source": {
     "workbook": "Grupetto Workouts.xlsx",

@@ -56,6 +56,18 @@ Conversion preserves the workbook's planned durations and targets, rather than c
 
 ## Edit or add workouts
 
+### Program tags
+
+Admin tags are fixed by code and the deployed Program catalog. The standard tags are Climb, Intervals, Tabata, Endurance, Heart Rate Zone, Power Zone, Beginner and Low Impact. Catalog-specific labels such as Demo are also admin-owned. Edit `public/tags.js` and Program JSON `tags` as the system administrator, then redeploy. The browser cannot create, rename, delete or change Program assignments of admin tags; the server is read-only.
+
+Use **Manage my tags** to create, rename or delete user tags. **Edit my tags** on each Program adds/removes existing tags or creates a new tag and assigns it in one dialog. Cancel discards that dialog’s changes. Deleting a user tag asks for confirmation and removes it from every assigned Program, including those not loaded. Admin and user tags both support any/all filtering.
+
+User taxonomy and assignments are saved separately in this browser’s localStorage, under `pelotonic-reaction-tag-profile-v1:local`. Clearing browser data loses these user tags. They are not yet synchronized across browsers or users. Stable tag IDs preserve assignments through renaming; stable Program IDs preserve them across catalog reloads. Keep deployed Program IDs unique and unchanged.
+
+`public/tag-profile.js` separates the profile model from its asynchronous load/save repository. When authentication is added, replace `BrowserTagProfileRepository` with an authenticated user-profile database API and enforce ownership on the server. No login or database is implemented here. Timer and History storage are unchanged.
+
+Export JSON includes admin `tags` and portable `userTags` names. Browser imports create/reuse custom user tags and ignore reserved admin labels; they cannot modify the admin catalog. Imported Programs still need to be deployed in `workouts/` for durable sharing. An already-loaded Program ID cannot be imported twice.
+
 Edit a JSON file in `workouts/`, or create a new `.json` file there. Refresh the page to reload the catalog. Malformed workouts are reported by filename; valid workouts still load. There is no build step and no manifest to maintain.
 
 All durations are **whole seconds**; cadence is RPM; resistance is the Peloton 0–100 scale; watts are the intended/estimated target. Omit a target or set it to `null` to leave it unspecified. Use standard JSON (no comments or trailing commas).
