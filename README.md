@@ -32,7 +32,7 @@ On the other device, open `http://YOUR-COMPUTER-LAN-IP:8080`. Allow the server t
 
 1. Open a workout to inspect the targets and schedule.
 2. Try **One-minute sound check** first; enable **Sound cues** and optionally **Spoken cues**.
-3. Press **Start workout**. A short tone sounds at 3, 2 and 1 seconds remaining and a longer tone marks each new block.
+3. Press **Start workout**. A 10-second countdown gives you time to get ready before the first block begins. You can pause and resume the countdown; it does not count toward ride time. A short tone sounds at 3, 2 and 1 seconds remaining and a longer tone marks each new block.
 4. Pause/resume any time. Previous, next and schedule/profile clicks let you move between blocks. A running ride pauses for confirmation before jumping.
 5. On landscape tablet screens (at least 800 × 560 browser pixels), the timer and program blocks sit side by side in a dashboard that fits the viewport. The block list follows the current interval automatically; you can also scroll that list independently to inspect other blocks. Smaller screens retain the stacked layout. Fullscreen enlarges the display. `Space` starts/pauses when the page has focus; arrow keys change blocks; `F` toggles fullscreen. Focused buttons keep their normal Space behavior.
 

@@ -26,3 +26,34 @@ test('the four converted workouts preserve spreadsheet durations and planned tar
 });
 test('time display rounds remaining seconds upward and includes hours when needed', () => { assert.equal(formatTime(19.1), '0:20'); assert.equal(formatTime(5400), '1:30:00'); assert.equal(formatTime(-1), '0:00'); });
 test('malformed metadata cannot break library rendering', () => { for (const extra of [{ tags: 'Tabata' }, { tags: [{}] }, { description: {} }, { id: 22 }]) assert.throws(() => compileWorkout({ ...sample, ...extra })); });
+
+test('start countdown preserves workout time, pauses, and catches up across the start boundary', () => {
+  let now = 0;
+  const clock = new WorkoutClock(60, () => now);
+  clock.start(10);
+  assert.equal(clock.countdownRemaining, 10);
+  assert.equal(clock.read(), 0);
+  now = 4000;
+  clock.pause();
+  now = 24000;
+  assert.equal(clock.countdownRemaining, 6);
+  assert.equal(clock.running, false);
+  clock.start(10);
+  now = 29500;
+  assert.equal(clock.countdownRemaining, 0.5);
+  assert.equal(clock.read(), 0);
+  now = 32000;
+  assert.equal(clock.countdownRemaining, 0);
+  assert.equal(clock.read(), 2);
+  clock.pause();
+  clock.start(10);
+  now = 33000;
+  assert.equal(clock.read(), 3);
+  clock.pause();
+  clock.seek(0);
+  clock.start(10);
+  assert.equal(clock.countdownRemaining, 10);
+  clock.seek(20);
+  assert.equal(clock.countdownRemaining, 0);
+  assert.equal(clock.read(), 20);
+});
