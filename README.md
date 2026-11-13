@@ -34,7 +34,7 @@ On the other device, open `http://YOUR-COMPUTER-LAN-IP:8080`. Allow the server t
 2. Try **One-minute sound check** first; enable **Sound cues** and optionally **Spoken cues**.
 3. Press **Start workout**. A 10-second countdown gives you time to get ready before the first block begins. You can pause and resume the countdown; it does not count toward ride time. A short tone sounds at 3, 2 and 1 seconds remaining and a longer tone marks each new block.
 4. Pause/resume any time. Previous, next and schedule/profile clicks let you move between blocks. A running ride pauses for confirmation before jumping.
-5. On landscape tablet screens (at least 800 × 560 browser pixels), the timer and program blocks sit side by side in a dashboard that fits the viewport. The block list follows the current interval automatically; you can also scroll that list independently to inspect other blocks. Smaller screens retain the stacked layout. Fullscreen enlarges the display. `Space` starts/pauses when the page has focus; arrow keys change blocks; `F` toggles fullscreen. Focused buttons keep their normal Space behavior.
+5. On landscape tablet screens (at least 800 × 560 browser pixels), the timer and program blocks sit side by side in a dashboard that fits the viewport. The timer dashboard reserves the bottom 10% of the viewport for the Grupetto overlay. The block list follows the current interval automatically; you can also scroll that list independently to inspect other blocks. Smaller screens retain the stacked layout. Fullscreen enlarges the display. `Space` starts/pauses when the page has focus; arrow keys change blocks; `F` toggles fullscreen. Focused buttons keep their normal Space behavior.
 
 The clock uses elapsed wall time, so delayed browser callbacks don't stretch an interval. If a tab was suspended, it catches up to the current block without replaying all missed cues. Keep the browser visible for dependable audio; browsers and operating systems can silence background tabs or sleeping devices. Speech depends on browser/device voice availability. The app requests a screen wake lock where supported (usually localhost or HTTPS); for plain HTTP over a LAN, disable automatic device sleep manually if needed.
 
@@ -66,7 +66,7 @@ User taxonomy and assignments are saved separately in this browser’s localStor
 
 `public/tag-profile.js` separates the profile model from its asynchronous load/save repository. When authentication is added, replace `BrowserTagProfileRepository` with an authenticated user-profile database API and enforce ownership on the server. No login or database is implemented here. Timer and History storage are unchanged.
 
-Export JSON includes admin `tags` and portable `userTags` names. Browser imports create/reuse custom user tags and ignore reserved admin labels; they cannot modify the admin catalog. Imported Programs still need to be deployed in `workouts/` for durable sharing. An already-loaded Program ID cannot be imported twice.
+Portable Program JSON supports admin `tags` and portable `userTags` names. Browser imports create/reuse custom user tags and ignore reserved admin labels; they cannot modify the admin catalog. Imported Programs still need to be deployed in `workouts/` for durable sharing. An already-loaded Program ID cannot be imported twice.
 
 Edit a JSON file in `workouts/`, or create a new `.json` file there. Refresh the page to reload the catalog. Malformed workouts are reported by filename; valid workouts still load. There is no build step and no manifest to maintain.
 
@@ -93,7 +93,7 @@ All durations are **whole seconds**; cadence is RPM; resistance is the Peloton 0
 }
 ```
 
-`workout.schema.json` describes the format for editors supporting JSON Schema. Runtime validation also limits expanded workouts to 5,000 intervals, five levels of nested repeats, and 24 hours. **Import workout** loads a JSON file into the current browser for the current page session. To share it permanently, save that file in the server's `workouts/` directory. **Export JSON** downloads the selected workout for editing or sharing.
+`workout.schema.json` describes the format for editors supporting JSON Schema. Runtime validation also limits expanded workouts to 5,000 intervals, five levels of nested repeats, and 24 hours. **Import workout** loads a JSON file into the current browser for the current page session. To share it permanently, save that file in the server's `workouts/` directory.
 
 ## Refresh workouts from Excel
 

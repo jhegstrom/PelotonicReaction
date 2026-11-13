@@ -9,10 +9,10 @@
 
 /* A fixed workout dashboard for landscape tablets, including browser chrome. */
 @media (min-width:800px) and (min-height:560px) {
-  body.workout-open .topbar{height:48px;padding:0 20px}
-  body.workout-open main{max-width:none;min-height:0;padding:12px 20px}
+  body.workout-open .topbar{height:44px;padding:0 20px}
+  body.workout-open main{max-width:none;min-height:0;padding:8px 20px 0}
   body.workout-open footer{display:none}
-  #player{height:calc(100vh - 72px);height:calc(100dvh - 72px);display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);grid-template-rows:36px minmax(0,1fr);gap:10px 18px}
+  #player{height:calc(90vh - 60px);height:calc(90dvh - 60px);display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);grid-template-rows:32px minmax(0,1fr);gap:8px 16px}
   .ride-heading{grid-column:1/-1;margin:0;gap:12px;min-width:0}
   .ride-heading h1{font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ride-heading button{padding:8px 12px}
@@ -64,15 +64,15 @@
 .upcoming .countdown{color:var(--cue)}
 .ride-controls{grid-column:1/-1}
 @media (min-width:800px) and (min-height:560px) {
-  .player-grid{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr) auto auto;gap:8px}
+  .player-grid{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr) auto auto;gap:6px}
   .stage,.next-panel.stage{display:flex;flex-direction:column;justify-content:space-between;min-height:0;margin:0}
-  .stage-top{padding:8px 14px 0}
+  .stage-top{padding:6px 14px 0}
   .stage h2{font-size:clamp(18px,2vw,26px);margin:2px 12px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .stage .countdown{font-size:clamp(42px,7vh,80px);line-height:1;padding:0 8px;letter-spacing:-2px}
+  .stage .countdown{font-size:clamp(36px,6vh,72px);line-height:1;padding:0 8px;letter-spacing:-2px}
   .stage .clock-caption{margin:0;font-size:9px}
-  .stage .metrics{margin:0 12px 6px;gap:6px}
+  .stage .metrics{margin:0 12px 4px;gap:6px}
   .stage .metrics>div{padding:4px 0 0}
-  .stage .metrics strong{font-size:clamp(26px,4.5vh,48px);line-height:1.1}
+  .stage .metrics strong{font-size:clamp(24px,4vh,44px);line-height:1.1}
   .stage .block-track{margin:0;height:3px}
   .upcoming{border-color:#52636f}
   .transport{padding:0;gap:8px}
@@ -81,4 +81,25 @@
   .session-panel{padding:0;border:0;background:none;display:flex;align-items:center;gap:16px}
   .session-panel>div:not(.session-track){margin:0;gap:8px;flex:1}
   .session-panel .session-track{display:none}
+}
+
+/* Ride timing and block position sit above the program table. */
+.schedule-heading{flex-wrap:wrap;gap:12px;margin-bottom:10px}
+.schedule-heading h2{flex-basis:100%;margin:0}
+.route-stats{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 20px;width:100%}
+.route-stats>div{display:flex;flex-direction:column;gap:4px}
+.route-stats span{font-size:9px;letter-spacing:.6px;color:var(--muted)}
+.route-stats strong{font-size:18px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.route-panel>.session-track{flex-shrink:0;margin-bottom:6px}
+
+/* Keep the timer dashboard above Grupetto's bottom-screen overlay. */
+body.workout-open{padding-bottom:10vh;padding-bottom:10dvh}
+@media (min-width:800px) and (min-height:560px) {
+  .timeline{height:34px;margin:2px 0 6px}
+  .schedule-heading{gap:6px;margin-bottom:6px}
+  .route-stats{gap:6px 12px}
+  .route-stats>div{gap:2px}
+  .route-stats strong{font-size:16px}
+  .schedule button{min-height:46px;padding-top:9px;padding-bottom:9px}
+  .ride-side p{margin:0}
 }
