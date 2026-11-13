@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleIdentifier</key><string>local.pelotonicreaction.grupetto-wifi-test</string>
+<key>CFBundleName</key><string>Grupetto WiFi Test</string>
+<key>CFBundleExecutable</key><string>GrupettoWiFi</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleShortVersionString</key><string>0.1.0</string>
+<key>CFBundleVersion</key><string>1</string>
+<key>LSMinimumSystemVersion</key><string>13.0</string>
+<key>NSLocalNetworkUsageDescription</key><string>Discover and connect to Grupetto on your Peloton to display bike metrics.</string>
+<key>NSBonjourServices</key><array><string>_wahoo-fitness-tnp._tcp</string></array>
+<key>NSHighResolutionCapable</key><true/>
+</dict></plist>
