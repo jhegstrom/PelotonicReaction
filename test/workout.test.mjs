@@ -57,3 +57,21 @@ test('start countdown preserves workout time, pauses, and catches up across the 
   assert.equal(clock.countdownRemaining, 0);
   assert.equal(clock.read(), 20);
 });
+
+test('optional HR and target-range metadata stays valid after simplifying live display', () => {
+  const base = { schemaVersion: 1, name: 'HR intervals', steps: [{ label: 'Steady', durationSeconds: 30, heartRate: 140, targetRanges: { heartRate: [135,145], watts: [190,210] } }] };
+  assert.deepEqual(compileWorkout(base).intervals[0].targetRanges.heartRate, [135,145]);
+  for (const targetRanges of [{ heartRate: [150,130] }, { watts: [100] }, { resistance: [-1,100] }, { cadence: ['80',100] }, { unknown: [1,2] }]) {
+    assert.throws(() => compileWorkout({ ...base, steps: [{ ...base.steps[0], targetRanges }] }));
+  }
+});
+
+test('posture, power zone and primary metadata validate and survive repeated steps',()=>{
+  const step={label:'Tempo',durationSeconds:60,posture:'seated',powerZone:3,primaryTargets:['watts']};
+  const make=s=>({schemaVersion:1,name:'Zone ride',steps:[{repeat:2,steps:[s]}]});
+  const result=compileWorkout(make(step));
+  assert.equal(result.intervals[1].posture,'seated'); assert.equal(result.intervals[1].powerZone,3);
+  assert.deepEqual(result.intervals[1].primaryTargets,['watts']);
+  for(const change of [{posture:'one-leg'},{powerZone:8},{powerZone:1.5},{watts:150},{targetRanges:{watts:[100,200]}},{primaryTargets:['powerZone']},{primaryTargets:['cadence']},{primaryTargets:['watts','watts']}]) assert.throws(()=>compileWorkout(make({...step,...change})));
+  assert.doesNotThrow(()=>compileWorkout(make({...step,powerZone:null,primaryTargets:null})));
+});

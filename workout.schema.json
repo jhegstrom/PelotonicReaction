@@ -125,6 +125,95 @@
               ],
               "minimum": 0,
               "maximum": 3000
+            },
+            "heartRate": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 30,
+              "maximum": 240,
+              "description": "Target heart rate in BPM; no age-based zones are inferred."
+            },
+            "targetRanges": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cadence": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 200
+                  }
+                },
+                "resistance": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                },
+                "watts": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3000
+                  }
+                },
+                "heartRate": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "number",
+                    "minimum": 30,
+                    "maximum": 240
+                  }
+                }
+              },
+              "description": "Explicit inclusive [low, high] segment ranges; override single-value targets for live gauges."
+            },
+            "posture": {
+              "enum": [
+                "seated",
+                "standing",
+                null
+              ],
+              "description": "Rider posture cue; null or omitted leaves posture unspecified."
+            },
+            "powerZone": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1,
+              "maximum": 7,
+              "description": "FTP-based zone; mutually exclusive with watts and targetRanges.watts."
+            },
+            "primaryTargets": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "cadence",
+                  "resistance",
+                  "watts",
+                  "heartRate"
+                ]
+              },
+              "description": "Only these metrics generate correction arrows/colors. Use watts for a powerZone target. Omitted, null or [] means reference targets only."
             }
           }
         },

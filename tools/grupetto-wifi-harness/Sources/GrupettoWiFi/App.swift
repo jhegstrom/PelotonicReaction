@@ -342,6 +342,9 @@ struct MonitorView: View {
     }
 }
 @main struct GrupettoWiFiApp: App {
-    init() { NSApplication.shared.setActivationPolicy(.regular) }
+    init() {
+        if CommandLine.arguments.contains("--bridge") { TelemetryBridge.run(); exit(0) }
+        NSApplication.shared.setActivationPolicy(.regular)
+    }
     var body: some Scene { WindowGroup { MonitorView() } }
 }

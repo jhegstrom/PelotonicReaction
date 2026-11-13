@@ -21,7 +21,11 @@
       "cadence": 80.0,
       "resistance": 30.0,
       "watts": 53.2,
-      "sourceRow": 2
+      "sourceRow": 2,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Warm-up 2",
@@ -30,7 +34,11 @@
       "cadence": 90.0,
       "resistance": 30.0,
       "watts": 65.1,
-      "sourceRow": 3
+      "sourceRow": 3,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Warm-up 3",
@@ -39,7 +47,11 @@
       "cadence": 70.0,
       "resistance": 40.0,
       "watts": 85.0,
-      "sourceRow": 4
+      "sourceRow": 4,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Climb 1",
@@ -48,7 +60,11 @@
       "cadence": 85.0,
       "resistance": 40.0,
       "watts": 121.4,
-      "sourceRow": 5
+      "sourceRow": 5,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Climb 2",
@@ -57,7 +73,11 @@
       "cadence": 82.0,
       "resistance": 43.3,
       "watts": 139.2,
-      "sourceRow": 6
+      "sourceRow": 6,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Climb 3",
@@ -66,7 +86,11 @@
       "cadence": 79.0,
       "resistance": 46.6,
       "watts": 156.5,
-      "sourceRow": 7
+      "sourceRow": 7,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Climb 4",
@@ -75,7 +99,11 @@
       "cadence": 76.0,
       "resistance": 49.9,
       "watts": 173.1,
-      "sourceRow": 8
+      "sourceRow": 8,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Climb 5",
@@ -84,7 +112,11 @@
       "cadence": 73.0,
       "resistance": 53.2,
       "watts": 188.3,
-      "sourceRow": 9
+      "sourceRow": 9,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Climb 6",
@@ -93,7 +125,11 @@
       "cadence": 70.0,
       "resistance": 56.5,
       "watts": 201.6,
-      "sourceRow": 10
+      "sourceRow": 10,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Climb 7",
@@ -102,7 +138,11 @@
       "cadence": 67.0,
       "resistance": 59.8,
       "watts": 212.4,
-      "sourceRow": 11
+      "sourceRow": 11,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Climb 8",
@@ -111,7 +151,11 @@
       "cadence": 64.0,
       "resistance": 63.1,
       "watts": 220.1,
-      "sourceRow": 12
+      "sourceRow": 12,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Climb 9",
@@ -120,7 +164,11 @@
       "cadence": 61.0,
       "resistance": 66.4,
       "watts": 224.2,
-      "sourceRow": 13
+      "sourceRow": 13,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recover",
@@ -129,7 +177,11 @@
       "cadence": 80.0,
       "resistance": 35.0,
       "watts": 78.3,
-      "sourceRow": 14
+      "sourceRow": 14,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Switchback 1",
@@ -138,7 +190,11 @@
       "cadence": 80.0,
       "resistance": 45.0,
       "watts": 146.7,
-      "sourceRow": 15
+      "sourceRow": 15,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recover",
@@ -147,7 +203,11 @@
       "cadence": 80.0,
       "resistance": 35.0,
       "watts": 78.3,
-      "sourceRow": 16
+      "sourceRow": 16,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Switchback 2",
@@ -156,7 +216,11 @@
       "cadence": 80.0,
       "resistance": 50.0,
       "watts": 190.9,
-      "sourceRow": 17
+      "sourceRow": 17,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recover",
@@ -165,7 +229,11 @@
       "cadence": 80.0,
       "resistance": 35.0,
       "watts": 78.3,
-      "sourceRow": 18
+      "sourceRow": 18,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Switchback 3",
@@ -174,7 +242,11 @@
       "cadence": 80.0,
       "resistance": 55.0,
       "watts": 242.3,
-      "sourceRow": 19
+      "sourceRow": 19,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recover",
@@ -183,7 +255,11 @@
       "cadence": 80.0,
       "resistance": 35.0,
       "watts": 78.3,
-      "sourceRow": 20
+      "sourceRow": 20,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Switchback 4",
@@ -192,7 +268,11 @@
       "cadence": 80.0,
       "resistance": 60.0,
       "watts": 301.2,
-      "sourceRow": 21
+      "sourceRow": 21,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recover",
@@ -201,7 +281,11 @@
       "cadence": 80.0,
       "resistance": 35.0,
       "watts": 78.3,
-      "sourceRow": 22
+      "sourceRow": 22,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Switchback 5",
@@ -210,7 +294,11 @@
       "cadence": 80.0,
       "resistance": 65.0,
       "watts": 367.9,
-      "sourceRow": 23
+      "sourceRow": 23,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recover",
@@ -219,7 +307,11 @@
       "cadence": 80.0,
       "resistance": 30.0,
       "watts": 53.2,
-      "sourceRow": 24
+      "sourceRow": 24,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     }
   ]
 }

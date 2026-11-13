@@ -57,6 +57,19 @@ final class ProtocolTests: XCTestCase {
             XCTAssertEqual(m["Resistance"]?.value, Double(level))
         }
     }
+    func testBridgeSerializesPopulatedMetricsAsNumbers() throws {
+        let monitor = Monitor(defaults: UserDefaults(suiteName: "BridgeSnapshotTests-\(UUID())")!)
+        monitor.metrics = ["Power": Reading(value: 222, unit: "W"), "Speed": Reading(value: 25.5, unit: "km/h")]
+        monitor.updated = ["Power": Date(timeIntervalSince1970: 1234), "Speed": Date(timeIntervalSince1970: 1234)]
+        monitor.active = true; monitor.packets = 3
+        let data = try JSONSerialization.data(withJSONObject: TelemetryBridge.snapshot(monitor, averagingSeconds: 3, epoch: "test"))
+        let decoded = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        XCTAssertEqual(decoded["powerAverage"] as? Double, 222)
+        XCTAssertEqual(decoded["notificationCount"] as? Int, 3)
+        let metrics = try XCTUnwrap(decoded["metrics"] as? [String: [String: Any]])
+        XCTAssertEqual(metrics["Speed"]?["value"] as? Double, 25.5)
+        XCTAssertEqual(metrics["Power"]?["at"] as? Double, 1234000)
+    }
     func testOtherCharacteristics() throws {
         let power = try decodeMetrics(characteristic: bluetoothUUID(0x2a63), bytes: [0, 0, 0xff, 0xff])
         XCTAssertEqual(power["Power"]?.value, -1)

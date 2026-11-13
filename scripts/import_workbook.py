@@ -54,6 +54,7 @@ def convert(source, output):
                 for key,col in metrics.items():
                     value = v.get(col) if col else None
                     if isinstance(value,(float,int)): step[key] = round(value,1)
+                step['primaryTargets'] = [key for key in ['cadence', 'resistance'] if key in step] or None
                 step['sourceRow'] = rownum
                 steps.append(step)
             slug = re.sub(r'[^a-z0-9]+','-',name.lower()).strip('-')
@@ -63,6 +64,12 @@ def convert(source, output):
             destination = output/(slug+'.json')
             existing = json.loads(destination.read_text()) if destination.exists() else {}
             tags = existing.get('tags', SHEET_TAGS[name])
+            authored = {s.get('sourceRow'): s for s in existing.get('steps', []) if 'sourceRow' in s}
+            for step in steps:
+                previous = authored.get(step['sourceRow'], {})
+                for key in ['posture', 'powerZone', 'primaryTargets', 'heartRate', 'targetRanges']:
+                    if key in previous: step[key] = previous[key]
+                if step.get('powerZone') is not None: step.pop('watts', None)
             workout = {'schemaVersion':1, 'id':slug, 'name':name, 'description':notes, 'tags':tags, 'source':{'workbook':source.name,'sheet':name,'convertedOn':datetime.date.today().isoformat(),'power':'Workbook estimate; not live or measured power'}, 'steps':steps}
             (output/(slug+'.json')).write_text(json.dumps(workout,indent=2)+'\n')
             print(f'{name}: {len(steps)} intervals, {sum(s["durationSeconds"] for s in steps)/60:g} min -> {slug}.json')

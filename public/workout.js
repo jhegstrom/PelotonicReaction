@@ -21,9 +21,24 @@ export function compileWorkout(input) {
       } else {
         if (typeof step.label !== 'string' || !step.label.trim() || step.label.length > 160) throw Error('Every interval needs a label (1–160 characters).');
         if (!Number.isInteger(step.durationSeconds) || step.durationSeconds < 1 || step.durationSeconds > 86400) throw Error(`${step.label}: durationSeconds must be a positive integer, at most 86400.`);
-        const bounds = { cadence: [0, 200], resistance: [0, 100], watts: [0, 3000] };
+        const bounds = { cadence: [0, 200], resistance: [0, 100], watts: [0, 3000], heartRate: [30, 240] };
         for (const [key, [lo, hi]] of Object.entries(bounds)) {
           if (step[key] != null && (typeof step[key] !== 'number' || !Number.isFinite(step[key]) || step[key] < lo || step[key] > hi)) throw Error(`${step.label}: ${key} must be a number from ${lo} to ${hi}, or null.`);
+        }
+        if (step.targetRanges != null) {
+          if (typeof step.targetRanges !== 'object' || Array.isArray(step.targetRanges)) throw Error(`${step.label}: targetRanges must be an object.`);
+          for (const [key, range] of Object.entries(step.targetRanges)) {
+            if (!bounds[key] || !Array.isArray(range) || range.length !== 2 || range.some(v => typeof v !== 'number' || !Number.isFinite(v)) || range[0] < bounds[key][0] || range[1] > bounds[key][1] || range[0] > range[1]) throw Error(`${step.label}: invalid ${key} target range.`);
+          }
+        }
+        if (step.posture != null && !['seated', 'standing'].includes(step.posture)) throw Error(`${step.label}: posture must be seated, standing or null.`);
+        if (step.powerZone != null && (!Number.isInteger(step.powerZone) || step.powerZone < 1 || step.powerZone > 7)) throw Error(`${step.label}: powerZone must be 1–7 or null.`);
+        if (step.powerZone != null && (step.watts != null || step.targetRanges?.watts)) throw Error(`${step.label}: choose a power zone or a watts target, not both.`);
+        if (step.primaryTargets != null) {
+          if (!Array.isArray(step.primaryTargets) || new Set(step.primaryTargets).size !== step.primaryTargets.length || step.primaryTargets.some(key => !Object.hasOwn(bounds, key))) throw Error(`${step.label}: primaryTargets must list unique cadence, resistance, watts or heartRate fields.`);
+          for (const key of step.primaryTargets) {
+            if (step[key] == null && !step.targetRanges?.[key] && !(key === 'watts' && step.powerZone != null)) throw Error(`${step.label}: primary target ${key} has no target value.`);
+          }
         }
         const kind = step.kind || 'work';
         if (!['warmup', 'work', 'recovery', 'cooldown'].includes(kind)) throw Error(`${step.label}: unsupported kind ${kind}.`);

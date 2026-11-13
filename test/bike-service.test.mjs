@@ -1,0 +1,46 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { once } from 'node:events';
+import { createAppServer } from '../server.mjs';
+import { BikeService } from '../lib/bike-service.mjs';
+
+test('bike session ownership and controls are separate from read-only catalog', async t => {
+  const bike = new BikeService('.', { platform: 'test' });
+  const server = createAppServer(undefined, { bike }); server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  t.after(() => { server.closeAllConnections(); return new Promise(resolve => server.close(resolve)); });
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const post = body => fetch(base + '/api/bike/session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  assert.equal((await post({ client: 'screen-111', action: 'start' })).status, 200);
+  assert.equal(bike.owner, 'screen-111');
+  assert.equal((await post({ client: 'screen-222', action: 'start' })).status, 409);
+  assert.equal((await post({ client: 'screen-222', action: 'stop' })).status, 200);
+  assert.equal(bike.owner, 'screen-111', 'another screen cannot disconnect the active rider');
+  assert.equal((await post({ client: 'screen-111', action: 'average', seconds: 3 })).status, 200);
+  assert.equal((await post({ client: 'screen-111', action: 'timing', recording: true })).status, 200);
+  assert.equal(bike.stats.running, true);
+  const stats = bike.stats;
+  assert.equal((await post({ client: 'screen-111', action: 'start' })).status, 200);
+  assert.equal(bike.stats, stats, 'session heartbeats must not reset whole-workout totals');
+  assert.equal((await post({ client: 'screen-222', action: 'timing', recording: false })).status, 409);
+  assert.equal((await post({ client: 'screen-111', action: 'timing', recording: 'yes' })).status, 400);
+  assert.equal((await post({ client: 'screen-111', action: 'average', seconds: -1 })).status, 400);
+  assert.equal((await post({ client: 'screen-111', action: 'address', host: ';bad', port: 8081 })).status, 400);
+  assert.equal((await fetch(base + '/api/bike/session', { method: 'POST', headers: { Origin: 'http://other-host', 'Content-Type': 'application/json' }, body: JSON.stringify({ client: 'screen-111', action: 'stop' }) })).status, 403);
+  assert.equal(bike.owner, 'screen-111');
+  assert.equal((await post({ client: 'screen-111', action: 'stop' })).status, 200);
+  assert.equal(bike.owner, null);
+  assert.equal((await fetch(base + '/api/workouts', { method: 'POST' })).status, 405);
+});
+test('SSE sends snapshots and disconnect cleanup removes subscribers', async t => {
+  const bike = new BikeService('.', { platform: 'test' });
+  const server = createAppServer(undefined, { bike }); server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  t.after(() => { server.closeAllConnections(); return new Promise(resolve => server.close(resolve)); });
+  const abort = new AbortController();
+  const response = await fetch(`http://127.0.0.1:${server.address().port}/api/bike/events?client=screen-111`, { signal: abort.signal });
+  assert.equal(response.headers.get('content-type'), 'text/event-stream');
+  const reader = response.body.getReader();
+  assert.match(new TextDecoder().decode((await reader.read()).value), /Bike connects at ride start/);
+  bike.publish({ connected: true, metrics: { Power: { value: 222, at: Date.now() } } });
+  assert.match(new TextDecoder().decode((await reader.read()).value), /222/);
+  abort.abort();
+});

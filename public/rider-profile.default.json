@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "kind": "pelotonic-reaction-rider-profile",
+  "id": "local-rider",
+  "displayName": "Rider",
+  "ageYears": 64,
+  "heartRate": {
+    "maxBpm": 156,
+    "maxMethod": "220-age",
+    "zones": [
+      {
+        "zone": 1,
+        "name": "Very light",
+        "minBpm": 78,
+        "maxBpm": 93
+      },
+      {
+        "zone": 2,
+        "name": "Light",
+        "minBpm": 94,
+        "maxBpm": 109
+      },
+      {
+        "zone": 3,
+        "name": "Moderate",
+        "minBpm": 110,
+        "maxBpm": 124
+      },
+      {
+        "zone": 4,
+        "name": "Hard",
+        "minBpm": 125,
+        "maxBpm": 140
+      },
+      {
+        "zone": 5,
+        "name": "Maximum",
+        "minBpm": 141,
+        "maxBpm": 156
+      }
+    ]
+  },
+  "preferences": {
+    "heartRateDisplay": "bpm",
+    "speedUnit": "km/h",
+    "powerAverageSeconds": 3
+  },
+  "power": {
+    "ftpWatts": null
+  }
+}

@@ -2,7 +2,7 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#11171c"><title>PelotonicReaction · Workout player</title><link rel="stylesheet" href="/style.css"></head>
 <body>
-<header class="topbar"><a class="brand" href="/" aria-label="PelotonicReaction home"><span class="brand-mark">P<span>R</span></span><span>PELOTONIC<span class="light">REACTION</span></span></a><span class="local-label"><i></i> YOUR RIDE. YOUR RHYTHM.</span><button id="fullscreen" class="quiet">Fullscreen ↗</button></header>
+<header class="topbar"><a class="brand" href="/" aria-label="PelotonicReaction home"><span class="brand-mark">P<span>R</span></span><span>PELOTONIC<span class="light">REACTION</span></span></a><span class="local-label"><i></i> YOUR RIDE. YOUR RHYTHM.</span><button id="rider-profile-open" class="quiet">Rider · Profile</button><button id="fullscreen" class="quiet">Fullscreen ↗</button></header>
 <main>
   <section id="library" aria-labelledby="library-title">
     <div class="library-heading"><div><p class="eyebrow">THE WORKOUT ROOM</p><h1 id="library-title">Pick your next ride.</h1><p class="subtle">A clear plan. A big clock. One block at a time.</p></div><button id="import-open" class="outline">＋ Import workout</button><input id="import-file" type="file" accept=".json,application/json" hidden></div>
@@ -26,15 +26,17 @@
         <div class="stage-top"><span id="phase" class="phase">READY</span><span id="step-count"></span></div>
         <h2 id="interval-label"></h2>
         <div id="countdown" class="countdown" aria-label="Time remaining in block">0:00</div>
+        <div id="current-posture" class="posture-cue" hidden></div>
+        <p id="segment-instructions" class="segment-instructions"></p>
         <p id="clock-caption" class="clock-caption">BLOCK REMAINING</p>
-        <div class="metrics"><div><span class="metric-title">CADENCE <small>RPM</small></span><strong id="cadence">—</strong></div><div><span class="metric-title">RESISTANCE</span><strong id="resistance">—</strong></div><div><span class="metric-title">POWER <small>W</small></span><strong id="watts">—</strong></div></div>
+        <div class="metrics"><div><span class="metric-title">TARGET CADENCE <small>RPM</small></span><strong id="cadence">—</strong></div><div><span class="metric-title">TARGET RESISTANCE</span><strong id="resistance">—</strong></div><div><span class="metric-title">TARGET POWER <small>W</small></span><strong id="watts">—</strong></div></div>
         <div class="block-track"><div id="block-progress"></div></div>
       </div>
       <div class="next-panel stage upcoming" aria-label="Next block">
         <div class="stage-top"><span class="phase">UP NEXT</span></div>
         <h2 id="next-name"></h2>
         <div id="next-duration" class="countdown" aria-label="Next block duration"></div>
-        <p class="clock-caption">BLOCK DURATION</p>
+        <div id="next-posture" class="posture-cue" hidden></div><p id="next-instructions" class="segment-instructions"></p><p class="clock-caption">BLOCK DURATION</p>
         <div id="next-targets" class="metrics"></div>
       </div>
       <div class="ride-controls">
@@ -43,11 +45,30 @@
       </div>
       <aside class="ride-side"><p id="ride-description" class="subtle"></p><p class="keyboard-hint">Space: start / pause<br>← →: change block · F: fullscreen</p><p id="sleep-status" class="subtle"></p></aside>
     </div>
+    <section class="telemetry-panel" aria-label="Live bike data and workout totals">
+      <div class="telemetry-heading"><h2>Ride data</h2><span id="bike-status">Bike connects at ride start</span></div>
+      <div id="ride-metrics" class="ride-metrics"></div>
+      <p class="guidance-legend"><span class="guide-on">On target</span> · <span class="guide-small">Small correction</span> · <span class="guide-large">Large correction</span><br>↑ Increase · ↓ Decrease</p>
+      <p class="metrics-note">Workout averages and totals exclude pauses and the preparation countdown.</p>
+    </section>
     <section class="route-panel" aria-label="Program blocks"><div class="schedule-heading"><h2>The route ahead</h2><div class="route-stats"><div><span>ELAPSED</span><strong id="elapsed">0:00</strong></div><div><span>REMAINING</span><strong id="ride-remaining">0:00</strong></div><div><span>PROGRAM TIME</span><strong id="total-label"></strong></div><div><span>BLOCKS</span><strong id="route-block-count"></strong></div></div></div><div class="session-track"><div id="session-progress"></div></div><div id="timeline" class="timeline" aria-label="Workout profile"></div>
     <div id="schedule" class="schedule" aria-label="Workout blocks"></div></section>
     <p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
   </section>
 </main>
+<p id="profile-status" class="profile-storage-status" role="status"></p>
+<dialog id="rider-profile-dialog" aria-labelledby="profile-title">
+<h2 id="profile-title">Rider profile</h2>
+<form id="profile-form">
+<div class="profile-fields"><label>Name <input id="profile-name" required maxlength="80"></label><label>Age <input id="profile-age" required type="number" min="1" max="120"></label><label>FTP <input id="profile-ftp" type="number" min="20" max="1500" step="1" placeholder="Not set"> W</label><label>Power smoothing <input id="profile-power-average" type="number" min="0" max="300" step="1" required> seconds (0 = off)</label><label>Speed units <select id="profile-speed-units"><option value="km/h">Kilometres per hour (km/h)</option><option value="mph">Miles per hour (mph)</option></select></label><label>Maximum HR <input id="profile-max" required type="number" min="60" max="240"> BPM</label></div>
+<button id="profile-recalculate" type="button" class="outline">Recalculate from 220 − age</button><p id="profile-method" class="subtle"></p>
+<table class="profile-zone-table"><thead><tr><th scope="col">Heart-rate zone</th><th scope="col">Range</th></tr></thead><tbody id="profile-zones"></tbody></table>
+<p class="subtle profile-estimate">Age-based zones are initial estimates. You can enter a personalized maximum or import custom zone boundaries.</p>
+<p id="profile-message" role="status"></p>
+<div class="dialog-actions"><button id="profile-import-open" type="button" class="outline">Import JSON</button><button id="profile-export" type="button" class="outline">Export saved profile</button><button id="profile-cancel" type="button" class="quiet">Cancel</button><button class="primary" type="submit">Save profile</button></div>
+<input id="profile-import-file" type="file" accept=".json,application/json" hidden>
+</form></dialog>
+<dialog id="bike-dialog" aria-labelledby="bike-dialog-title"><h2 id="bike-dialog-title">Looking for your bike</h2><p>No Grupetto bike was found. Discovery continues automatically. Check that Grupetto’s Wi-Fi broadcast is running on the same network, or enter its address.</p><form id="bike-address-form"><label>Bike address <input id="bike-host" required placeholder="192.168.1.50" autocomplete="off"></label><label>Port <input id="bike-port" required type="number" min="1" max="65535" value="8081"></label><button class="primary" type="submit">Connect</button></form><button id="bike-dialog-close" class="quiet">Keep looking</button></dialog>
 <dialog id="confirm-dialog"><h2 id="dialog-title"></h2><p id="dialog-copy"></p><div class="dialog-actions"><button id="dialog-cancel" class="outline">Cancel</button><button id="dialog-ok" class="primary">Continue</button></div></dialog>
 <dialog id="user-tags-dialog" aria-labelledby="user-tags-title">
 <h2 id="user-tags-title">Manage my tags</h2><h3>Admin tags · read-only</h3><div id="admin-tag-list" class="program-tags"></div>

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "primary-targets-and-power-zones-demo",
+  "name": "Primary targets and power zones demo",
+  "description": "Illustrates reference watts with cadence/resistance guidance, then FTP-based power guidance. Enter your own FTP in Rider Profile.",
+  "steps": [
+    { "label": "Cadence and resistance", "durationSeconds": 60, "posture": "seated", "cadence": 80, "resistance": 40, "watts": 180, "primaryTargets": ["cadence", "resistance"] },
+    { "label": "Power zone effort", "durationSeconds": 60, "posture": "standing", "cadence": 80, "powerZone": 3, "primaryTargets": ["watts"] },
+    { "label": "Easy finish", "durationSeconds": 60, "posture": "seated", "primaryTargets": null }
+  ]
+}

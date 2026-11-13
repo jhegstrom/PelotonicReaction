@@ -21,7 +21,11 @@
       "cadence": 80.0,
       "resistance": 35.0,
       "watts": 78.3,
-      "sourceRow": 2
+      "sourceRow": 2,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Block 1A",
@@ -30,7 +34,11 @@
       "cadence": 90.0,
       "resistance": 40.0,
       "watts": 133.6,
-      "sourceRow": 3
+      "sourceRow": 3,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Block 1B",
@@ -39,7 +47,11 @@
       "cadence": 85.0,
       "resistance": 42.0,
       "watts": 137.2,
-      "sourceRow": 4
+      "sourceRow": 4,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Block 1C",
@@ -48,7 +60,11 @@
       "cadence": 80.0,
       "resistance": 44.0,
       "watts": 138.7,
-      "sourceRow": 5
+      "sourceRow": 5,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recovery",
@@ -57,7 +73,11 @@
       "cadence": 75.0,
       "resistance": 35.0,
       "watts": 69.6,
-      "sourceRow": 6
+      "sourceRow": 6,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Block 2A",
@@ -66,7 +86,11 @@
       "cadence": 90.0,
       "resistance": 40.0,
       "watts": 133.6,
-      "sourceRow": 7
+      "sourceRow": 7,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Block 2B",
@@ -75,7 +99,11 @@
       "cadence": 85.0,
       "resistance": 42.0,
       "watts": 137.2,
-      "sourceRow": 8
+      "sourceRow": 8,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Block 2C",
@@ -84,7 +112,11 @@
       "cadence": 80.0,
       "resistance": 44.0,
       "watts": 138.7,
-      "sourceRow": 9
+      "sourceRow": 9,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recovery",
@@ -93,7 +125,11 @@
       "cadence": 75.0,
       "resistance": 35.0,
       "watts": 69.6,
-      "sourceRow": 10
+      "sourceRow": 10,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Block 3A",
@@ -102,7 +138,11 @@
       "cadence": 90.0,
       "resistance": 40.0,
       "watts": 133.6,
-      "sourceRow": 11
+      "sourceRow": 11,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Block 3B",
@@ -111,7 +151,11 @@
       "cadence": 85.0,
       "resistance": 42.0,
       "watts": 137.2,
-      "sourceRow": 12
+      "sourceRow": 12,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Block 3C",
@@ -120,7 +164,11 @@
       "cadence": 80.0,
       "resistance": 44.0,
       "watts": 138.7,
-      "sourceRow": 13
+      "sourceRow": 13,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recovery",
@@ -129,7 +177,11 @@
       "cadence": 75.0,
       "resistance": 35.0,
       "watts": 69.6,
-      "sourceRow": 14
+      "sourceRow": 14,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Block 4A",
@@ -138,7 +190,11 @@
       "cadence": 90.0,
       "resistance": 40.0,
       "watts": 133.6,
-      "sourceRow": 15
+      "sourceRow": 15,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Block 4B",
@@ -147,7 +203,11 @@
       "cadence": 85.0,
       "resistance": 42.0,
       "watts": 137.2,
-      "sourceRow": 16
+      "sourceRow": 16,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Block 4C",
@@ -156,7 +216,11 @@
       "cadence": 80.0,
       "resistance": 44.0,
       "watts": 138.7,
-      "sourceRow": 17
+      "sourceRow": 17,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recovery",
@@ -165,7 +229,11 @@
       "cadence": 75.0,
       "resistance": 35.0,
       "watts": 69.6,
-      "sourceRow": 18
+      "sourceRow": 18,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     }
   ]
 }

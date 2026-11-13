@@ -21,7 +21,11 @@
       "cadence": 80.0,
       "resistance": 30.0,
       "watts": 53.2,
-      "sourceRow": 2
+      "sourceRow": 2,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Warm-up 2",
@@ -30,7 +34,11 @@
       "cadence": 90.0,
       "resistance": 35.0,
       "watts": 95.7,
-      "sourceRow": 3
+      "sourceRow": 3,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Warm-up 3",
@@ -39,7 +47,11 @@
       "cadence": 90.0,
       "resistance": 38.0,
       "watts": 117.5,
-      "sourceRow": 4
+      "sourceRow": 4,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 1.1 work",
@@ -48,7 +60,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 5
+      "sourceRow": 5,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 1.1 rest",
@@ -57,7 +73,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 6
+      "sourceRow": 6,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 1.2 work",
@@ -66,7 +86,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 7
+      "sourceRow": 7,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 1.2 rest",
@@ -75,7 +99,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 8
+      "sourceRow": 8,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 1.3 work",
@@ -84,7 +112,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 9
+      "sourceRow": 9,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 1.3 rest",
@@ -93,7 +125,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 10
+      "sourceRow": 10,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 1.4 work",
@@ -102,7 +138,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 11
+      "sourceRow": 11,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 1.4 rest",
@@ -111,7 +151,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 12
+      "sourceRow": 12,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 1.5 work",
@@ -120,7 +164,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 13
+      "sourceRow": 13,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 1.5 rest",
@@ -129,7 +177,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 14
+      "sourceRow": 14,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 1.6 work",
@@ -138,7 +190,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 15
+      "sourceRow": 15,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 1.6 rest",
@@ -147,7 +203,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 16
+      "sourceRow": 16,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 1.7 work",
@@ -156,7 +216,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 17
+      "sourceRow": 17,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 1.7 rest",
@@ -165,7 +229,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 18
+      "sourceRow": 18,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 1.8 work",
@@ -174,7 +242,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 19
+      "sourceRow": 19,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 1.8 rest",
@@ -183,7 +255,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 20
+      "sourceRow": 20,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recovery 1 easy",
@@ -192,7 +268,11 @@
       "cadence": 85.0,
       "resistance": 30.2,
       "watts": 60.0,
-      "sourceRow": 21
+      "sourceRow": 21,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recovery 1 build",
@@ -201,7 +281,11 @@
       "cadence": 90.0,
       "resistance": 34.2,
       "watts": 90.0,
-      "sourceRow": 22
+      "sourceRow": 22,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recovery 1 ready",
@@ -210,7 +294,11 @@
       "cadence": 95.0,
       "resistance": 37.0,
       "watts": 120.0,
-      "sourceRow": 23
+      "sourceRow": 23,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 2.1 work",
@@ -219,7 +307,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 24
+      "sourceRow": 24,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 2.1 rest",
@@ -228,7 +320,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 25
+      "sourceRow": 25,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 2.2 work",
@@ -237,7 +333,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 26
+      "sourceRow": 26,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 2.2 rest",
@@ -246,7 +346,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 27
+      "sourceRow": 27,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 2.3 work",
@@ -255,7 +359,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 28
+      "sourceRow": 28,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 2.3 rest",
@@ -264,7 +372,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 29
+      "sourceRow": 29,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 2.4 work",
@@ -273,7 +385,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 30
+      "sourceRow": 30,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 2.4 rest",
@@ -282,7 +398,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 31
+      "sourceRow": 31,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 2.5 work",
@@ -291,7 +411,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 32
+      "sourceRow": 32,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 2.5 rest",
@@ -300,7 +424,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 33
+      "sourceRow": 33,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 2.6 work",
@@ -309,7 +437,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 34
+      "sourceRow": 34,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 2.6 rest",
@@ -318,7 +450,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 35
+      "sourceRow": 35,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 2.7 work",
@@ -327,7 +463,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 36
+      "sourceRow": 36,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 2.7 rest",
@@ -336,7 +476,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 37
+      "sourceRow": 37,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 2.8 work",
@@ -345,7 +489,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 38
+      "sourceRow": 38,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 2.8 rest",
@@ -354,7 +502,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 39
+      "sourceRow": 39,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recovery 2 easy",
@@ -363,7 +515,11 @@
       "cadence": 85.0,
       "resistance": 30.2,
       "watts": 60.0,
-      "sourceRow": 40
+      "sourceRow": 40,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recovery 2 build",
@@ -372,7 +528,11 @@
       "cadence": 90.0,
       "resistance": 34.2,
       "watts": 90.0,
-      "sourceRow": 41
+      "sourceRow": 41,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recovery 2 ready",
@@ -381,7 +541,11 @@
       "cadence": 95.0,
       "resistance": 37.0,
       "watts": 120.0,
-      "sourceRow": 42
+      "sourceRow": 42,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 3.1 work",
@@ -390,7 +554,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 43
+      "sourceRow": 43,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 3.1 rest",
@@ -399,7 +567,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 44
+      "sourceRow": 44,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 3.2 work",
@@ -408,7 +580,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 45
+      "sourceRow": 45,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 3.2 rest",
@@ -417,7 +593,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 46
+      "sourceRow": 46,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 3.3 work",
@@ -426,7 +606,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 47
+      "sourceRow": 47,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 3.3 rest",
@@ -435,7 +619,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 48
+      "sourceRow": 48,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 3.4 work",
@@ -444,7 +632,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 49
+      "sourceRow": 49,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 3.4 rest",
@@ -453,7 +645,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 50
+      "sourceRow": 50,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 3.5 work",
@@ -462,7 +658,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 51
+      "sourceRow": 51,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 3.5 rest",
@@ -471,7 +671,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 52
+      "sourceRow": 52,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 3.6 work",
@@ -480,7 +684,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 53
+      "sourceRow": 53,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 3.6 rest",
@@ -489,7 +697,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 54
+      "sourceRow": 54,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 3.7 work",
@@ -498,7 +710,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 55
+      "sourceRow": 55,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 3.7 rest",
@@ -507,7 +723,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 56
+      "sourceRow": 56,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 3.8 work",
@@ -516,7 +736,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 57
+      "sourceRow": 57,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 3.8 rest",
@@ -525,7 +749,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 58
+      "sourceRow": 58,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recovery 3 easy",
@@ -534,7 +762,11 @@
       "cadence": 85.0,
       "resistance": 30.2,
       "watts": 60.0,
-      "sourceRow": 59
+      "sourceRow": 59,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recovery 3 build",
@@ -543,7 +775,11 @@
       "cadence": 90.0,
       "resistance": 34.2,
       "watts": 90.0,
-      "sourceRow": 60
+      "sourceRow": 60,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recovery 3 ready",
@@ -552,7 +788,11 @@
       "cadence": 95.0,
       "resistance": 37.0,
       "watts": 120.0,
-      "sourceRow": 61
+      "sourceRow": 61,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 4.1 work",
@@ -561,7 +801,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 62
+      "sourceRow": 62,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 4.1 rest",
@@ -570,7 +814,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 63
+      "sourceRow": 63,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 4.2 work",
@@ -579,7 +827,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 64
+      "sourceRow": 64,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 4.2 rest",
@@ -588,7 +840,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 65
+      "sourceRow": 65,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 4.3 work",
@@ -597,7 +853,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 66
+      "sourceRow": 66,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 4.3 rest",
@@ -606,7 +866,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 67
+      "sourceRow": 67,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 4.4 work",
@@ -615,7 +879,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 68
+      "sourceRow": 68,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 4.4 rest",
@@ -624,7 +892,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 69
+      "sourceRow": 69,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 4.5 work",
@@ -633,7 +905,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 70
+      "sourceRow": 70,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 4.5 rest",
@@ -642,7 +918,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 71
+      "sourceRow": 71,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 4.6 work",
@@ -651,7 +931,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 72
+      "sourceRow": 72,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 4.6 rest",
@@ -660,7 +944,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 73
+      "sourceRow": 73,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 4.7 work",
@@ -669,7 +957,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 74
+      "sourceRow": 74,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 4.7 rest",
@@ -678,7 +970,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 75
+      "sourceRow": 75,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 4.8 work",
@@ -687,7 +983,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 76
+      "sourceRow": 76,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 4.8 rest",
@@ -696,7 +996,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 77
+      "sourceRow": 77,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recovery 4 easy",
@@ -705,7 +1009,11 @@
       "cadence": 85.0,
       "resistance": 30.2,
       "watts": 60.0,
-      "sourceRow": 78
+      "sourceRow": 78,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recovery 4 build",
@@ -714,7 +1022,11 @@
       "cadence": 90.0,
       "resistance": 34.2,
       "watts": 90.0,
-      "sourceRow": 79
+      "sourceRow": 79,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Recovery 4 ready",
@@ -723,7 +1035,11 @@
       "cadence": 95.0,
       "resistance": 37.0,
       "watts": 120.0,
-      "sourceRow": 80
+      "sourceRow": 80,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 5.1 work",
@@ -732,7 +1048,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 81
+      "sourceRow": 81,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 5.1 rest",
@@ -741,7 +1061,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 82
+      "sourceRow": 82,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 5.2 work",
@@ -750,7 +1074,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 83
+      "sourceRow": 83,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 5.2 rest",
@@ -759,7 +1087,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 84
+      "sourceRow": 84,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 5.3 work",
@@ -768,7 +1100,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 85
+      "sourceRow": 85,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 5.3 rest",
@@ -777,7 +1113,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 86
+      "sourceRow": 86,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 5.4 work",
@@ -786,7 +1126,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 87
+      "sourceRow": 87,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 5.4 rest",
@@ -795,7 +1139,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 88
+      "sourceRow": 88,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 5.5 work",
@@ -804,7 +1152,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 89
+      "sourceRow": 89,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 5.5 rest",
@@ -813,7 +1165,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 90
+      "sourceRow": 90,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 5.6 work",
@@ -822,7 +1178,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 91
+      "sourceRow": 91,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 5.6 rest",
@@ -831,7 +1191,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 92
+      "sourceRow": 92,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 5.7 work",
@@ -840,7 +1204,11 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 93
+      "sourceRow": 93,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 5.7 rest",
@@ -849,7 +1217,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 94
+      "sourceRow": 94,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Tabata 5.8 work",
@@ -858,7 +1230,12 @@
       "cadence": 75.0,
       "resistance": 49.0,
       "watts": 161.3,
-      "sourceRow": 95
+      "sourceRow": 95,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ],
+      "posture": "standing"
     },
     {
       "label": "Tabata 5.8 rest",
@@ -867,7 +1244,11 @@
       "cadence": 95.0,
       "resistance": 30.0,
       "watts": 71.0,
-      "sourceRow": 96
+      "sourceRow": 96,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Ending recovery",
@@ -876,7 +1257,11 @@
       "cadence": 90.0,
       "resistance": 32.6,
       "watts": 80.0,
-      "sourceRow": 97
+      "sourceRow": 97,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     },
     {
       "label": "Cool-down",
@@ -885,7 +1270,11 @@
       "cadence": 85.0,
       "resistance": 25.0,
       "watts": 37.5,
-      "sourceRow": 98
+      "sourceRow": 98,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
     }
   ]
 }

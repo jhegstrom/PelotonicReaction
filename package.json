@@ -4,6 +4,12 @@
   "private": true,
   "type": "module",
   "description": "A readable, local-first cycling workout player",
-  "engines": { "node": ">=18" },
-  "scripts": { "start": "node server.mjs", "test": "node --test" }
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test",
+    "prepare:bike": "sh tools/grupetto-wifi-harness/build.sh"
+  }
 }
