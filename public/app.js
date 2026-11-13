@@ -115,14 +115,32 @@ async function jump(index) {
 }
 async function toggle() {
   if (!clock) return;
-  if (completed) { clock.seek(0); completed = false; currentIndex = -1; }
+  if (completed) { clock.seek(0); completed = false; currentIndex = -1; lastCue = ''; render(); }
   if (clock.running) { clock.pause(); if ('speechSynthesis' in window) speechSynthesis.cancel(); await releaseWake(); }
-  else { await enableAudio(); clock.start(); holdWake(); const p = positionAt(selected, clock.read()); if (!p.done && p.index === currentIndex) announce(selected.intervals[p.index]); }
+  else { await enableAudio(); clock.start(clock.read() === 0 ? 10 : 0); holdWake(); const p = positionAt(selected, clock.read()); if (!clock.countdownRemaining && !p.done && p.index === currentIndex) announce(selected.intervals[p.index]); }
   render(); saveSession();
 }
 function render() {
   if (!selected || !clock) return;
+  const preparing = clock.countdownRemaining > 0;
   const p = positionAt(selected, clock.read()), changed = p.index !== currentIndex;
+  if (preparing) {
+    currentIndex = -1;
+    $('phase').textContent = clock.running ? 'GET READY' : 'COUNTDOWN PAUSED';
+    $('interval-label').textContent = 'Your ride starts in…';
+    $('countdown').textContent = formatTime(clock.countdownRemaining);
+    $('countdown').setAttribute('aria-label', 'Time until workout starts');
+    $('clock-caption').textContent = 'WORKOUT STARTS IN';
+    $('toggle').textContent = clock.running ? 'Pause Ⅱ' : 'Resume countdown ▶';
+    const cue = Math.ceil(clock.countdownRemaining);
+    if (clock.running && lastCue !== `start:${cue}`) {
+      lastCue = `start:${cue}`;
+      if (cue <= 3) tone(600, .09);
+      $('announcement').textContent = `Workout starts in ${cue} seconds.`;
+    }
+    return;
+  }
+  $('countdown').setAttribute('aria-label', 'Time remaining in block');
   if (p.done && !completed) { completed = true; clock.pause(); releaseWake(); tone(1000, .5); speak('Workout complete. Nice ride.'); $('announcement').textContent = 'Workout complete.'; saveSession(); }
   if (changed) {
     currentIndex = p.index;

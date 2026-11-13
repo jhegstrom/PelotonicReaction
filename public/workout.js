@@ -48,9 +48,16 @@ export function positionAt(workout, seconds) {
 // The clock is anchored to a timestamp, not the number of timer callbacks received.
 export class WorkoutClock {
   constructor(totalSeconds, now = () => Date.now()) { this.totalSeconds = totalSeconds; this.now = now; this.elapsed = 0; this.anchor = null; }
-  read() { return Math.min(this.totalSeconds, this.elapsed + (this.anchor === null ? 0 : Math.max(0, this.now() - this.anchor) / 1000)); }
-  start() { if (this.anchor === null && this.elapsed < this.totalSeconds) this.anchor = this.now(); }
-  pause() { this.elapsed = this.read(); this.anchor = null; }
+  position() { return Math.min(this.totalSeconds, this.elapsed + (this.anchor === null ? 0 : Math.max(0, this.now() - this.anchor) / 1000)); }
+  read() { return Math.max(0, this.position()); }
+  get countdownRemaining() { return Math.max(0, -this.position()); }
+  start(delaySeconds = 0) {
+    if (this.anchor === null && this.elapsed < this.totalSeconds) {
+      if (this.elapsed === 0) this.elapsed = -Math.max(0, delaySeconds);
+      this.anchor = this.now();
+    }
+  }
+  pause() { this.elapsed = this.position(); this.anchor = null; }
   seek(seconds) { this.elapsed = Math.max(0, Math.min(seconds, this.totalSeconds)); if (this.anchor !== null) this.anchor = this.now(); }
   get running() { return this.anchor !== null && this.read() < this.totalSeconds; }
 }
