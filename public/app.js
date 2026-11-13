@@ -102,7 +102,7 @@ async function selectWorkout(raw, elapsed = 0) {
   if (clock?.running) { clock.pause(); saveSession(); await releaseWake(); }
   try { selected = compileWorkout(raw); } catch (e) { $('notice').textContent = e.message; return; }
   rawSelected = { ...raw, tags: selected.tags }; clock = new WorkoutClock(selected.totalSeconds); clock.seek(elapsed); currentIndex = -1; completed = elapsed >= selected.totalSeconds; lastCue = '';
-  $('library').hidden = true; $('player').hidden = false; document.body.classList.add('workout-open'); $('ride-name').textContent = selected.name; $('ride-description').textContent = selected.description || ''; $('total-label').textContent = `${formatTime(selected.totalSeconds)} total · ${selected.intervals.length} blocks`;
+  $('library').hidden = true; $('player').hidden = false; document.body.classList.add('workout-open'); $('ride-name').textContent = selected.name; $('ride-description').textContent = selected.description || ''; $('total-label').textContent = formatTime(selected.totalSeconds);
   buildSchedule(); render(); saveSession(); window.scrollTo({ top: 0 });
 }
 async function jump(index) {
@@ -124,6 +124,7 @@ function render() {
   if (!selected || !clock) return;
   const preparing = clock.countdownRemaining > 0;
   const p = positionAt(selected, clock.read()), changed = p.index !== currentIndex;
+  $('route-block-count').textContent = `${p.done ? selected.intervals.length : p.index + 1} / ${selected.intervals.length}`;
   if (preparing) {
     currentIndex = -1;
     $('phase').textContent = clock.running ? 'GET READY' : 'COUNTDOWN PAUSED';
@@ -187,7 +188,6 @@ $('toggle').onclick = toggle; $('previous').onclick = () => jump(currentIndex ==
 $('restart').onclick = async () => { if (!clock) return; clock.pause(); render(); releaseWake(); if (await ask('Restart this ride?', 'Return to the beginning? Your current progress will be replaced.')) { clock.seek(0); currentIndex = -1; completed = false; render(); saveSession(); } };
 $('back').onclick = () => { clock?.pause(); saveSession(); releaseWake(); if ('speechSynthesis' in window) speechSynthesis.cancel(); $('player').hidden = true; $('library').hidden = false; document.body.classList.remove('workout-open'); document.title = 'PelotonicReaction · Workout player'; };
 $('fullscreen').onclick = async () => { try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); } catch { $('sleep-status').textContent = 'Fullscreen is unavailable in this browser.'; } };
-$('download').onclick = () => { const blob = new Blob([JSON.stringify(tagControls.exportProgram(rawSelected), null, 2) + '\n'], { type: 'application/json' }); const url = URL.createObjectURL(blob), link = el('a'); link.href = url; link.download = `${selected.id || 'workout'}.json`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); };
 $('import-open').onclick = () => $('import-file').click();
 $('import-file').onchange = async e => {
   const file = e.target.files[0]; if (!file) return;
