@@ -1,8 +1,12 @@
+import { standingBadge, renderPosture } from './posture.js';
+import { segmentInstructions, formatProgramTarget, isPrimaryTarget } from './target-guidance.js';
 import { compileWorkout, positionAt, WorkoutClock, formatTime } from './workout.js';
 import { normalizeTags } from './tags.js';
+import { BikePanel } from './bike-panel.js';
 import { TagControls } from './tag-controls.js';
 const $ = id => document.getElementById(id);
 const key = 'pelotonic-reaction-session-v1';
+const bikePanel = new BikePanel();
 let selected = null, rawSelected = null, clock = null, currentIndex = -1, audio = null, wake = null, lastCue = '', completed = false, workoutItems = [];
 let selectedTags = [];
 const tagControls = new TagControls({ onChange: renderLibrary, confirm: ask });
@@ -38,10 +42,10 @@ function speak(text) {
   speechSynthesis.cancel(); const cue = new SpeechSynthesisUtterance(text); cue.rate = 1.03; speechSynthesis.speak(cue);
 }
 function announce(interval) {
-  const phrase = `${interval.label}. ${interval.cadence == null ? '' : `${displayTarget(interval.cadence)} RPM.`} ${interval.resistance == null ? '' : `Resistance ${displayTarget(interval.resistance)}.`} ${interval.watts == null ? '' : `${Math.round(interval.watts)} watts.`}`;
+  const phrase = `${interval.label}. ${interval.posture ? interval.posture + '.' : ''} ${interval.powerZone != null ? 'Power zone ' + interval.powerZone + '.' : ''} ${interval.cadence == null ? '' : `${displayTarget(interval.cadence)} RPM.`} ${interval.resistance == null ? '' : `Resistance ${displayTarget(interval.resistance)}.`} ${interval.watts == null ? '' : `${Math.round(interval.watts)} watts.`}`;
   $('announcement').textContent = phrase; speak(phrase);
 }
-function height(step) { return `${Math.max(14, Math.min(100, 14 + (step.watts || 70) / 4))}%`; }
+function height(step) { return `${Math.max(14, Math.min(100, step.powerZone != null ? 20 + step.powerZone * 10 : 14 + (step.watts || 70) / 4))}%`; }
 function renderLibrary() {
   const programs = workoutItems.map(item => item.workout), entries = tagControls.entries();
   selectedTags = selectedTags.filter(id => entries.some(t => t.id === id));
@@ -94,16 +98,21 @@ function buildSchedule() {
     const bar = el('button'); bar.dataset.kind = step.kind; bar.style.flexGrow = step.durationSeconds; bar.style.height = height(step); bar.title = `${step.label} · ${formatTime(step.durationSeconds)}`; bar.setAttribute('aria-label', `Go to ${step.label}`); bar.onclick = () => jump(index); $('timeline').append(bar);
     const row = el('button'); row.dataset.index = index; row.setAttribute('aria-label', `Go to ${step.label}, ${formatTime(step.durationSeconds)}`);
     const duration = el('span', formatTime(step.durationSeconds), 'block-duration');
-    row.append(el('strong', step.label), duration, el('span', displayTarget(step.cadence)), el('span', displayTarget(step.resistance)), el('span', step.watts == null ? '—' : Math.round(step.watts)));
+    const blockLabel = el('strong', null, 'block-label'); blockLabel.append(el('span', step.label));
+    const postureBadge = standingBadge(step); if (postureBadge) { blockLabel.append(postureBadge); row.setAttribute('aria-label', `${row.getAttribute('aria-label')}, standing`); }
+    row.append(blockLabel, duration, el('span', displayTarget(step.cadence)), el('span', displayTarget(step.resistance)), el('span', step.powerZone != null ? `Z${step.powerZone}` : step.watts == null ? '—' : Math.round(step.watts)));
     row.onclick = () => jump(index); $('schedule').append(row);
   });
 }
 async function selectWorkout(raw, elapsed = 0) {
+  if (selected) bikePanel.end();
   if (clock?.running) { clock.pause(); saveSession(); await releaseWake(); }
   try { selected = compileWorkout(raw); } catch (e) { $('notice').textContent = e.message; return; }
   rawSelected = { ...raw, tags: selected.tags }; clock = new WorkoutClock(selected.totalSeconds); clock.seek(elapsed); currentIndex = -1; completed = elapsed >= selected.totalSeconds; lastCue = '';
   $('library').hidden = true; $('player').hidden = false; document.body.classList.add('workout-open'); $('ride-name').textContent = selected.name; $('ride-description').textContent = selected.description || ''; $('total-label').textContent = formatTime(selected.totalSeconds);
-  buildSchedule(); render(); saveSession(); window.scrollTo({ top: 0 });
+  buildSchedule(); render(); saveSession();
+  if (elapsed > 0 && !completed) bikePanel.begin();
+  window.scrollTo({ top: 0 });
 }
 async function jump(index) {
   if (!selected || index < 0 || index >= selected.intervals.length) return;
@@ -117,12 +126,17 @@ async function toggle() {
   if (!clock) return;
   if (completed) { clock.seek(0); completed = false; currentIndex = -1; lastCue = ''; render(); }
   if (clock.running) { clock.pause(); if ('speechSynthesis' in window) speechSynthesis.cancel(); await releaseWake(); }
-  else { await enableAudio(); clock.start(clock.read() === 0 ? 10 : 0); holdWake(); const p = positionAt(selected, clock.read()); if (!clock.countdownRemaining && !p.done && p.index === currentIndex) announce(selected.intervals[p.index]); }
+  else { bikePanel.begin(); await enableAudio(); clock.start(clock.read() === 0 ? 10 : 0); holdWake(); const p = positionAt(selected, clock.read()); if (!clock.countdownRemaining && !p.done && p.index === currentIndex) announce(selected.intervals[p.index]); }
   render(); saveSession();
 }
 function render() {
   if (!selected || !clock) return;
   const preparing = clock.countdownRemaining > 0;
+  const activeStep = selected.intervals[positionAt(selected, clock.read()).index];
+  bikePanel.setStep(activeStep);
+  renderPosture($('current-posture'), activeStep);
+  $('segment-instructions').textContent = segmentInstructions(activeStep);
+  bikePanel.setRecording(clock.running && !preparing && !positionAt(selected, clock.read()).done);
   const p = positionAt(selected, clock.read()), changed = p.index !== currentIndex;
   $('route-block-count').textContent = `${p.done ? selected.intervals.length : p.index + 1} / ${selected.intervals.length}`;
   if (preparing) {
@@ -142,7 +156,7 @@ function render() {
     return;
   }
   $('countdown').setAttribute('aria-label', 'Time remaining in block');
-  if (p.done && !completed) { completed = true; clock.pause(); releaseWake(); tone(1000, .5); speak('Workout complete. Nice ride.'); $('announcement').textContent = 'Workout complete.'; saveSession(); }
+  if (p.done && !completed) { completed = true; bikePanel.end(); clock.pause(); releaseWake(); tone(1000, .5); speak('Workout complete. Nice ride.'); $('announcement').textContent = 'Workout complete.'; saveSession(); }
   if (changed) {
     currentIndex = p.index;
     for (const [index, node] of [...$('timeline').children].entries()) { node.classList.toggle('active', index === p.index); node.setAttribute('aria-current', index === p.index ? 'step' : 'false'); }
@@ -166,7 +180,12 @@ function render() {
     activeDuration.setAttribute('aria-label', `${formatTime(p.remaining)} remaining in block`);
   }
   $('countdown').textContent = formatTime(p.remaining); $('clock-caption').textContent = p.done ? 'YOU MADE THE TIME.' : 'BLOCK REMAINING';
-  for (const id of ['cadence', 'resistance', 'watts']) $(id).textContent = step ? displayTarget(id === 'watts' && step[id] != null ? Math.round(step[id]) : step[id]) : '—';
+  for (const id of ['cadence', 'resistance', 'watts']) {
+    const key = id === 'watts' ? 'power' : id;
+    $(id).textContent = formatProgramTarget(step, key, bikePanel.profile);
+    $(id).parentElement.classList.toggle('primary-program-target', isPrimaryTarget(step, key));
+    $(id).classList.toggle('range-target', $(id).textContent.includes('–') || $(id).textContent.includes('+'));
+  }
   $('elapsed').textContent = formatTime(Math.floor(p.elapsed)); $('ride-remaining').textContent = formatTime(selected.totalSeconds - p.elapsed);
   $('session-progress').style.width = `${p.elapsed / selected.totalSeconds * 100}%`; $('block-progress').style.width = p.done ? '100%' : `${(step.durationSeconds - p.remaining) / step.durationSeconds * 100}%`;
   $('toggle').textContent = p.done ? 'Ride again ↻' : clock.running ? 'Pause Ⅱ' : clock.read() === 0 ? 'Start workout ▶' : 'Resume ▶';
@@ -174,19 +193,23 @@ function render() {
   $('next-name').textContent = p.done ? 'Time to recover.' : next?.label || 'Finish line';
   $('next-duration').textContent = next && !p.done ? formatTime(next.durationSeconds) : '—';
   document.querySelector('.upcoming').dataset.kind = next?.kind || 'cooldown';
+  renderPosture($('next-posture'), !p.done ? next : null);
+  $('next-instructions').textContent = !p.done ? segmentInstructions(next) : '';
   $('next-targets').replaceChildren();
   for (const [key, label, unit] of [['cadence', 'CADENCE', 'RPM'], ['resistance', 'RESISTANCE', ''], ['watts', 'POWER', 'W']]) {
     const metric = el('div'), title = el('span', null, 'metric-title');
     title.append(document.createTextNode(label + ' '), el('small', unit));
-    metric.append(title, el('strong', next && !p.done ? displayTarget(key === 'watts' && next[key] != null ? Math.round(next[key]) : next[key]) : '—'));
+    metric.classList.toggle('primary-program-target', isPrimaryTarget(next, key === 'watts' ? 'power' : key));
+    const targetText = !p.done ? formatProgramTarget(next, key === 'watts' ? 'power' : key, bikePanel.profile) : '—';
+    metric.append(title, el('strong', targetText, targetText.includes('–') || targetText.includes('+') ? 'range-target' : ''));
     $('next-targets').append(metric);
   }
   const cue = Math.ceil(p.remaining);
   if (clock.running && cue >= 1 && cue <= 3 && lastCue !== `${p.index}:${cue}`) { lastCue = `${p.index}:${cue}`; tone(600, .09); }
 }
 $('toggle').onclick = toggle; $('previous').onclick = () => jump(currentIndex === -1 ? selected.intervals.length - 1 : currentIndex - 1); $('next').onclick = () => jump(currentIndex + 1);
-$('restart').onclick = async () => { if (!clock) return; clock.pause(); render(); releaseWake(); if (await ask('Restart this ride?', 'Return to the beginning? Your current progress will be replaced.')) { clock.seek(0); currentIndex = -1; completed = false; render(); saveSession(); } };
-$('back').onclick = () => { clock?.pause(); saveSession(); releaseWake(); if ('speechSynthesis' in window) speechSynthesis.cancel(); $('player').hidden = true; $('library').hidden = false; document.body.classList.remove('workout-open'); document.title = 'PelotonicReaction · Workout player'; };
+$('restart').onclick = async () => { if (!clock) return; clock.pause(); render(); releaseWake(); if (await ask('Restart this ride?', 'Return to the beginning? Your current progress will be replaced.')) { bikePanel.end(); clock.seek(0); currentIndex = -1; completed = false; render(); saveSession(); } };
+$('back').onclick = () => { bikePanel.end(); clock?.pause(); saveSession(); releaseWake(); if ('speechSynthesis' in window) speechSynthesis.cancel(); $('player').hidden = true; $('library').hidden = false; document.body.classList.remove('workout-open'); document.title = 'PelotonicReaction · Workout player'; };
 $('fullscreen').onclick = async () => { try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); } catch { $('sleep-status').textContent = 'Fullscreen is unavailable in this browser.'; } };
 $('import-open').onclick = () => $('import-file').click();
 $('import-file').onchange = async e => {
@@ -207,5 +230,6 @@ async function init() {
   if (saved && !saved.completed && Number.isFinite(saved.elapsed) && saved.elapsed > 0) {
     try { compileWorkout(saved.workout); if (await ask('Continue your last ride?', `${saved.workout.name} · ${formatTime(saved.elapsed)} completed. It will reopen paused.`)) await selectWorkout(saved.workout, saved.elapsed); } catch { /* Ignore invalid or outdated saved sessions. */ }
   }
+  if ($('player').hidden) bikePanel.end();
 }
 init();

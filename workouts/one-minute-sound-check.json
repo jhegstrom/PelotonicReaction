@@ -3,17 +3,63 @@
   "id": "one-minute-sound-check",
   "name": "One-minute sound check",
   "description": "A short player demo. Check the countdown, sound and spoken cues before your ride. Targets are illustrative.",
-  "tags": ["Demo"],
+  "tags": [
+    "Demo"
+  ],
   "steps": [
-    { "label": "Get ready", "kind": "warmup", "durationSeconds": 10, "cadence": 80, "resistance": 30, "watts": 53 },
+    {
+      "label": "Get ready",
+      "kind": "warmup",
+      "durationSeconds": 10,
+      "cadence": 80,
+      "resistance": 30,
+      "watts": 53,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
+    },
     {
       "label": "Cue check",
       "repeat": 3,
       "steps": [
-        { "label": "Work", "kind": "work", "durationSeconds": 5, "cadence": 90, "resistance": 40, "watts": 134 },
-        { "label": "Recover", "kind": "recovery", "durationSeconds": 5, "cadence": 80, "resistance": 30, "watts": 53 }
+        {
+          "label": "Work",
+          "kind": "work",
+          "durationSeconds": 5,
+          "cadence": 90,
+          "resistance": 40,
+          "watts": 134,
+          "primaryTargets": [
+            "cadence",
+            "resistance"
+          ]
+        },
+        {
+          "label": "Recover",
+          "kind": "recovery",
+          "durationSeconds": 5,
+          "cadence": 80,
+          "resistance": 30,
+          "watts": 53,
+          "primaryTargets": [
+            "cadence",
+            "resistance"
+          ]
+        }
       ]
     },
-    { "label": "Easy finish", "kind": "cooldown", "durationSeconds": 20, "cadence": 75, "resistance": 25, "watts": 30 }
+    {
+      "label": "Easy finish",
+      "kind": "cooldown",
+      "durationSeconds": 20,
+      "cadence": 75,
+      "resistance": 25,
+      "watts": 30,
+      "primaryTargets": [
+        "cadence",
+        "resistance"
+      ]
+    }
   ]
 }

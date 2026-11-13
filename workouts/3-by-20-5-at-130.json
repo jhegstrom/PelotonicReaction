@@ -18,43 +18,50 @@
       "label": "Warm-up",
       "durationSeconds": 600,
       "kind": "warmup",
-      "sourceRow": 2
+      "sourceRow": 2,
+      "primaryTargets": null
     },
     {
       "label": "Climb",
       "durationSeconds": 1200,
       "kind": "work",
-      "sourceRow": 3
+      "sourceRow": 3,
+      "primaryTargets": null
     },
     {
       "label": "Rest",
       "durationSeconds": 300,
       "kind": "recovery",
-      "sourceRow": 4
+      "sourceRow": 4,
+      "primaryTargets": null
     },
     {
       "label": "Climb",
       "durationSeconds": 1200,
       "kind": "work",
-      "sourceRow": 5
+      "sourceRow": 5,
+      "primaryTargets": null
     },
     {
       "label": "Rest",
       "durationSeconds": 300,
       "kind": "recovery",
-      "sourceRow": 6
+      "sourceRow": 6,
+      "primaryTargets": null
     },
     {
       "label": "Climb",
       "durationSeconds": 1200,
       "kind": "work",
-      "sourceRow": 7
+      "sourceRow": 7,
+      "primaryTargets": null
     },
     {
       "label": "Cool-down",
       "durationSeconds": 300,
       "kind": "cooldown",
-      "sourceRow": 8
+      "sourceRow": 8,
+      "primaryTargets": null
     }
   ]
 }

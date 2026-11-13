@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:PelotonicReaction}/tools/grupetto-wifi-harness",
+            "name": "Debug GrupettoWiFi (tools/grupetto-wifi-harness)",
+            "target": "GrupettoWiFi",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug GrupettoWiFi (tools/grupetto-wifi-harness)"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:PelotonicReaction}/tools/grupetto-wifi-harness",
+            "name": "Release GrupettoWiFi (tools/grupetto-wifi-harness)",
+            "target": "GrupettoWiFi",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release GrupettoWiFi (tools/grupetto-wifi-harness)"
+        }
+    ]
+}
