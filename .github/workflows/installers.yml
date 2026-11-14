@@ -1,0 +1,47 @@
+name: Native installers
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            target: mac
+            arch: arm64
+          - os: macos-latest
+            target: mac
+            arch: x64
+          - os: windows-latest
+            target: windows
+            arch: x64
+          - os: ubuntu-latest
+            target: linux
+            arch: x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y rpm
+      - run: npm test
+      - run: npm run package:${{ matrix.target }} -- --arch ${{ matrix.arch }}
+      - uses: actions/upload-artifact@v6
+        with:
+          name: installers-${{ matrix.target }}-${{ matrix.arch }}
+          path: |
+            dist/*.pkg
+            dist/*.msi
+            dist/*.deb
+            dist/*.rpm
+            dist/*.sha256
+          if-no-files-found: error

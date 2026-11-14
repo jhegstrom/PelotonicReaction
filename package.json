@@ -10,9 +10,21 @@
   "scripts": {
     "start": "node server.mjs",
     "test": "node --test",
-    "prepare:bike": "sh tools/grupetto-wifi-harness/build.sh"
+    "prepare:bike": "sh tools/grupetto-wifi-harness/build.sh",
+    "desktop": "electron .",
+    "package:mac": "node scripts/package.mjs mac",
+    "package:windows": "node scripts/package.mjs win",
+    "package:linux": "node scripts/package.mjs linux",
+    "package:verify": "node scripts/verify-package.mjs"
   },
   "dependencies": {
     "@garmin/fitsdk": "^21.221.0"
-  }
+  },
+  "devDependencies": {
+    "electron": "45.3.2",
+    "electron-builder": "26.18.0"
+  },
+  "main": "desktop/main.mjs",
+  "author": "PelotonicReaction",
+  "license": "UNLICENSED"
 }

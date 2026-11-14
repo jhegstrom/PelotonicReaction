@@ -10,9 +10,9 @@ import { BikeService } from './lib/bike-service.mjs';
 import { compileWorkout } from './public/workout.js';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml' };
-export function createAppServer(base = root, { bike, strava = new StravaService(base), rides = new RideStore(base) } = {}) {
+export function createAppServer(base = root, { dataRoot = base, helperPath = null, workoutsRoot = path.join(base, 'workouts'), bike, strava = new StravaService(dataRoot), rides = new RideStore(dataRoot) } = {}) {
   const uploads = new RideUploads(rides, strava);
-  bike ??= new BikeService(base, { rides, athleteId: () => strava.data?.athleteId || strava.data?.profile?.athleteId || null, onFinish: ride => uploads.complete(ride) });
+  bike ??= new BikeService(base, { helperPath, rides, athleteId: () => strava.data?.athleteId || strava.data?.profile?.athleteId || null, onFinish: ride => uploads.complete(ride) });
   if (bike.recorder) bike.recorder.onFinish = ride => uploads.complete(ride);
   const server = http.createServer(async (req, res) => {
     const send = (status, text, type = 'application/json; charset=utf-8') => { res.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer' }); res.end(req.method === 'HEAD' ? '' : text); };
@@ -94,9 +94,9 @@ export function createAppServer(base = root, { bike, strava = new StravaService(
       if (!['GET', 'HEAD'].includes(req.method)) return send(405, JSON.stringify({ error: 'Read-only server.' }));
       if (url.pathname === '/api/workouts') {
         const workouts = [], errors = [];
-        const files = (await readdir(path.join(base, 'workouts'))).filter(f => f.endsWith('.json')).sort();
+        const files = (await readdir(workoutsRoot)).filter(f => f.endsWith('.json')).sort();
         for (const filename of files) {
-          try { const raw = JSON.parse(await readFile(path.join(base, 'workouts', filename), 'utf8')); compileWorkout(raw); workouts.push({ filename, workout: raw }); }
+          try { const raw = JSON.parse(await readFile(path.join(workoutsRoot, filename), 'utf8')); compileWorkout(raw); workouts.push({ filename, workout: raw }); }
           catch (e) { errors.push({ filename, message: e.message }); }
         }
         return send(200, JSON.stringify({ workouts, errors }));

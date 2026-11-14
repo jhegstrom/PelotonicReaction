@@ -2,7 +2,11 @@
 
 A local cycling workout player for the view from your bike: large countdown, cadence, resistance and estimated watts; a preview of the next block; and an easy-to-follow workout profile.
 
-## Run on Windows, macOS or Linux
+## Desktop installers
+
+The desktop packaging branch adds a bundled launcher and native `.pkg` (Mac), `.msi` (Windows), and `.deb`/`.rpm` (Linux) build targets. Mac includes the precompiled Grupetto helper. See [packaging and installation](packaging/README.md) for building, persistent-data migration, signing, and platform limitations.
+
+## Run from source on Windows, macOS or Linux
 
 Install **Node.js 18 or newer** (a current LTS release is recommended). Run `npm install` once to install Garmin’s official FIT SDK for activity files. Live Grupetto telemetry currently requires a Mac host with Xcode or Swift command-line tools installed; the Peloton browser only needs access to that Mac on the LAN.
 
