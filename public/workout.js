@@ -32,12 +32,14 @@ export function compileWorkout(input) {
           }
         }
         if (step.posture != null && !['seated', 'standing'].includes(step.posture)) throw Error(`${step.label}: posture must be seated, standing or null.`);
+        if (step.heartRateZone != null && (!Number.isInteger(step.heartRateZone) || step.heartRateZone < 1 || step.heartRateZone > 5)) throw Error(`${step.label}: heartRateZone must be 1–5 or null.`);
+        if (step.heartRateZone != null && (step.heartRate != null || step.targetRanges?.heartRate)) throw Error(`${step.label}: choose a heart-rate zone or a BPM target, not both.`);
         if (step.powerZone != null && (!Number.isInteger(step.powerZone) || step.powerZone < 1 || step.powerZone > 7)) throw Error(`${step.label}: powerZone must be 1–7 or null.`);
-        if (step.powerZone != null && (step.watts != null || step.targetRanges?.watts)) throw Error(`${step.label}: choose a power zone or a watts target, not both.`);
+        if (step.powerZone != null && step.targetRanges?.watts) throw Error(`${step.label}: choose a power zone or a watts range, not both.`);
         if (step.primaryTargets != null) {
           if (!Array.isArray(step.primaryTargets) || new Set(step.primaryTargets).size !== step.primaryTargets.length || step.primaryTargets.some(key => !Object.hasOwn(bounds, key))) throw Error(`${step.label}: primaryTargets must list unique cadence, resistance, watts or heartRate fields.`);
           for (const key of step.primaryTargets) {
-            if (step[key] == null && !step.targetRanges?.[key] && !(key === 'watts' && step.powerZone != null)) throw Error(`${step.label}: primary target ${key} has no target value.`);
+            if (step[key] == null && !step.targetRanges?.[key] && !(key === 'watts' && step.powerZone != null) && !(key === 'heartRate' && step.heartRateZone != null)) throw Error(`${step.label}: primary target ${key} has no target value.`);
           }
         }
         const kind = step.kind || 'work';

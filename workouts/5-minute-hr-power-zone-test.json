@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "id": "5-minute-hr-power-zone-test",
+  "name": "5 Minute HR and Power Zone Test",
+  "description": "Five one-minute steps through HR and power Zones 1\u20135, with watts and HR both primary. Watt targets and suggested cadence/resistance are based on FTP 150 W and nearby combinations in the existing workouts. HR zones follow the rider profile. Cadence and resistance are references; adjust resistance to match watts. This is a short display and recording test; HR may lag the one-minute steps.",
+  "tags": [
+    "Demo",
+    "Heart Rate Zone",
+    "Power Zone",
+    "Intervals"
+  ],
+  "steps": [
+    {
+      "label": "HR Zone 1 + Power Zone 1",
+      "kind": "work",
+      "durationSeconds": 60,
+      "heartRateZone": 1,
+      "powerZone": 1,
+      "watts": 38,
+      "cadence": 85,
+      "resistance": 25,
+      "primaryTargets": [
+        "watts",
+        "heartRate"
+      ]
+    },
+    {
+      "label": "HR Zone 2 + Power Zone 2",
+      "kind": "work",
+      "durationSeconds": 60,
+      "heartRateZone": 2,
+      "powerZone": 2,
+      "watts": 96,
+      "cadence": 90,
+      "resistance": 35,
+      "primaryTargets": [
+        "watts",
+        "heartRate"
+      ]
+    },
+    {
+      "label": "HR Zone 3 + Power Zone 3",
+      "kind": "work",
+      "durationSeconds": 60,
+      "heartRateZone": 3,
+      "powerZone": 3,
+      "watts": 121,
+      "cadence": 85,
+      "resistance": 40,
+      "primaryTargets": [
+        "watts",
+        "heartRate"
+      ]
+    },
+    {
+      "label": "HR Zone 4 + Power Zone 4",
+      "kind": "work",
+      "durationSeconds": 60,
+      "heartRateZone": 4,
+      "powerZone": 4,
+      "watts": 147,
+      "cadence": 80,
+      "resistance": 45,
+      "primaryTargets": [
+        "watts",
+        "heartRate"
+      ]
+    },
+    {
+      "label": "HR Zone 5 + Power Zone 5",
+      "kind": "work",
+      "durationSeconds": 60,
+      "heartRateZone": 5,
+      "powerZone": 5,
+      "watts": 170,
+      "cadence": 75,
+      "resistance": 50,
+      "primaryTargets": [
+        "watts",
+        "heartRate"
+      ]
+    }
+  ]
+}

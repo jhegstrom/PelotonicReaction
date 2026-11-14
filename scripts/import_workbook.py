@@ -67,9 +67,12 @@ def convert(source, output):
             authored = {s.get('sourceRow'): s for s in existing.get('steps', []) if 'sourceRow' in s}
             for step in steps:
                 previous = authored.get(step['sourceRow'], {})
-                for key in ['posture', 'powerZone', 'primaryTargets', 'heartRate', 'targetRanges']:
+                for key in ['cadence', 'resistance', 'watts']:
+                    if key not in step and key in previous: step[key] = previous[key]
+                for key in ['posture', 'powerZone', 'primaryTargets', 'heartRateZone', 'heartRate', 'targetRanges']:
                     if key in previous: step[key] = previous[key]
-                if step.get('powerZone') is not None: step.pop('watts', None)
+                if step.get('powerZone') is not None and previous.get('watts') is None: step.pop('watts', None)
+            if name == '3 by 20-5 at 130' and any(s.get('watts') is not None for s in steps): notes = existing.get('description', notes)
             workout = {'schemaVersion':1, 'id':slug, 'name':name, 'description':notes, 'tags':tags, 'source':{'workbook':source.name,'sheet':name,'convertedOn':datetime.date.today().isoformat(),'power':'Workbook estimate; not live or measured power'}, 'steps':steps}
             (output/(slug+'.json')).write_text(json.dumps(workout,indent=2)+'\n')
             print(f'{name}: {len(steps)} intervals, {sum(s["durationSeconds"] for s in steps)/60:g} min -> {slug}.json')

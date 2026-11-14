@@ -2,3 +2,9 @@
 node_modules/
 coverage/
 *.log
+
+STRAVA_CLIENT_ID=297009
+STRAVA_CLIENT_SECRET=9461947dfb6e3bef20cb6693fa80b92699363725
+
+.env
+.data/

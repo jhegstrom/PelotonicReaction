@@ -1,16 +1,22 @@
+import { importedZoneRange } from './strava-profile.js';
 import { powerZoneRange } from './power-zones.js';
 // These are the instantaneous target fields currently supported by Program JSON.
 export const TARGET_FIELDS = { cadence: 'cadence', power: 'watts', resistance: 'resistance', hr: 'heartRate' };
 export function programTarget(step, key, profile = null) {
   const field = TARGET_FIELDS[key];
   if (!field || !step) return null;
-  if (field === 'watts' && step.powerZone != null) return powerZoneRange(step.powerZone, profile?.power?.ftpWatts);
+  if (field === 'watts' && step.powerZone != null && !Number.isFinite(step.watts)) return profile?.strava?.powerZones?.length ? importedZoneRange(profile.strava.powerZones, step.powerZone) : powerZoneRange(step.powerZone, profile?.power?.ftpWatts);
+  if (field === 'heartRate' && step.heartRateZone != null) {
+    if (profile?.strava?.heartRateZones?.length) return importedZoneRange(profile.strava.heartRateZones, step.heartRateZone);
+    const zone = profile?.heartRate?.zones?.find(z => z.zone === step.heartRateZone);
+    return zone ? { low: zone.minBpm, high: zone.maxBpm, explicitRange: true, zone: zone.zone } : null;
+  }
   const range = step.targetRanges?.[field];
   if (Array.isArray(range) && range.length === 2 && range.every(Number.isFinite) && range[0] <= range[1]) {
     return { low: range[0], high: range[1], explicitRange: true };
   }
   if (!Number.isFinite(step[field])) return null;
-  return { low: step[field], high: step[field], explicitRange: false };
+  return { low: step[field], high: step[field], explicitRange: false, ...(field === 'watts' && step.powerZone != null ? { zone: step.powerZone } : {}) };
 }
 export function isPrimaryTarget(step, key) {
   return Array.isArray(step?.primaryTargets) && step.primaryTargets.includes(TARGET_FIELDS[key]);
@@ -34,14 +40,16 @@ export function segmentInstructions(step) {
   if (!step) return '';
   const labels = { cadence: 'cadence', resistance: 'resistance', watts: 'power', heartRate: 'HR' };
   const parts = [];
+  if (step.heartRateZone != null) parts.push(`HR zone ${step.heartRateZone}`);
   if (step.powerZone != null) parts.push(`Power zone ${step.powerZone}`);
   const primary = step.primaryTargets || [];
   if (primary.length) parts.push(`Guide: ${primary.map(key => labels[key]).join(' + ')}`);
-  else if (Object.values(TARGET_FIELDS).some(key => step[key] != null || step.targetRanges?.[key]) || step.powerZone != null) parts.push('Reference targets');
+  else if (Object.values(TARGET_FIELDS).some(key => step[key] != null || step.targetRanges?.[key]) || step.powerZone != null || step.heartRateZone != null) parts.push('Reference targets');
   return parts.join(' · ');
 }
 export function formatProgramTarget(step, key, profile) {
   const target = programTarget(step, key, profile);
+  if (!target && key === 'hr' && step?.heartRateZone != null) return `Z${step.heartRateZone}`;
   if (!target) return key === 'power' && step?.powerZone != null ? `Z${step.powerZone}` : '—';
   const number = n => String(Math.round(n * 10) / 10);
   return target.high === Infinity ? `${number(target.low)}+` : target.low === target.high ? number(target.low) : `${number(target.low)}–${number(target.high)}`;

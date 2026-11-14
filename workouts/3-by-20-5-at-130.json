@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "3-by-20-5-at-130",
   "name": "3 by 20-5 at 130",
-  "description": "Three 20-minute climbs with easy resets. The source has timings only; cadence, resistance and power are intentionally unspecified. Total source duration is 85 minutes.",
+  "description": "Three 20-minute blocks at 130 W: cadence 90, 85, then 80 RPM, with suggested resistance 40, 41, then 43. Power is primary; cadence and resistance are references. Zone 3 is based on FTP 150 W. Total duration is 85 minutes.",
   "tags": [
     "Climb",
     "Endurance"
@@ -11,7 +11,7 @@
     "workbook": "Grupetto Workouts.xlsx",
     "sheet": "3 by 20-5 at 130",
     "convertedOn": "2026-11-11",
-    "power": "Workbook estimate; not live or measured power"
+    "power": "Authored 130 W target; suggested resistance approximated from existing workout cadence/power combinations. Zone 3 based on rider FTP 150 W."
   },
   "steps": [
     {
@@ -26,7 +26,13 @@
       "durationSeconds": 1200,
       "kind": "work",
       "sourceRow": 3,
-      "primaryTargets": null
+      "primaryTargets": [
+        "watts"
+      ],
+      "watts": 130,
+      "powerZone": 3,
+      "cadence": 90,
+      "resistance": 40
     },
     {
       "label": "Rest",
@@ -40,7 +46,13 @@
       "durationSeconds": 1200,
       "kind": "work",
       "sourceRow": 5,
-      "primaryTargets": null
+      "primaryTargets": [
+        "watts"
+      ],
+      "watts": 130,
+      "powerZone": 3,
+      "cadence": 85,
+      "resistance": 41
     },
     {
       "label": "Rest",
@@ -54,7 +66,13 @@
       "durationSeconds": 1200,
       "kind": "work",
       "sourceRow": 7,
-      "primaryTargets": null
+      "primaryTargets": [
+        "watts"
+      ],
+      "watts": 130,
+      "powerZone": 3,
+      "cadence": 80,
+      "resistance": 43
     },
     {
       "label": "Cool-down",

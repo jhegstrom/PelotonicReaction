@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "id": "45-minute-hr-zone-3",
+  "name": "45 Minute HR Zone 3",
+  "description": "Exactly 45 minutes: 2 minutes easy, three 30-second spin-ups at 120 RPM each followed by 30 seconds easy (5-minute warm-up total), then 1 minute building to HR Zone 2. Seven rounds of 4 minutes in HR Zone 3 and 1 minute in HR Zone 2, followed by a final 4 minutes in HR Zone 3 to finish at 45:00. HR targets use the rider profile zones.",
+  "tags": [
+    "Heart Rate Zone",
+    "Intervals",
+    "Endurance"
+  ],
+  "steps": [
+    {
+      "label": "Easy start",
+      "kind": "warmup",
+      "durationSeconds": 120,
+      "primaryTargets": null
+    },
+    {
+      "label": "Spin-up",
+      "repeat": 3,
+      "steps": [
+        {
+          "label": "Spin up to 120 RPM",
+          "kind": "warmup",
+          "durationSeconds": 30,
+          "cadence": 120,
+          "primaryTargets": [
+            "cadence"
+          ]
+        },
+        {
+          "label": "Easy spin recovery",
+          "kind": "warmup",
+          "durationSeconds": 30,
+          "primaryTargets": null
+        }
+      ]
+    },
+    {
+      "label": "Build to HR Zone 2",
+      "kind": "warmup",
+      "durationSeconds": 60,
+      "heartRateZone": 2,
+      "primaryTargets": [
+        "heartRate"
+      ]
+    },
+    {
+      "label": "HR interval",
+      "repeat": 7,
+      "steps": [
+        {
+          "label": "HR Zone 3",
+          "kind": "work",
+          "durationSeconds": 240,
+          "heartRateZone": 3,
+          "primaryTargets": [
+            "heartRate"
+          ]
+        },
+        {
+          "label": "HR Zone 2 recovery",
+          "kind": "recovery",
+          "durationSeconds": 60,
+          "heartRateZone": 2,
+          "primaryTargets": [
+            "heartRate"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Final HR Zone 3 \u00b7 finish at 45:00",
+      "kind": "work",
+      "durationSeconds": 240,
+      "heartRateZone": 3,
+      "primaryTargets": [
+        "heartRate"
+      ]
+    }
+  ]
+}

@@ -51,3 +51,15 @@ test('FTP power zones resolve as ranges, remain unresolved without FTP and allow
   assert.equal(targetCorrection(145,target,true).direction,'increase');
   assert.equal(targetCorrection(500,powerZoneRange(7,200),true).level,'on');
 });
+
+test('absolute watts remain primary when a reference power-zone cue is present',()=>{
+  const target=programTarget({watts:130,powerZone:3,primaryTargets:['watts']},'power',{power:{ftpWatts:150}});
+  assert.deepEqual(target,{low:130,high:130,explicitRange:false,zone:3});
+});
+
+test('heart-rate zone targets follow rider profiles and imported custom zones',()=>{
+  const step={heartRateZone:3,primaryTargets:['heartRate']};
+  assert.deepEqual(programTarget(step,'hr',{heartRate:{zones:[{zone:3,minBpm:110,maxBpm:124}]}}),{low:110,high:124,explicitRange:true,zone:3});
+  assert.deepEqual(programTarget(step,'hr',{strava:{heartRateZones:[{zone:3,min:125,max:140}]},heartRate:{zones:[{zone:3,minBpm:110,maxBpm:124}]}}),{low:125,high:139,explicitRange:true,zone:3});
+  assert.equal(programTarget(step,'hr',null),null);
+});
