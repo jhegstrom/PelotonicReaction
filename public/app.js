@@ -1,3 +1,5 @@
+import { scheduleColumns, scheduleTarget } from './schedule-targets.js';
+import { RideHistory } from './ride-history.js';
 import { standingBadge, renderPosture } from './posture.js';
 import { segmentInstructions, formatProgramTarget, isPrimaryTarget } from './target-guidance.js';
 import { compileWorkout, positionAt, WorkoutClock, formatTime } from './workout.js';
@@ -7,6 +9,7 @@ import { TagControls } from './tag-controls.js';
 const $ = id => document.getElementById(id);
 const key = 'pelotonic-reaction-session-v1';
 const bikePanel = new BikePanel();
+const rideHistory = new RideHistory();
 let selected = null, rawSelected = null, clock = null, currentIndex = -1, audio = null, wake = null, lastCue = '', completed = false, workoutItems = [];
 let selectedTags = [];
 const tagControls = new TagControls({ onChange: renderLibrary, confirm: ask });
@@ -21,7 +24,7 @@ function ask(title, message, action = 'Continue') {
     $('dialog-ok').onclick = () => done(true); $('dialog-cancel').onclick = () => done(false); dialog.oncancel = event => { event.preventDefault(); done(false); }; dialog.showModal();
   });
 }
-function saveSession() { if (clock && selected) storageSet(key, { workout: rawSelected, elapsed: clock.read(), completed }); }
+function saveSession() { if (clock && selected) storageSet(key, { workout: rawSelected, elapsed: clock.read(), completed, rideId: bikePanel.rideId }); }
 async function releaseWake() { try { await wake?.release(); } catch {} wake = null; $('sleep-status').textContent = ''; }
 async function holdWake() {
   if (!clock?.running || document.visibilityState !== 'visible') return;
@@ -93,23 +96,35 @@ function showCards(items) {
 }
 function buildSchedule() {
   $('timeline').replaceChildren(); $('schedule').replaceChildren();
-  const head = el('div', null, 'schedule-head'); for (const label of ['BLOCK', 'DURATION / LEFT', 'RPM', 'RESISTANCE', 'WATTS']) head.append(el('span', label)); $('schedule').append(head);
+  const columns=scheduleColumns(selected.intervals);
+  $('schedule').style.setProperty('--target-columns',columns.length);
+  $('schedule').dataset.targetColumns=columns.length;
+  const head = el('div', null, 'schedule-head'); for (const label of ['BLOCK', 'DURATION / LEFT', ...columns.map(c=>c.label)]) head.append(el('span', label)); $('schedule').append(head);
   selected.intervals.forEach((step, index) => {
     const bar = el('button'); bar.dataset.kind = step.kind; bar.style.flexGrow = step.durationSeconds; bar.style.height = height(step); bar.title = `${step.label} · ${formatTime(step.durationSeconds)}`; bar.setAttribute('aria-label', `Go to ${step.label}`); bar.onclick = () => jump(index); $('timeline').append(bar);
     const row = el('button'); row.dataset.index = index; row.setAttribute('aria-label', `Go to ${step.label}, ${formatTime(step.durationSeconds)}`);
     const duration = el('span', formatTime(step.durationSeconds), 'block-duration');
     const blockLabel = el('strong', null, 'block-label'); blockLabel.append(el('span', step.label));
     const postureBadge = standingBadge(step); if (postureBadge) { blockLabel.append(postureBadge); row.setAttribute('aria-label', `${row.getAttribute('aria-label')}, standing`); }
-    row.append(blockLabel, duration, el('span', displayTarget(step.cadence)), el('span', displayTarget(step.resistance)), el('span', step.powerZone != null ? `Z${step.powerZone}` : step.watts == null ? '—' : Math.round(step.watts)));
+    row.append(blockLabel, duration);
+    for(const column of columns){
+      const target=scheduleTarget(step,column), cell=el('span',target.text,'schedule-target');
+      cell.classList.toggle('schedule-primary',target.primary);
+      cell.title=`${column.label}: ${target.text}${target.primary?' · Primary target':''}`;
+      if(target.primary)cell.setAttribute('aria-label',`${column.label}: ${target.text}, primary target`);
+      row.append(cell);
+      if(target.text!=='—')row.setAttribute('aria-label',`${row.getAttribute('aria-label')}, ${column.label} ${target.text}${target.primary?' primary':''}`);
+    }
     row.onclick = () => jump(index); $('schedule').append(row);
   });
 }
-async function selectWorkout(raw, elapsed = 0) {
+async function selectWorkout(raw, elapsed = 0, rideId = null) {
   if (selected) bikePanel.end();
   if (clock?.running) { clock.pause(); saveSession(); await releaseWake(); }
   try { selected = compileWorkout(raw); } catch (e) { $('notice').textContent = e.message; return; }
+  bikePanel.workoutName = selected.name; bikePanel.workoutDescription = selected.description; bikePanel.rideId = rideId;
   rawSelected = { ...raw, tags: selected.tags }; clock = new WorkoutClock(selected.totalSeconds); clock.seek(elapsed); currentIndex = -1; completed = elapsed >= selected.totalSeconds; lastCue = '';
-  $('library').hidden = true; $('player').hidden = false; document.body.classList.add('workout-open'); $('ride-name').textContent = selected.name; $('ride-description').textContent = selected.description || ''; $('total-label').textContent = formatTime(selected.totalSeconds);
+  $('library').hidden = true; $('player').hidden = false; document.body.classList.add('workout-open'); document.body.classList.remove('workout-completed'); $('ride-name').textContent = selected.name; $('ride-description').textContent = selected.description || ''; $('total-label').textContent = formatTime(selected.totalSeconds);
   buildSchedule(); render(); saveSession();
   if (elapsed > 0 && !completed) bikePanel.begin();
   window.scrollTo({ top: 0 });
@@ -124,7 +139,7 @@ async function jump(index) {
 }
 async function toggle() {
   if (!clock) return;
-  if (completed) { clock.seek(0); completed = false; currentIndex = -1; lastCue = ''; render(); }
+  if (completed) { document.body.classList.remove('workout-completed'); clock.seek(0); completed = false; currentIndex = -1; lastCue = ''; render(); }
   if (clock.running) { clock.pause(); if ('speechSynthesis' in window) speechSynthesis.cancel(); await releaseWake(); }
   else { bikePanel.begin(); await enableAudio(); clock.start(clock.read() === 0 ? 10 : 0); holdWake(); const p = positionAt(selected, clock.read()); if (!clock.countdownRemaining && !p.done && p.index === currentIndex) announce(selected.intervals[p.index]); }
   render(); saveSession();
@@ -132,8 +147,10 @@ async function toggle() {
 function render() {
   if (!selected || !clock) return;
   const preparing = clock.countdownRemaining > 0;
-  const activeStep = selected.intervals[positionAt(selected, clock.read()).index];
-  bikePanel.setStep(activeStep);
+  const activePosition = positionAt(selected, clock.read());
+  const activeStep = selected.intervals[activePosition.index];
+  bikePanel.remainingSeconds = Math.max(0, selected.totalSeconds-clock.read());
+  bikePanel.setStep(activePosition.done ? null : activeStep, activePosition.index);
   renderPosture($('current-posture'), activeStep);
   $('segment-instructions').textContent = segmentInstructions(activeStep);
   bikePanel.setRecording(clock.running && !preparing && !positionAt(selected, clock.read()).done);
@@ -156,7 +173,7 @@ function render() {
     return;
   }
   $('countdown').setAttribute('aria-label', 'Time remaining in block');
-  if (p.done && !completed) { completed = true; bikePanel.end(); clock.pause(); releaseWake(); tone(1000, .5); speak('Workout complete. Nice ride.'); $('announcement').textContent = 'Workout complete.'; saveSession(); }
+  if (p.done && !completed) { completed = true; document.body.classList.add('workout-completed'); bikePanel.end('complete').then(() => rideHistory.refresh()); clock.pause(); releaseWake(); tone(1000, .5); speak('Workout complete. Nice ride.'); $('announcement').textContent = 'Workout complete.'; saveSession(); }
   if (changed) {
     currentIndex = p.index;
     for (const [index, node] of [...$('timeline').children].entries()) { node.classList.toggle('active', index === p.index); node.setAttribute('aria-current', index === p.index ? 'step' : 'false'); }
@@ -208,8 +225,8 @@ function render() {
   if (clock.running && cue >= 1 && cue <= 3 && lastCue !== `${p.index}:${cue}`) { lastCue = `${p.index}:${cue}`; tone(600, .09); }
 }
 $('toggle').onclick = toggle; $('previous').onclick = () => jump(currentIndex === -1 ? selected.intervals.length - 1 : currentIndex - 1); $('next').onclick = () => jump(currentIndex + 1);
-$('restart').onclick = async () => { if (!clock) return; clock.pause(); render(); releaseWake(); if (await ask('Restart this ride?', 'Return to the beginning? Your current progress will be replaced.')) { bikePanel.end(); clock.seek(0); currentIndex = -1; completed = false; render(); saveSession(); } };
-$('back').onclick = () => { bikePanel.end(); clock?.pause(); saveSession(); releaseWake(); if ('speechSynthesis' in window) speechSynthesis.cancel(); $('player').hidden = true; $('library').hidden = false; document.body.classList.remove('workout-open'); document.title = 'PelotonicReaction · Workout player'; };
+$('restart').onclick = async () => { if (!clock) return; clock.pause(); render(); releaseWake(); if (await ask('Restart this ride?', 'Return to the beginning? Your current progress will be replaced.')) { document.body.classList.remove('workout-completed'); bikePanel.end(); clock.seek(0); currentIndex = -1; completed = false; render(); saveSession(); } };
+$('back').onclick = () => { bikePanel.end().then(() => rideHistory.refresh()); clock?.pause(); saveSession(); releaseWake(); if ('speechSynthesis' in window) speechSynthesis.cancel(); $('player').hidden = true; $('library').hidden = false; document.body.classList.remove('workout-open','workout-completed'); document.title = 'PelotonicReaction · Workout player'; };
 $('fullscreen').onclick = async () => { try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); } catch { $('sleep-status').textContent = 'Fullscreen is unavailable in this browser.'; } };
 $('import-open').onclick = () => $('import-file').click();
 $('import-file').onchange = async e => {
@@ -228,7 +245,7 @@ async function init() {
   catch (e) { await tagControls.init([]); renderLibrary(); $('notice').textContent = `${e.message} Start the app with npm start, then refresh. You can also import a JSON workout.`; }
   const saved = storageGet(key);
   if (saved && !saved.completed && Number.isFinite(saved.elapsed) && saved.elapsed > 0) {
-    try { compileWorkout(saved.workout); if (await ask('Continue your last ride?', `${saved.workout.name} · ${formatTime(saved.elapsed)} completed. It will reopen paused.`)) await selectWorkout(saved.workout, saved.elapsed); } catch { /* Ignore invalid or outdated saved sessions. */ }
+    try { compileWorkout(saved.workout); if (await ask('Continue your last ride?', `${saved.workout.name} · ${formatTime(saved.elapsed)} completed. It will reopen paused.`)) await selectWorkout(saved.workout, saved.elapsed, saved.rideId); } catch { /* Ignore invalid or outdated saved sessions. */ }
   }
   if ($('player').hidden) bikePanel.end();
 }

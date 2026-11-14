@@ -1,5 +1,6 @@
+import { ZoneIndicator } from './zone-indicator.js';
 import { ProfileControls } from './profile-controls.js';
-import { zoneAt, zoneRangeLabel } from './rider-profile.js';
+import { decimalZoneAt, zoneRangeLabel } from './rider-profile.js';
 import { TARGET_FIELDS, programTarget, targetCorrection, isPrimaryTarget } from './target-guidance.js';
 import { liveReading, speedValue, distanceValue } from './live-metrics.js';
 const node = (tag, text, className) => { const n = document.createElement(tag); if (text != null) n.textContent = text; if (className) n.className = className; return n; };
@@ -33,7 +34,9 @@ export class BikePanel {
       actualRow.append(value, arrow);
       const targetLabel = node('p', '', 'metric-target'); targetLabel.hidden = !(key in TARGET_FIELDS);
       card.append(title, actualRow, targetLabel, unit, detail); (['cadence', 'power', 'resistance'].includes(key) ? primary : secondary).append(card);
-      this.cards.push({ key, card, value, unit, detail, arrow, targetLabel });
+      const indicator=['power','hr'].includes(key)?new ZoneIndicator(key):null;
+      if(indicator){card.classList.add('has-zone-indicator');card.append(indicator.root);}
+      this.cards.push({ key, card, value, unit, detail, arrow, targetLabel, indicator });
     }
     this.events = new EventSource(`/api/bike/events?client=${encodeURIComponent(this.client)}`);
     this.events.onmessage = event => {
@@ -56,28 +59,36 @@ export class BikePanel {
     setInterval(() => { if (this.desired) this.ensureSession(); }, 5000);
     this.render();
   }
-  async command(action, fields = {}) {
+  command(action, fields = {}) {
+    const body = { ...(action==='timing' ? {block:this.block} : {}), action, client: this.client, rideId: this.rideId, ...fields };
+    const job = (this.commandQueue || Promise.resolve()).then(() => this.postCommand(action, body));
+    this.commandQueue = job.catch(() => false); return job;
+  }
+  async postCommand(action, body) {
     try {
-      const response = await fetch('/api/bike/session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, client: this.client, ...fields }), keepalive: action === 'stop' });
-      if (!response.ok) { const data = await response.json(); this.snapshot.status = data.error || 'Bike connection retrying…'; return false; }
+      const response = await fetch('/api/bike/session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: ['stop','timing'].includes(action) });
+      if (!response.ok) { const data = await response.json(); this.snapshot.status = data.error || 'Bike connection retrying…'; if(data.code==='recording-ended'&&action==='start'&&this.rideId===body.rideId){this.rideId=globalThis.crypto?.randomUUID?.()||`ride-${Date.now()}-${Math.random().toString(16).slice(2)}`; document.getElementById('ride-recording-result').dataset.rideId=this.rideId;} return false; }
       return true;
     } catch { this.snapshot.status = 'Bike connection retrying…'; return false; }
   }
   async ensureSession() {
     if (this.posting || !this.desired) return;
-    this.posting = true;
-    try { if (await this.command('start') && this.desired) { await this.command('average', { seconds: this.seconds }); if (this.desired) await this.command('timing', { recording: this.recording }); } }
+    this.posting = true; const rideId=this.rideId;
+    try { if (await this.command('start', {name:this.workoutName,description:this.workoutDescription?.slice(0,800)}) && this.desired && this.rideId===rideId) { await this.command('average', { seconds: this.seconds }); if (this.desired && this.rideId===rideId) await this.command('timing', { recording: this.recording, remainingSeconds:this.remainingSeconds }); } }
     finally { this.posting = false; }
   }
-  begin() { if (!this.desired) { this.desired = true; this.noBikeOffered = false; this.ensureSession(); } }
-  end() { this.desired = false; this.recording = false; document.getElementById('bike-dialog').close(); this.command('stop'); }
-  setStep(step) {
-    if (this.step !== step) { this.step = step; this.corrections.clear(); }
+  begin() { if (!this.desired) { this.rideId ||= globalThis.crypto?.randomUUID?.() || `ride-${Date.now()}-${Math.random().toString(16).slice(2)}`; document.getElementById('ride-recording-result').dataset.rideId=this.rideId; this.desired = true; this.noBikeOffered = false; this.ensureSession(); } }
+  end(reason = 'ended') { this.desired = false; this.recording = false; document.getElementById('bike-dialog').close(); const result=this.command('stop', {reason}); this.rideId=null; return result; }
+  setStep(step, index) {
+    if (this.step !== step) {
+      this.step = step; this.block=step?{index,label:step.label.slice(0,320)}:null;this.corrections.clear();
+      if(this.desired)this.command('timing',{recording:this.recording,remainingSeconds:this.remainingSeconds});
+    }
   }
   setRecording(recording) {
     if (recording === this.recording) return;
     this.recording = recording;
-    if (this.desired) this.command('timing', { recording });
+    if (this.desired) this.command('timing', { recording, remainingSeconds:this.remainingSeconds });
   }
   render() {
     const now = performance.now();
@@ -87,9 +98,9 @@ export class BikePanel {
     const decimal = value => Number.isFinite(value) ? value.toFixed(1) : '—';
     const stale = reading => reading.value == null ? 'Waiting for bike data' : reading.fresh ? '' : 'Last reading · reconnecting';
     const diagnostics = this.snapshot.notificationCount;
-    this.status.textContent = this.snapshot.status + (Number.isFinite(diagnostics) ? ` · ${diagnostics} bike updates` : '');
+    this.status.textContent = (this.snapshot.recording?.error || this.snapshot.status) + (Number.isFinite(diagnostics) ? ` · ${diagnostics} bike updates` : '');
     const avg = this.snapshot.averagingSeconds === this.seconds && Number.isFinite(this.snapshot.powerAverage) ? this.snapshot.powerAverage : power.value;
-    for (const { key, card, value, unit, detail, arrow, targetLabel } of this.cards) {
+    for (const { key, card, value, unit, detail, arrow, targetLabel, indicator } of this.cards) {
       const reading = ({ speed, cadence, power, hr, resistance })[key];
       card.dataset.stale = String(reading ? !reading.fresh : false);
       if (key === 'speed') {
@@ -105,7 +116,7 @@ export class BikePanel {
         value.textContent = number(avg); unit.textContent = this.seconds ? `W · ${this.seconds}s average` : 'W · current';
         detail.textContent = `Current ${number(power.value)} W · ${decimal(ride.energyKj)} kJ${stale(power) ? ' · ' + stale(power) : ''}`;
       } else if (key === 'hr') {
-        const zone = zoneAt(hr.value, this.profile);
+        const zone = decimalZoneAt(hr.value, this.profile);
         const zoneMode = this.profile.preferences.heartRateDisplay === 'zone';
         value.textContent = hr.value == null ? '—' : zoneMode ? zone.label : number(hr.value);
         unit.textContent = zoneMode ? 'ZONE' : 'BPM';
@@ -117,6 +128,7 @@ export class BikePanel {
         value.textContent = number(ride.estimatedCaloriesKcal); unit.textContent = 'kcal';
         detail.textContent = 'Ride total';
       }
+      if(indicator)indicator.render(this.profile,key==='power'?avg:hr.value,key==='power'?power.fresh:hr.fresh,programTarget(this.step,key,this.profile));
       if (key in TARGET_FIELDS) {
         const target = programTarget(this.step, key, this.profile);
         const actual = key === 'power' ? avg : reading.value;
@@ -125,7 +137,7 @@ export class BikePanel {
         this.corrections.set(key, correction); card.dataset.correction = correction.level;
         const numericTarget = target ? target.high === Infinity ? `${targetNumber(target.low)}+` : target.low === target.high ? targetNumber(target.low) : `${targetNumber(target.low)}–${targetNumber(target.high)}` : null;
         const targetText = target && key === 'hr' && this.profile.preferences.heartRateDisplay === 'zone' ? zoneRangeLabel([target.low, target.high], this.profile) : numericTarget;
-        targetLabel.textContent = target ? `/ ${target?.zone ? `Z${target.zone} · ` : ''}${targetText} ${primary ? 'primary' : 'reference'}` : key === 'power' && this.step?.powerZone != null ? `/ Z${this.step.powerZone} · set FTP` : 'No target';
+        targetLabel.textContent = target ? `/ ${target?.zone ? `Z${target.zone} · ` : ''}${targetText} ${primary ? 'primary' : 'reference'}` : key === 'power' && this.step?.powerZone != null ? `/ Z${this.step.powerZone} · ${this.profile.strava?.powerZones?.length ? 'zone unavailable' : 'set FTP'}` : key === 'hr' && this.step?.heartRateZone != null ? `/ Z${this.step.heartRateZone} · zone unavailable` : 'No target';
         card.dataset.primary = String(primary);
         targetLabel.title = target && key === 'hr' ? `${numericTarget} BPM target` : '';
         // HR comparisons always use BPM, even when the displayed number is a zone.

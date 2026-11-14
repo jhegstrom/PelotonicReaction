@@ -2,10 +2,10 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#11171c"><title>PelotonicReaction · Workout player</title><link rel="stylesheet" href="/style.css"></head>
 <body>
-<header class="topbar"><a class="brand" href="/" aria-label="PelotonicReaction home"><span class="brand-mark">P<span>R</span></span><span>PELOTONIC<span class="light">REACTION</span></span></a><span class="local-label"><i></i> YOUR RIDE. YOUR RHYTHM.</span><button id="rider-profile-open" class="quiet">Rider · Profile</button><button id="fullscreen" class="quiet">Fullscreen ↗</button></header>
+<header class="topbar"><a class="brand" href="/" aria-label="PelotonicReaction home"><span class="brand-mark">P<span>R</span></span><span>PELOTONIC<span class="light">REACTION</span></span></a><span class="local-label"><i></i> YOUR RIDE. YOUR RHYTHM.</span><button id="fullscreen" class="quiet">Fullscreen ↗</button></header>
 <main>
   <section id="library" aria-labelledby="library-title">
-    <div class="library-heading"><div><p class="eyebrow">THE WORKOUT ROOM</p><h1 id="library-title">Pick your next ride.</h1><p class="subtle">A clear plan. A big clock. One block at a time.</p></div><button id="import-open" class="outline">＋ Import workout</button><input id="import-file" type="file" accept=".json,application/json" hidden></div>
+    <div class="library-heading"><div><p class="eyebrow">THE WORKOUT ROOM</p><h1 id="library-title">Pick your next ride.</h1><p class="subtle">A clear plan. A big clock. One block at a time.</p></div><button id="rider-profile-open" class="quiet">Rider · Profile</button><button id="import-open" class="outline">＋ Import workout</button><input id="import-file" type="file" accept=".json,application/json" hidden></div>
     <div id="notice" role="status"></div>
     <section class="program-filters" aria-labelledby="filter-heading">
       <div class="filter-heading"><h2 id="filter-heading">Find a Program</h2><label class="match-mode" for="tag-match">Match <select id="tag-match"><option value="any">any selected tag</option><option value="all">all selected tags</option></select></label><button id="clear-tags" class="quiet" disabled>Clear filters</button></div>
@@ -17,9 +17,11 @@
       <p id="filter-status" class="filter-status" role="status" aria-live="polite"></p>
     </section>
     <div id="workout-cards" class="cards"><p>Loading workouts…</p></div>
+    <section class="ride-history" aria-labelledby="recorded-title"><h2 id="recorded-title">Recorded rides</h2><p id="ride-history-message" role="status"></p><div id="recorded-rides"></div></section>
     <p class="library-note">Use Edit my tags on a Program to add or remove your labels. Admin tags are part of the deployed Program catalog.</p>
   </section>
   <section id="player" hidden aria-label="Workout player">
+    <div id="ride-recording-result" class="ride-recording-result" hidden></div>
     <div class="ride-heading"><button id="back" class="quiet">← Workouts</button><h1 id="ride-name"></h1></div>
     <div class="player-grid">
       <div class="stage" id="stage">
@@ -48,7 +50,6 @@
     <section class="telemetry-panel" aria-label="Live bike data and workout totals">
       <div class="telemetry-heading"><h2>Ride data</h2><span id="bike-status">Bike connects at ride start</span></div>
       <div id="ride-metrics" class="ride-metrics"></div>
-      <p class="guidance-legend"><span class="guide-on">On target</span> · <span class="guide-small">Small correction</span> · <span class="guide-large">Large correction</span><br>↑ Increase · ↓ Decrease</p>
       <p class="metrics-note">Workout averages and totals exclude pauses and the preparation countdown.</p>
     </section>
     <section class="route-panel" aria-label="Program blocks"><div class="schedule-heading"><h2>The route ahead</h2><div class="route-stats"><div><span>ELAPSED</span><strong id="elapsed">0:00</strong></div><div><span>REMAINING</span><strong id="ride-remaining">0:00</strong></div><div><span>PROGRAM TIME</span><strong id="total-label"></strong></div><div><span>BLOCKS</span><strong id="route-block-count"></strong></div></div></div><div class="session-track"><div id="session-progress"></div></div><div id="timeline" class="timeline" aria-label="Workout profile"></div>
@@ -59,15 +60,19 @@
 <p id="profile-status" class="profile-storage-status" role="status"></p>
 <dialog id="rider-profile-dialog" aria-labelledby="profile-title">
 <h2 id="profile-title">Rider profile</h2>
+<section class="strava-profile" aria-label="Strava connection"><p id="strava-status" role="status">Checking Strava connection…</p><div class="dialog-actions"><button id="strava-connect" type="button" class="outline">Connect with Strava</button><button id="strava-refresh" type="button" class="outline">Refresh from Strava</button><button id="strava-disconnect" type="button" class="quiet">Disconnect</button></div><p id="strava-details" class="subtle"></p><p id="strava-help" class="subtle"></p></section>
 <form id="profile-form">
 <div class="profile-fields"><label>Name <input id="profile-name" required maxlength="80"></label><label>Age <input id="profile-age" required type="number" min="1" max="120"></label><label>FTP <input id="profile-ftp" type="number" min="20" max="1500" step="1" placeholder="Not set"> W</label><label>Power smoothing <input id="profile-power-average" type="number" min="0" max="300" step="1" required> seconds (0 = off)</label><label>Speed units <select id="profile-speed-units"><option value="km/h">Kilometres per hour (km/h)</option><option value="mph">Miles per hour (mph)</option></select></label><label>Maximum HR <input id="profile-max" required type="number" min="60" max="240"> BPM</label></div>
 <button id="profile-recalculate" type="button" class="outline">Recalculate from 220 − age</button><p id="profile-method" class="subtle"></p>
-<table class="profile-zone-table"><thead><tr><th scope="col">Heart-rate zone</th><th scope="col">Range</th></tr></thead><tbody id="profile-zones"></tbody></table>
-<p class="subtle profile-estimate">Age-based zones are initial estimates. You can enter a personalized maximum or import custom zone boundaries.</p>
+<div class="profile-zone-grid"><table class="profile-zone-table"><thead><tr><th scope="col">Heart-rate zone</th><th scope="col">Range</th></tr></thead><tbody id="profile-zones"></tbody></table>
+
+<table class="profile-zone-table" id="profile-power-table" hidden><thead><tr><th scope="col">Power zone · Strava</th><th scope="col">Range</th></tr></thead><tbody id="profile-power-zones"></tbody></table>
+</div><p class="subtle profile-estimate">Imported values are edited in Strava. Age and maximum HR are local fallbacks when Strava zones are unavailable. Smoothing is an app preference.</p>
 <p id="profile-message" role="status"></p>
 <div class="dialog-actions"><button id="profile-import-open" type="button" class="outline">Import JSON</button><button id="profile-export" type="button" class="outline">Export saved profile</button><button id="profile-cancel" type="button" class="quiet">Cancel</button><button class="primary" type="submit">Save profile</button></div>
 <input id="profile-import-file" type="file" accept=".json,application/json" hidden>
 </form></dialog>
+<dialog id="ride-upload-dialog"><h2>Check Strava before retrying</h2><p>The previous upload may have reached Strava. Check your activities first to avoid creating a duplicate. Retry only if the ride is missing.</p><a href="https://www.strava.com/athlete/training" target="_blank" rel="noopener noreferrer">Open Strava activities ↗</a><div class="dialog-actions"><button id="ride-upload-cancel" class="outline">Cancel</button><button id="ride-upload-retry" class="primary">Ride is missing · Retry</button></div></dialog>
 <dialog id="bike-dialog" aria-labelledby="bike-dialog-title"><h2 id="bike-dialog-title">Looking for your bike</h2><p>No Grupetto bike was found. Discovery continues automatically. Check that Grupetto’s Wi-Fi broadcast is running on the same network, or enter its address.</p><form id="bike-address-form"><label>Bike address <input id="bike-host" required placeholder="192.168.1.50" autocomplete="off"></label><label>Port <input id="bike-port" required type="number" min="1" max="65535" value="8081"></label><button class="primary" type="submit">Connect</button></form><button id="bike-dialog-close" class="quiet">Keep looking</button></dialog>
 <dialog id="confirm-dialog"><h2 id="dialog-title"></h2><p id="dialog-copy"></p><div class="dialog-actions"><button id="dialog-cancel" class="outline">Cancel</button><button id="dialog-ok" class="primary">Continue</button></div></dialog>
 <dialog id="user-tags-dialog" aria-labelledby="user-tags-title">

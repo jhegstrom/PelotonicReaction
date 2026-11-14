@@ -16,11 +16,11 @@ test('invalid imported workouts fail with actionable errors', () => {
   for (const value of [null, {}, { ...sample, schemaVersion: 2 }, { ...sample, steps: [] }, { ...sample, steps: [{ label: 'Bad', durationSeconds: 0 }] }, { ...sample, steps: [{ label: 'Bad', durationSeconds: 10, cadence: '80' }] }, { ...sample, steps: [{ repeat: 1000, steps: sample.steps }] }, { ...sample, steps: [{ label: 'Bad', durationSeconds: 10, resistance: 101 }] }]) assert.throws(() => compileWorkout(value));
 });
 test('the four converted workouts preserve spreadsheet durations and planned targets', async () => {
-  const expected = { '3-by-20-5-at-130.json': [5100, 7], 'mt-peloton-90-minute-climb.json': [5400, 23], '90-minute-fat-burn.json': [5400, 17], '45-minute-tabata.json': [2700, 97], 'one-minute-sound-check.json': [60, 8] };
+  const expected = { '5-minute-hr-power-zone-test.json': [300, 5], '45-minute-hr-zone-3.json': [2700, 23], '3-by-20-5-at-130.json': [5100, 7], 'mt-peloton-90-minute-climb.json': [5400, 23], '90-minute-fat-burn.json': [5400, 17], '45-minute-tabata.json': [2700, 97], 'one-minute-sound-check.json': [60, 8] };
   for (const file of await readdir(new URL('../workouts/', import.meta.url))) {
     const raw = JSON.parse(await readFile(new URL('../workouts/' + file, import.meta.url))); const w = compileWorkout(raw); assert.deepEqual([w.totalSeconds, w.intervals.length], expected[file], file);
     if (file === '45-minute-tabata.json') { assert.equal(w.intervals[3].durationSeconds, 20); assert.equal(w.intervals[4].durationSeconds, 10); assert.equal(w.intervals[3].watts, 161.3); assert.equal(w.intervals[3].cadence, 75); }
-    if (file === '3-by-20-5-at-130.json') assert.equal(w.intervals[1].watts, undefined);
+    if (file === '3-by-20-5-at-130.json') { const work=w.intervals.filter(s=>s.kind==='work'); assert.deepEqual(work.map(s=>[s.watts,s.powerZone,s.cadence,s.resistance,s.primaryTargets]),[[130,3,90,40,['watts']],[130,3,85,41,['watts']],[130,3,80,43,['watts']]]); }
     if (file === '90-minute-fat-burn.json') assert.equal(w.intervals[1].watts, 133.6);
   }
 });
@@ -72,6 +72,17 @@ test('posture, power zone and primary metadata validate and survive repeated ste
   const result=compileWorkout(make(step));
   assert.equal(result.intervals[1].posture,'seated'); assert.equal(result.intervals[1].powerZone,3);
   assert.deepEqual(result.intervals[1].primaryTargets,['watts']);
-  for(const change of [{posture:'one-leg'},{powerZone:8},{powerZone:1.5},{watts:150},{targetRanges:{watts:[100,200]}},{primaryTargets:['powerZone']},{primaryTargets:['cadence']},{primaryTargets:['watts','watts']}]) assert.throws(()=>compileWorkout(make({...step,...change})));
+  for(const change of [{posture:'one-leg'},{powerZone:8},{powerZone:1.5},{targetRanges:{watts:[100,200]}},{primaryTargets:['powerZone']},{primaryTargets:['cadence']},{primaryTargets:['watts','watts']}]) assert.throws(()=>compileWorkout(make({...step,...change})));
   assert.doesNotThrow(()=>compileWorkout(make({...step,powerZone:null,primaryTargets:null})));
+});
+
+test('45 Minute HR Zone 3 has exact warm-up, spin-ups and alternating zones through 45:00',async()=>{
+ const raw=JSON.parse(await readFile(new URL('../workouts/45-minute-hr-zone-3.json',import.meta.url)));
+ const w=compileWorkout(raw);assert.equal(w.totalSeconds,2700);
+ assert.equal(w.intervals[0].durationSeconds,120);
+ const spins=w.intervals.filter(s=>s.cadence===120);assert.equal(spins.length,3);assert.ok(spins.every(s=>s.durationSeconds===30&&s.primaryTargets.includes('cadence')));
+ assert.equal(w.intervals[7].startSeconds,300);assert.equal(w.intervals[7].heartRateZone,2);assert.equal(w.intervals[7].durationSeconds,60);
+ const work=w.intervals.filter(s=>s.kind==='work');assert.equal(work.length,8);assert.ok(work.every(s=>s.heartRateZone===3&&s.durationSeconds===240&&s.primaryTargets.includes('heartRate')));
+ assert.equal(w.intervals.at(-1).endSeconds,2700);assert.equal(w.intervals.at(-1).startSeconds,2460);
+ for(const change of [{heartRateZone:0},{heartRateZone:6},{heartRateZone:2.5},{heartRateZone:3,heartRate:130},{heartRateZone:3,targetRanges:{heartRate:[120,140]}}])assert.throws(()=>compileWorkout({schemaVersion:1,name:'Invalid',steps:[{label:'HR',durationSeconds:60,...change}]}));
 });

@@ -197,7 +197,7 @@
               ],
               "minimum": 1,
               "maximum": 7,
-              "description": "FTP-based zone; mutually exclusive with watts and targetRanges.watts."
+              "description": "Power-zone cue. When watts is also supplied, watts is the precise guidance target and the zone is a reference cue. Mutually exclusive with targetRanges.watts."
             },
             "primaryTargets": {
               "type": [
@@ -214,6 +214,15 @@
                 ]
               },
               "description": "Only these metrics generate correction arrows/colors. Use watts for a powerZone target. Omitted, null or [] means reference targets only."
+            },
+            "heartRateZone": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1,
+              "maximum": 5,
+              "description": "HR zone resolved from rider profile (Strava zones first, local fallback). Mutually exclusive with heartRate and targetRanges.heartRate. Use heartRate in primaryTargets for guidance."
             }
           }
         },

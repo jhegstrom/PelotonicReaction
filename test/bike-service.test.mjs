@@ -6,7 +6,7 @@ import { BikeService } from '../lib/bike-service.mjs';
 
 test('bike session ownership and controls are separate from read-only catalog', async t => {
   const bike = new BikeService('.', { platform: 'test' });
-  const server = createAppServer(undefined, { bike }); server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  const server = createAppServer(undefined, { bike, rides:{rides:new Map(),list:()=>[]} }); server.listen(0, '127.0.0.1'); await once(server, 'listening');
   t.after(() => { server.closeAllConnections(); return new Promise(resolve => server.close(resolve)); });
   const base = `http://127.0.0.1:${server.address().port}`;
   const post = body => fetch(base + '/api/bike/session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -33,7 +33,7 @@ test('bike session ownership and controls are separate from read-only catalog', 
 });
 test('SSE sends snapshots and disconnect cleanup removes subscribers', async t => {
   const bike = new BikeService('.', { platform: 'test' });
-  const server = createAppServer(undefined, { bike }); server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  const server = createAppServer(undefined, { bike, rides:{rides:new Map(),list:()=>[]} }); server.listen(0, '127.0.0.1'); await once(server, 'listening');
   t.after(() => { server.closeAllConnections(); return new Promise(resolve => server.close(resolve)); });
   const abort = new AbortController();
   const response = await fetch(`http://127.0.0.1:${server.address().port}/api/bike/events?client=screen-111`, { signal: abort.signal });

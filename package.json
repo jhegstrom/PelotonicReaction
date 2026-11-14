@@ -11,5 +11,8 @@
     "start": "node server.mjs",
     "test": "node --test",
     "prepare:bike": "sh tools/grupetto-wifi-harness/build.sh"
+  },
+  "dependencies": {
+    "@garmin/fitsdk": "^21.221.0"
   }
 }

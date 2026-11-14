@@ -1,3 +1,4 @@
+import { sanitizeStravaProfile } from './strava-profile.js';
 export const PROFILE_KEY = 'pelotonic-reaction-rider-profile-v1';
 const ZONE_NAMES = ['Very light', 'Light', 'Moderate', 'Hard', 'Maximum'];
 export function estimatedZones(maxBpm) {
@@ -30,10 +31,16 @@ export function validateProfile(input) {
   if (!prefs || !['bpm', 'zone'].includes(prefs.heartRateDisplay) || !['km/h', 'mph'].includes(prefs.speedUnit) || !Number.isInteger(prefs.powerAverageSeconds) || prefs.powerAverageSeconds < 0 || prefs.powerAverageSeconds > 300) bad('Profile display preferences are invalid.');
   if (input.power != null && (typeof input.power !== 'object' || Array.isArray(input.power) || (input.power.ftpWatts !== null && (!Number.isInteger(input.power.ftpWatts) || input.power.ftpWatts < 20 || input.power.ftpWatts > 1500)))) bad('FTP must be a whole number from 20–1500 W, or left unset.');
   const normalized = structuredClone(input); normalized.power ??= { ftpWatts: null };
+  if (normalized.strava) normalized.strava = sanitizeStravaProfile(normalized.strava);
   return normalized;
 }
 export function zoneAt(bpm, profile) {
   if (!Number.isFinite(bpm)) return null;
+  const imported = profile.strava?.heartRateZones;
+  if (imported?.length) {
+    const found = imported.find(z => bpm >= z.min && (z.max === null || bpm < z.max));
+    return found ? { label: `Z${found.zone}`, zone: found.zone } : { label: bpm < imported[0].min ? 'Below Z1' : `Above Z${imported.length}`, zone: bpm < imported[0].min ? 0 : imported.length + 1 };
+  }
   const zones = profile.heartRate.zones;
   if (bpm < zones[0].minBpm) return { label: 'Below Z1', zone: 0 };
   if (bpm > zones[4].maxBpm) return { label: 'Above Z5', zone: 6 };
@@ -58,4 +65,18 @@ export function loadProfile(storage) {
   } catch {}
   storage.setItem(PROFILE_KEY, JSON.stringify(profile));
   return profile;
+}
+
+// Interpolate only within a finite zone. Never round into the next zone or
+// invent an upper boundary for Strava's open-ended highest zone.
+export function decimalZoneAt(bpm, profile) {
+  const classified=zoneAt(bpm,profile);
+  if(!classified || !classified.label.startsWith('Z'))return classified;
+  const imported=profile.strava?.heartRateZones;
+  const bounds=imported?.length ? imported.find(z=>z.zone===classified.zone) : profile.heartRate.zones.find(z=>z.zone===classified.zone);
+  const low=imported?.length ? bounds?.min : bounds?.minBpm;
+  const high=imported?.length ? bounds?.max : bounds?.maxBpm+1;
+  if(!Number.isFinite(low)||!Number.isFinite(high)||high<=low)return classified;
+  const tenth=Math.max(0,Math.min(9,Math.round((bpm-low)/(high-low)*10)));
+  return {...classified,label:`Z${classified.zone}.${tenth}`};
 }
