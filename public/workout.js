@@ -1,3 +1,4 @@
+import { validateRoute } from './terrain.js';
 import { normalizeTags } from './tags.js';
 
 export function compileWorkout(input) {
@@ -5,9 +6,12 @@ export function compileWorkout(input) {
   if (input.schemaVersion !== 1) throw Error('schemaVersion must be 1.');
   if (typeof input.name !== 'string' || !input.name.trim() || input.name.length > 160) throw Error('Give the workout a name (1–160 characters).');
   if (input.description != null && typeof input.description !== 'string') throw Error('description must be text.');
+  validateRoute(input.route);
   const tags = normalizeTags(input.tags);
   normalizeTags(input.userTags); // Validate portable user-tag labels on browser imports.
   if (input.id != null && typeof input.id !== 'string') throw Error('id must be text.');
+  const completionMetric = input.completionMetric || 'time';
+  if (!['time', 'distance'].includes(completionMetric)) throw Error('completionMetric must be time or distance.');
   const intervals = [];
   function visit(steps, prefix = '', depth = 0) {
     if (!Array.isArray(steps) || !steps.length) throw Error('steps must be a non-empty array.');
@@ -21,6 +25,8 @@ export function compileWorkout(input) {
       } else {
         if (typeof step.label !== 'string' || !step.label.trim() || step.label.length > 160) throw Error('Every interval needs a label (1–160 characters).');
         if (!Number.isInteger(step.durationSeconds) || step.durationSeconds < 1 || step.durationSeconds > 86400) throw Error(`${step.label}: durationSeconds must be a positive integer, at most 86400.`);
+        if (step.cue != null && (typeof step.cue !== 'string' || step.cue.length > 500)) throw Error(`${step.label}: cue must be text of at most 500 characters.`);
+        if (completionMetric === 'distance' && (!Number.isFinite(step.distanceMeters) || step.distanceMeters <= 0 || step.distanceMeters > 1000000)) throw Error(`${step.label}: distanceMeters must be positive, at most 1000000.`);
         const bounds = { cadence: [0, 200], resistance: [0, 100], watts: [0, 3000], heartRate: [30, 240] };
         for (const [key, [lo, hi]] of Object.entries(bounds)) {
           if (step[key] != null && (typeof step[key] !== 'number' || !Number.isFinite(step[key]) || step[key] < lo || step[key] > hi)) throw Error(`${step.label}: ${key} must be a number from ${lo} to ${hi}, or null.`);
@@ -53,10 +59,20 @@ export function compileWorkout(input) {
   let totalSeconds = 0;
   for (const interval of intervals) { interval.startSeconds = totalSeconds; totalSeconds += interval.durationSeconds; interval.endSeconds = totalSeconds; }
   if (totalSeconds > 86400) throw Error('A workout must be no longer than 24 hours.');
-  return { ...input, name: input.name.trim(), tags, intervals, totalSeconds };
+  let totalDistanceMeters = 0;
+  if (completionMetric === 'distance') {
+    for (const interval of intervals) { interval.startDistanceMeters = totalDistanceMeters; totalDistanceMeters += interval.distanceMeters; interval.endDistanceMeters = totalDistanceMeters; }
+    if (input.route && Math.abs(input.route.points.at(-1).distance - totalDistanceMeters) > 1) throw Error('Segment distances must cover the route exactly.');
+  }
+  return { ...input, completionMetric, name: input.name.trim(), tags, intervals, totalSeconds, totalDistanceMeters };
 }
 
-export function positionAt(workout, seconds) {
+export function positionAt(workout, seconds, distanceMeters = 0) {
+  if (workout.completionMetric === 'distance') {
+    const distance = Math.min(workout.totalDistanceMeters, Math.max(0, Number.isFinite(distanceMeters) ? distanceMeters : 0));
+    const index = workout.intervals.findIndex(i => distance < i.endDistanceMeters);
+    return { elapsed: Math.max(0, seconds), distance, index, done: index === -1, remaining: index === -1 ? 0 : workout.intervals[index].endDistanceMeters - distance };
+  }
   const elapsed = Math.max(0, Math.min(seconds, workout.totalSeconds));
   const index = workout.intervals.findIndex(i => elapsed < i.endSeconds);
   return { elapsed, index, done: index === -1, remaining: index === -1 ? 0 : workout.intervals[index].endSeconds - elapsed };
@@ -78,6 +94,8 @@ export class WorkoutClock {
   seek(seconds) { this.elapsed = Math.max(0, Math.min(seconds, this.totalSeconds)); if (this.anchor !== null) this.anchor = this.now(); }
   get running() { return this.anchor !== null && this.read() < this.totalSeconds; }
 }
+
+export { formatRouteDistance as formatDistance } from './measurement-units.js';
 
 export function formatTime(seconds) {
   const n = Math.max(0, Math.ceil(seconds));

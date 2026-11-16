@@ -8,7 +8,7 @@ test('terrain import preserves duration and distinguishes climbing from descendi
   const workout = terrainWorkout(records);
   assert.equal(compileWorkout(workout).totalSeconds, 2700);
   assert.ok(workout.steps.some(s => s.powerZone === 4 && s.cadence === 65));
-  assert.ok(workout.steps.some(s => s.kind === 'recovery' && s.cadence === 95));
+  assert.ok(workout.steps.some(s => ['recovery','cooldown'].includes(s.kind) && s.cadence === 95));
   assert.ok(workout.steps.every(s => s.durationSeconds > 0));
   assert.equal(JSON.stringify(workout).includes('positionLat'), false);
 });

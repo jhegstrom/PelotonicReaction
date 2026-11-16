@@ -126,3 +126,52 @@ test('Strava block description uses time-weighted raw metrics, excludes pauses a
  assert.match(ride.description,/3\. Recovery \(0:03\): — W · — rpm · resistance — \[partial data\]/);
  assert.equal(new RideStore(path.dirname(path.dirname(store.dir))).get(ride.id).description,ride.description);
 });
+
+
+test('virtual recording FIT uses actual distance, pauses, partial route and persisted GPS',t=>{
+ const {store,root}=setup(t);let now=0;
+ const recorder=new RideRecorder(store,{now:()=>now,wallNow:()=>Date.UTC(2026,0,1)});
+ const route={points:[{distance:0,altitude:100,lat:40,lon:-105},{distance:1000,altitude:200,lat:40.01,lon:-105.01},{distance:2000,altitude:150,lat:40.02,lon:-105.02}]};
+ recorder.begin('virtual-ride-001','Virtual climb',42,'',route,.25);
+ const summary=distanceKm=>({distanceKm,activeSeconds:now/1000});
+ recorder.timing(true,snapshot(),summary(0));
+ now=1000;recorder.sample(snapshot(),summary(.25));
+ now=2000;recorder.timing(false,snapshot(),summary(.5));
+ const count=store.entries('virtual-ride-001').filter(e=>e.type==='sample').length;
+ now=12000;recorder.sample(snapshot(),summary(.5));
+ assert.equal(store.entries('virtual-ride-001').filter(e=>e.type==='sample').length,count);
+ recorder.timing(true,snapshot(),summary(.5));
+ now=13000;recorder.finish('ended',snapshot(),summary(.75));
+ const reloaded=new RideStore(root),ride=reloaded.get('virtual-ride-001');
+ assert.equal(ride.virtualRide,true);assert.match(ride.description,/Spinulator virtual ride/);
+ const {messages:m,errors}=new Decoder(Stream.fromByteArray(reloaded.fit(ride.id))).read();
+ assert.deepEqual(errors,[]);assert.equal(m.sessionMesgs[0].subSport,'virtualActivity');
+ const records=m.recordMesgs;
+ assert.ok(Math.abs(records[0].positionLat*180/2147483648-40.0025)<1e-6);
+ assert.equal(records[0].altitude,125);
+ assert.ok(Math.abs(records.at(-1).positionLat*180/2147483648-40.01)<1e-6);
+ assert.equal(records.at(-1).altitude,200);assert.equal(records.at(-1).power,231);
+ assert.ok(records.every(r=>r.positionLat*180/2147483648<=40.010001),'partial ride never includes unvisited route');
+});
+
+test('GPS-free terrain recordings stay indoor and do not synthesize coordinates',t=>{
+ const {store}=setup(t);let now=0;const recorder=new RideRecorder(store,{now:()=>now,wallNow:()=>Date.UTC(2026,0,1)});
+ recorder.begin('no-gps-ride-001','Elevation only',42,'',{points:[{distance:0,altitude:100},{distance:1000,altitude:200}]});
+ recorder.timing(true,snapshot(),{distanceKm:0});now=1000;recorder.finish('ended',snapshot(),{distanceKm:.1});
+ const {messages:m}=new Decoder(Stream.fromByteArray(store.fit('no-gps-ride-001'))).read();
+ assert.equal(m.sessionMesgs[0].subSport,'indoorCycling');assert.ok(m.recordMesgs.every(r=>!('positionLat' in r)));
+});
+
+
+test('bike session accepts validated route geometry and passes it to the recorded FIT',async t=>{
+ const {root,store}=setup(t);const bike=new BikeService(root,{platform:'test',rides:store});t.after(()=>bike.close());
+ await assert.rejects(bike.start('screen-one',{rideId:'virtual-bad-001',virtualRoute:{points:[]}}),e=>e.status===400);
+ assert.equal(bike.owner,null);
+ await bike.start('screen-one',{rideId:'virtual-bike-001',virtualRoute:{points:[{distance:0,altitude:100,lat:40,lon:-105},{distance:1000,altitude:200,lat:40.01,lon:-105.01}]},routeOffsetKm:.5});
+ bike.publish(snapshot());bike.configure('screen-one',{action:'timing',recording:true});
+ await bike.start('screen-one',{rideId:'virtual-bike-001'});
+ bike.stop('screen-one');
+ const {messages:m}=new Decoder(Stream.fromByteArray(store.fit('virtual-bike-001'))).read();
+ assert.equal(m.sessionMesgs[0].subSport,'virtualActivity');assert.equal(m.recordMesgs[0].altitude,150);
+ assert.ok(Math.abs(m.recordMesgs[0].positionLat*180/2147483648-40.005)<1e-6);
+});

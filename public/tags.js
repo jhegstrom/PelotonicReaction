@@ -1,13 +1,13 @@
 // Suggestions, not a closed taxonomy: programs may also use custom tags.
 export const PROGRAM_TAGS = Object.freeze([
   'Climb', 'Intervals', 'Tabata', 'Endurance', 'Heart Rate Zone',
-  'Power Zone', 'Beginner', 'Low Impact',
+  'Power Zone', 'Beginner', 'Low Impact', 'Spinulator',
 ]);
 
 const clean = tag => tag.normalize('NFC').trim().replace(/\s+/gu, ' ');
 export const tagKey = tag => clean(tag).toLowerCase();
 const suggested = new Map(PROGRAM_TAGS.map(tag => [tagKey(tag), tag]));
-const aliases = new Map([['climbing', 'Climb']]);
+const aliases = new Map([['climbing', 'Climb'], ['map', 'Spinulator']]);
 
 export function normalizeTags(tags) {
   if (tags == null) return [];

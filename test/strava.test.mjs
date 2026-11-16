@@ -117,5 +117,7 @@ test('Strava upload sends a FIT multipart file, stable external ID and trainer f
   assert.equal(seen.body.get('data_type'),'fit');assert.equal(seen.body.get('trainer'),'1');assert.equal(seen.body.get('external_id'),'pelotonic-ride-test-123.fit');assert.equal(seen.body.get('name'),'Test workout');
   assert.equal(await seen.body.get('file').text(),'FIT-content');
   assert.equal(seen.body.get('description'),'Actual block averages:\n1. Work: 130 W · 90 rpm · resistance 40');
+  await f.service.uploadActivity(Buffer.from('FIT-content'),{id:'virtual-ride-123',athleteId:42,name:'Virtual climb',virtualRide:true});
+  assert.equal(seen.body.get('trainer'),'0','virtual GPS rides must not be forced into mapless trainer activities');
   await assert.rejects(f.service.uploadActivity(Buffer.from('fit'),{id:'other-ride',athleteId:999,name:'Other'}),/account used/);
 });
