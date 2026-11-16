@@ -1,14 +1,26 @@
+import { programKey } from './tag-profile.js';
+import { distanceUnit, formatRouteLabel } from './measurement-units.js';
+import { TerrainView } from './terrain.js';
 import { scheduleColumns, scheduleTarget } from './schedule-targets.js';
 import { RideHistory } from './ride-history.js';
 import { standingBadge, renderPosture } from './posture.js';
 import { segmentInstructions, formatProgramTarget, isPrimaryTarget } from './target-guidance.js';
-import { compileWorkout, positionAt, WorkoutClock, formatTime } from './workout.js';
+import { compileWorkout, positionAt, WorkoutClock, formatTime, formatDistance } from './workout.js';
 import { normalizeTags } from './tags.js';
 import { BikePanel } from './bike-panel.js';
 import { TagControls } from './tag-controls.js';
 const $ = id => document.getElementById(id);
 const key = 'pelotonic-reaction-session-v1';
 const bikePanel = new BikePanel();
+let previewDistanceKm = null;
+const terrainView = new TerrainView($('terrain-view'), { onPreview: distance => { previewDistanceKm = distance; } });
+let mapWorkout = false, lastRouteDistance = null, distanceSessionId = null, distanceOffsetKm = 0;
+const distanceMode = () => selected?.completionMetric === 'distance';
+const ridePosition = () => positionAt(selected, clock.read(), (previewDistanceKm ?? lastRouteDistance ?? 0) * 1000);
+const stepLength = step => distanceMode() ? formatDistance(step.distanceMeters, bikePanel.unit) : formatTime(step.durationSeconds);
+const remainingLabel = value => distanceMode() ? formatDistance(value, bikePanel.unit) : formatTime(value);
+function resetDistance() { bikePanel.routeOffsetKm = 0; bikePanel.routeDistanceKm = 0; lastRouteDistance = null; distanceSessionId = null; distanceOffsetKm = 0; }
+$('route-table-toggle').onclick = () => { const show = $('schedule').hidden; $('schedule').hidden = !show; $('timeline').hidden = !show; $('route-table-toggle').textContent = show ? 'Hide workout blocks' : 'Show workout blocks'; };
 const rideHistory = new RideHistory();
 let selected = null, rawSelected = null, clock = null, currentIndex = -1, audio = null, wake = null, lastCue = '', completed = false, workoutItems = [];
 let selectedTags = [];
@@ -24,7 +36,7 @@ function ask(title, message, action = 'Continue') {
     $('dialog-ok').onclick = () => done(true); $('dialog-cancel').onclick = () => done(false); dialog.oncancel = event => { event.preventDefault(); done(false); }; dialog.showModal();
   });
 }
-function saveSession() { if (clock && selected) storageSet(key, { workout: rawSelected, elapsed: clock.read(), completed, rideId: bikePanel.rideId }); }
+function saveSession() { if (clock && selected) storageSet(key, { workout: rawSelected, elapsed: clock.read(), completed, rideId: bikePanel.rideId, routeDistance: lastRouteDistance, distanceSessionId, distanceOffsetKm }); }
 async function releaseWake() { try { await wake?.release(); } catch {} wake = null; $('sleep-status').textContent = ''; }
 async function holdWake() {
   if (!clock?.running || document.visibilityState !== 'visible') return;
@@ -45,7 +57,7 @@ function speak(text) {
   speechSynthesis.cancel(); const cue = new SpeechSynthesisUtterance(text); cue.rate = 1.03; speechSynthesis.speak(cue);
 }
 function announce(interval) {
-  const phrase = `${interval.label}. ${interval.posture ? interval.posture + '.' : ''} ${interval.powerZone != null ? 'Power zone ' + interval.powerZone + '.' : ''} ${interval.cadence == null ? '' : `${displayTarget(interval.cadence)} RPM.`} ${interval.resistance == null ? '' : `Resistance ${displayTarget(interval.resistance)}.`} ${interval.watts == null ? '' : `${Math.round(interval.watts)} watts.`}`;
+  const phrase = `${formatRouteLabel(interval.label,bikePanel.unit)}. ${interval.posture ? interval.posture + '.' : ''} ${interval.powerZone != null ? 'Power zone ' + interval.powerZone + '.' : ''} ${interval.cadence == null ? '' : `${displayTarget(interval.cadence)} RPM.`} ${interval.resistance == null ? '' : `Resistance ${displayTarget(interval.resistance)}.`} ${interval.watts == null ? '' : `${Math.round(interval.watts)} watts.`}`;
   $('announcement').textContent = phrase; speak(phrase);
 }
 function height(step) { return `${Math.max(14, Math.min(100, step.powerZone != null ? 20 + step.powerZone * 10 : 14 + (step.watts || 70) / 4))}%`; }
@@ -89,22 +101,70 @@ function showCards(items) {
     if (!tags.children.length) tags.append(el('span', 'Untagged', 'program-tag untagged'));
     card.append(tags, el('h2', w.name), el('p', raw.description || 'Your next workout, one interval at a time.'));
     const profile = el('div', null, 'mini-profile'); profile.setAttribute('aria-hidden', 'true');
-    for (const step of w.intervals) { const bar = el('span', null, step.kind); bar.style.flexGrow = step.durationSeconds; bar.style.height = height(step); profile.append(bar); }
-    const stats = el('div', null, 'card-stats'); const duration = el('div'); duration.append(el('strong', Math.round(w.totalSeconds / 60)), el('span', ' min')); const count = el('span', `${w.intervals.length} blocks`); stats.append(duration, count);
-    const button = el('button', 'Open workout →', 'outline'); button.onclick = () => selectWorkout(raw); const editTags = el('button', 'Edit my tags', 'quiet'); editTags.setAttribute('aria-label', `Edit my tags for ${w.name}`); editTags.disabled = Boolean(tagControls.error); editTags.onclick = () => tagControls.editProgram(raw); card.append(stats, profile, button, editTags); $('workout-cards').append(card);
+    for (const step of w.intervals) { const bar = el('span', null, step.kind); bar.style.flexGrow = w.completionMetric === 'distance' ? step.distanceMeters : step.durationSeconds; bar.style.height = height(step); profile.append(bar); }
+    const stats = el('div', null, 'card-stats'); const duration = el('div'); duration.append(el('strong', w.completionMetric === 'distance' ? formatDistance(w.totalDistanceMeters, bikePanel.unit, 1).split(' ')[0] : Math.round(w.totalSeconds / 60)), el('span', w.completionMetric === 'distance' ? ' '+distanceUnit(bikePanel.unit) : ' min')); const count = el('span', `${w.intervals.length} blocks`); stats.append(duration, count);
+    const button = el('button', 'Open workout →', 'outline'); button.onclick = () => selectWorkout(raw); const editTags = el('button', 'Edit my tags', 'quiet'); editTags.setAttribute('aria-label', `Edit my tags for ${w.name}`); editTags.disabled = Boolean(tagControls.error); editTags.onclick = () => tagControls.editProgram(raw); card.append(stats, profile, button, editTags);
+    if (item.imported) {
+      const actions=el('div',null,'saved-workout-actions');
+      const rename=el('button','Rename','quiet');rename.setAttribute('aria-label',`Rename ${w.name}`);rename.onclick=()=>openRenameWorkout(item);
+      const remove=el('button','Delete','quiet');remove.setAttribute('aria-label',`Delete ${w.name}`);remove.onclick=()=>deleteWorkout(item,remove);
+      actions.append(rename,remove);card.append(actions);
+    }
+    $('workout-cards').append(card);
   }
+}
+let renamingWorkout=null;
+function openRenameWorkout(item) {
+  renamingWorkout=item;$('workout-name-input').value=item.workout.name;$('rename-workout-error').textContent='';
+  $('rename-workout-dialog').showModal();$('workout-name-input').focus();$('workout-name-input').select();
+}
+$('rename-workout-cancel').onclick=()=>$('rename-workout-dialog').close();
+async function changeSavedWorkout(item,method,name) {
+  const response=await fetch('/api/workouts/saved/'+encodeURIComponent(item.filename),{method,headers:{'Content-Type':'application/json'},...(name===undefined?{}:{body:JSON.stringify({name})})});
+  const result=await response.json();if(!response.ok)throw Error(result.error||'Could not change the saved workout.');return result;
+}
+function updateSavedSession(before,after) {
+  const saved=storageGet(key);
+  if(saved?.workout && programKey(saved.workout)===programKey(before)) {
+    if(after)storageSet(key,{...saved,workout:after});
+    else {try{localStorage.removeItem(key);}catch{}}
+  }
+  if(rawSelected && programKey(rawSelected)===programKey(before)) {
+    if(after) {rawSelected=after;selected=compileWorkout(after);bikePanel.workoutName=after.name;}
+    else {rawSelected=null;selected=null;clock=null;}
+  }
+}
+$('rename-workout-form').onsubmit=async event=>{
+  event.preventDefault();const item=renamingWorkout;const name=$('workout-name-input').value.trim();
+  if(!name){$('rename-workout-error').textContent='Enter a workout name.';return;}
+  $('rename-workout-save').disabled=true;
+  try {
+    const result=await changeSavedWorkout(item,'PATCH',name);updateSavedSession(item.workout,result.workout);Object.assign(item,result);
+    renderLibrary();$('rename-workout-dialog').close();$('notice').textContent=`Renamed workout to ${result.workout.name}.`;
+  }catch(error){$('rename-workout-error').textContent=error.message;}
+  finally{$('rename-workout-save').disabled=false;}
+};
+async function deleteWorkout(item,button) {
+  if(!await ask('Delete saved workout?',`Delete “${item.workout.name}” from your library? Recorded rides will be kept.`))return;
+  button.disabled=true;
+  try {
+    await changeSavedWorkout(item,'DELETE');updateSavedSession(item.workout,null);workoutItems=workoutItems.filter(w=>w!==item);renderLibrary();
+    $('notice').textContent=`Deleted ${item.workout.name}.`;
+  }catch(error){$('notice').textContent=error.message;button.disabled=false;}
 }
 function buildSchedule() {
   $('timeline').replaceChildren(); $('schedule').replaceChildren();
   const columns=scheduleColumns(selected.intervals);
   $('schedule').style.setProperty('--target-columns',columns.length);
   $('schedule').dataset.targetColumns=columns.length;
-  const head = el('div', null, 'schedule-head'); for (const label of ['BLOCK', 'DURATION / LEFT', ...columns.map(c=>c.label)]) head.append(el('span', label)); $('schedule').append(head);
+  const head = el('div', null, 'schedule-head'); for (const label of ['BLOCK', distanceMode() ? 'DISTANCE / LEFT' : 'DURATION / LEFT', ...columns.map(c=>c.label)]) head.append(el('span', label)); $('schedule').append(head);
   selected.intervals.forEach((step, index) => {
-    const bar = el('button'); bar.dataset.kind = step.kind; bar.style.flexGrow = step.durationSeconds; bar.style.height = height(step); bar.title = `${step.label} · ${formatTime(step.durationSeconds)}`; bar.setAttribute('aria-label', `Go to ${step.label}`); bar.onclick = () => jump(index); $('timeline').append(bar);
-    const row = el('button'); row.dataset.index = index; row.setAttribute('aria-label', `Go to ${step.label}, ${formatTime(step.durationSeconds)}`);
-    const duration = el('span', formatTime(step.durationSeconds), 'block-duration');
-    const blockLabel = el('strong', null, 'block-label'); blockLabel.append(el('span', step.label));
+    const bar = el('button'); bar.dataset.kind = step.kind; bar.style.flexGrow = distanceMode() ? step.distanceMeters : step.durationSeconds; bar.style.height = height(step); bar.title = `${formatRouteLabel(step.label,bikePanel.unit)} · ${stepLength(step)}`; bar.setAttribute('aria-label', `Go to ${formatRouteLabel(step.label,bikePanel.unit)}`); bar.onclick = () => jump(index); $('timeline').append(bar);
+    if (distanceMode()) { bar.disabled = true; bar.title = 'Segments advance by distance traveled'; }
+    const row = el('button'); row.disabled = distanceMode(); row.dataset.index = index; row.setAttribute('aria-label', `Go to ${formatRouteLabel(step.label,bikePanel.unit)}, ${stepLength(step)}`);
+    const duration = el('span', stepLength(step), 'block-duration');
+    const blockLabel = el('strong', null, 'block-label'); blockLabel.append(el('span', formatRouteLabel(step.label,bikePanel.unit)));
+    if (step.cue) blockLabel.append(el('small', step.cue, 'schedule-cue'));
     const postureBadge = standingBadge(step); if (postureBadge) { blockLabel.append(postureBadge); row.setAttribute('aria-label', `${row.getAttribute('aria-label')}, standing`); }
     row.append(blockLabel, duration);
     for(const column of columns){
@@ -118,19 +178,32 @@ function buildSchedule() {
     row.onclick = () => jump(index); $('schedule').append(row);
   });
 }
-async function selectWorkout(raw, elapsed = 0, rideId = null) {
+async function selectWorkout(raw, elapsed = 0, rideId = null, savedDistance = null) {
   if (selected) bikePanel.end();
   if (clock?.running) { clock.pause(); saveSession(); await releaseWake(); }
   try { selected = compileWorkout(raw); } catch (e) { $('notice').textContent = e.message; return; }
   bikePanel.workoutName = selected.name; bikePanel.workoutDescription = selected.description; bikePanel.rideId = rideId;
-  rawSelected = { ...raw, tags: selected.tags }; clock = new WorkoutClock(selected.totalSeconds); clock.seek(elapsed); currentIndex = -1; completed = elapsed >= selected.totalSeconds; lastCue = '';
+  rawSelected = { ...raw, tags: selected.tags }; clock = new WorkoutClock(distanceMode() ? Infinity : selected.totalSeconds); clock.seek(elapsed); currentIndex = -1; completed = !distanceMode() && elapsed >= selected.totalSeconds; lastCue = '';
   $('library').hidden = true; $('player').hidden = false; document.body.classList.add('workout-open'); document.body.classList.remove('workout-completed'); $('ride-name').textContent = selected.name; $('ride-description').textContent = selected.description || ''; $('total-label').textContent = formatTime(selected.totalSeconds);
+  resetDistance();
+  if (distanceMode() && savedDistance) { lastRouteDistance = Number.isFinite(savedDistance.routeDistance) ? Math.max(0,savedDistance.routeDistance) : null; distanceSessionId = savedDistance.distanceSessionId || rideId; distanceOffsetKm = Number.isFinite(savedDistance.distanceOffsetKm) ? Math.max(0,savedDistance.distanceOffsetKm) : 0; }
+  bikePanel.virtualRoute = selected.tags.includes('Spinulator') ? selected.route : null;
+  bikePanel.routeOffsetKm = distanceOffsetKm;
+  $('total-label').previousElementSibling.textContent = distanceMode() ? 'ROUTE DISTANCE' : 'PROGRAM TIME';
+  $('total-label').textContent = distanceMode() ? formatDistance(selected.totalDistanceMeters, bikePanel.unit) : formatTime(selected.totalSeconds);
+  $('ride-remaining').previousElementSibling.textContent = distanceMode() ? 'DISTANCE LEFT' : 'REMAINING';
+  $('next-duration').setAttribute('aria-label',distanceMode()?'Next block distance':'Next block duration');
+  document.querySelector('.upcoming .clock-caption').textContent = distanceMode() ? 'BLOCK DISTANCE' : 'BLOCK DURATION';
+  mapWorkout = terrainView.setWorkout(selected);
+  $('route-heading').textContent = mapWorkout ? 'Explore the route' : 'The route ahead';
+  $('route-table-toggle').hidden = !mapWorkout; $('route-table-toggle').textContent = 'Show workout blocks';
+  $('timeline').hidden = mapWorkout; $('schedule').hidden = mapWorkout;
   buildSchedule(); render(); saveSession();
   if (elapsed > 0 && !completed) bikePanel.begin();
   window.scrollTo({ top: 0 });
 }
 async function jump(index) {
-  if (!selected || index < 0 || index >= selected.intervals.length) return;
+  if (distanceMode() || !selected || index < 0 || index >= selected.intervals.length) return;
   const wasRunning = clock.running;
   if (wasRunning) { clock.pause(); render(); await releaseWake(); if (!await ask('Change block?', `Jump to ${selected.intervals[index].label}? The workout will continue from that block.`)) { clock.start(); holdWake(); return; } }
   clock.seek(selected.intervals[index].startSeconds); completed = false; currentIndex = -1; lastCue = '';
@@ -139,22 +212,39 @@ async function jump(index) {
 }
 async function toggle() {
   if (!clock) return;
-  if (completed) { document.body.classList.remove('workout-completed'); clock.seek(0); completed = false; currentIndex = -1; lastCue = ''; render(); }
+  terrainView.stopPreview();
+  if (completed) { resetDistance(); document.body.classList.remove('workout-completed'); clock.seek(0); completed = false; currentIndex = -1; lastCue = ''; render(); }
   if (clock.running) { clock.pause(); if ('speechSynthesis' in window) speechSynthesis.cancel(); await releaseWake(); }
-  else { bikePanel.begin(); await enableAudio(); clock.start(clock.read() === 0 ? 10 : 0); holdWake(); const p = positionAt(selected, clock.read()); if (!clock.countdownRemaining && !p.done && p.index === currentIndex) announce(selected.intervals[p.index]); }
+  else { bikePanel.begin(); await enableAudio(); clock.start(clock.read() === 0 ? 10 : 0); holdWake(); const p = ridePosition(); if (!clock.countdownRemaining && !p.done && p.index === currentIndex) announce(selected.intervals[p.index]); }
   render(); saveSession();
 }
+let renderedUnit = null;
 function render() {
+  if (renderedUnit !== bikePanel.unit) {renderedUnit=bikePanel.unit;terrainView.setUnits(bikePanel.unit);renderLibrary();if(selected){buildSchedule();currentIndex=-1;$('total-label').textContent=distanceMode()?formatDistance(selected.totalDistanceMeters,bikePanel.unit):formatTime(selected.totalSeconds);}}
   if (!selected || !clock) return;
+  terrainView.setPreviewAllowed(!clock.running && clock.read() === 0 && !bikePanel.desired);
+  const previewing = previewDistanceKm != null;
   const preparing = clock.countdownRemaining > 0;
-  const activePosition = positionAt(selected, clock.read());
+  terrainView.setRideRunning(clock.running && !preparing);
+  if (mapWorkout || distanceMode()) {
+    const snapshot = bikePanel.snapshot;
+    if (bikePanel.desired && clock.running && !preparing && snapshot.rideId === bikePanel.rideId && Number.isFinite(snapshot.ride?.distanceKm)) {
+      if (distanceSessionId !== snapshot.rideId) { distanceOffsetKm = lastRouteDistance || 0; distanceSessionId = snapshot.rideId; }
+      lastRouteDistance = Math.max(lastRouteDistance || 0, distanceOffsetKm + snapshot.ride.distanceKm);
+    }
+    bikePanel.routeDistanceKm = lastRouteDistance;
+    terrainView.update(lastRouteDistance, Boolean(snapshot.connected && bikePanel.desired));
+  }
+  const activePosition = ridePosition();
   const activeStep = selected.intervals[activePosition.index];
-  bikePanel.remainingSeconds = Math.max(0, selected.totalSeconds-clock.read());
-  bikePanel.setStep(activePosition.done ? null : activeStep, activePosition.index);
+  bikePanel.remainingSeconds = distanceMode() ? null : Math.max(0, selected.totalSeconds-clock.read());
+  bikePanel.setStep(previewing || activePosition.done ? null : activeStep, activePosition.index);
+  $('current-cue').textContent = activeStep?.cue || '';
+  $('next-cue').textContent = !activePosition.done ? selected.intervals[activePosition.index + 1]?.cue || '' : '';
   renderPosture($('current-posture'), activeStep);
   $('segment-instructions').textContent = segmentInstructions(activeStep);
-  bikePanel.setRecording(clock.running && !preparing && !positionAt(selected, clock.read()).done);
-  const p = positionAt(selected, clock.read()), changed = p.index !== currentIndex;
+  bikePanel.setRecording(!previewing && clock.running && !preparing && !ridePosition().done);
+  const p = ridePosition(), changed = p.index !== currentIndex;
   $('route-block-count').textContent = `${p.done ? selected.intervals.length : p.index + 1} / ${selected.intervals.length}`;
   if (preparing) {
     currentIndex = -1;
@@ -172,12 +262,12 @@ function render() {
     }
     return;
   }
-  $('countdown').setAttribute('aria-label', 'Time remaining in block');
-  if (p.done && !completed) { completed = true; document.body.classList.add('workout-completed'); bikePanel.end('complete').then(() => rideHistory.refresh()); clock.pause(); releaseWake(); tone(1000, .5); speak('Workout complete. Nice ride.'); $('announcement').textContent = 'Workout complete.'; saveSession(); }
+  $('countdown').setAttribute('aria-label', distanceMode() ? 'Distance remaining in block' : 'Time remaining in block');
+  if (!previewing && p.done && !completed) { completed = true; document.body.classList.add('workout-completed'); bikePanel.end('complete').then(() => rideHistory.refresh()); clock.pause(); releaseWake(); tone(1000, .5); speak('Workout complete. Nice ride.'); $('announcement').textContent = 'Workout complete.'; saveSession(); }
   if (changed) {
     currentIndex = p.index;
     for (const [index, node] of [...$('timeline').children].entries()) { node.classList.toggle('active', index === p.index); node.setAttribute('aria-current', index === p.index ? 'step' : 'false'); }
-    for (const node of $('schedule').querySelectorAll('[data-index]')) { node.classList.toggle('active', Number(node.dataset.index) === p.index); node.setAttribute('aria-current', Number(node.dataset.index) === p.index ? 'step' : 'false'); node.querySelector('.block-duration').removeAttribute('aria-label'); node.querySelector('.block-duration').textContent = formatTime(selected.intervals[Number(node.dataset.index)].durationSeconds); }
+    for (const node of $('schedule').querySelectorAll('[data-index]')) { node.classList.toggle('active', Number(node.dataset.index) === p.index); node.setAttribute('aria-current', Number(node.dataset.index) === p.index ? 'step' : 'false'); node.querySelector('.block-duration').removeAttribute('aria-label'); node.querySelector('.block-duration').textContent = stepLength(selected.intervals[Number(node.dataset.index)]); }
     // Move only the block list, keeping the timer and page stationary.
     const activeRow = $('schedule').querySelector('[aria-current="step"]');
     if (activeRow) {
@@ -188,27 +278,29 @@ function render() {
   }
   const step = selected.intervals[p.index], next = selected.intervals[p.index + 1];
   $('stage').dataset.kind = step?.kind || 'cooldown';
-  $('phase').textContent = p.done ? 'COMPLETE' : clock.running ? ({ warmup: 'WARM UP', work: 'WORK', recovery: 'RECOVERY', cooldown: 'COOL DOWN' }[step.kind]) : clock.read() === 0 ? 'READY TO RIDE' : 'PAUSED';
+  $('phase').textContent = previewing ? (p.done ? 'PREVIEW COMPLETE' : 'PREVIEW · NOT RECORDING') : p.done ? 'COMPLETE' : clock.running ? ({ warmup: 'WARM UP', work: 'WORK', recovery: 'RECOVERY', cooldown: 'COOL DOWN' }[step.kind]) : clock.read() === 0 ? 'READY TO RIDE' : 'PAUSED';
   $('step-count').textContent = `${p.done ? selected.intervals.length : p.index + 1} / ${selected.intervals.length} BLOCKS`;
-  $('interval-label').textContent = p.done ? 'Workout complete. Nice ride.' : step.label;
+  $('interval-label').textContent = p.done ? (previewing ? 'Route preview complete' : 'Workout complete. Nice ride.') : formatRouteLabel(step.label,bikePanel.unit);
   const activeDuration = $('schedule').querySelector('[aria-current="step"] .block-duration');
   if (activeDuration) {
-    activeDuration.textContent = `${formatTime(p.remaining)} left`;
-    activeDuration.setAttribute('aria-label', `${formatTime(p.remaining)} remaining in block`);
+    activeDuration.textContent = `${remainingLabel(p.remaining)} left`;
+    activeDuration.setAttribute('aria-label', `${remainingLabel(p.remaining)} remaining in block`);
   }
-  $('countdown').textContent = formatTime(p.remaining); $('clock-caption').textContent = p.done ? 'YOU MADE THE TIME.' : 'BLOCK REMAINING';
+  $('distance-progress').hidden = !distanceMode();
+  $('distance-progress').textContent = distanceMode() ? `${Math.min(100,p.done ? 100 : Math.floor((step.distanceMeters - p.remaining) / step.distanceMeters * 100))}% of segment · ${Math.min(100,Math.floor(p.distance / selected.totalDistanceMeters * 100))}% of route` : '';
+  $('countdown').textContent = remainingLabel(p.remaining); $('clock-caption').textContent = p.done ? (previewing ? 'PREVIEW COMPLETE' : 'WORKOUT COMPLETE') : distanceMode() ? 'DISTANCE REMAINING' : 'BLOCK REMAINING';
   for (const id of ['cadence', 'resistance', 'watts']) {
     const key = id === 'watts' ? 'power' : id;
     $(id).textContent = formatProgramTarget(step, key, bikePanel.profile);
     $(id).parentElement.classList.toggle('primary-program-target', isPrimaryTarget(step, key));
     $(id).classList.toggle('range-target', $(id).textContent.includes('–') || $(id).textContent.includes('+'));
   }
-  $('elapsed').textContent = formatTime(Math.floor(p.elapsed)); $('ride-remaining').textContent = formatTime(selected.totalSeconds - p.elapsed);
-  $('session-progress').style.width = `${p.elapsed / selected.totalSeconds * 100}%`; $('block-progress').style.width = p.done ? '100%' : `${(step.durationSeconds - p.remaining) / step.durationSeconds * 100}%`;
-  $('toggle').textContent = p.done ? 'Ride again ↻' : clock.running ? 'Pause Ⅱ' : clock.read() === 0 ? 'Start workout ▶' : 'Resume ▶';
-  $('previous').disabled = p.index === 0; $('next').disabled = p.done || p.index >= selected.intervals.length - 1;
-  $('next-name').textContent = p.done ? 'Time to recover.' : next?.label || 'Finish line';
-  $('next-duration').textContent = next && !p.done ? formatTime(next.durationSeconds) : '—';
+  $('elapsed').textContent = formatTime(Math.floor(p.elapsed)); $('ride-remaining').textContent = distanceMode() ? formatDistance(selected.totalDistanceMeters - p.distance, bikePanel.unit) : formatTime(selected.totalSeconds - p.elapsed);
+  $('session-progress').style.width = `${(distanceMode() ? p.distance / selected.totalDistanceMeters : p.elapsed / selected.totalSeconds) * 100}%`; const length = distanceMode() ? step?.distanceMeters : step?.durationSeconds; $('block-progress').style.width = p.done ? '100%' : `${(length - p.remaining) / length * 100}%`;
+  $('toggle').textContent = previewing ? 'Start workout ▶' : p.done ? 'Ride again ↻' : clock.running ? 'Pause Ⅱ' : clock.read() === 0 ? 'Start workout ▶' : 'Resume ▶';
+  $('previous').disabled = distanceMode() || p.index === 0; $('next').disabled = distanceMode() || p.done || p.index >= selected.intervals.length - 1;
+  $('next-name').textContent = p.done ? (previewing ? 'Preview finished' : 'Time to recover.') : (next ? formatRouteLabel(next.label,bikePanel.unit) : 'Finish line');
+  $('next-duration').textContent = next && !p.done ? stepLength(next) : '—';
   document.querySelector('.upcoming').dataset.kind = next?.kind || 'cooldown';
   renderPosture($('next-posture'), !p.done ? next : null);
   $('next-instructions').textContent = !p.done ? segmentInstructions(next) : '';
@@ -222,18 +314,44 @@ function render() {
     $('next-targets').append(metric);
   }
   const cue = Math.ceil(p.remaining);
-  if (clock.running && cue >= 1 && cue <= 3 && lastCue !== `${p.index}:${cue}`) { lastCue = `${p.index}:${cue}`; tone(600, .09); }
+  if (!distanceMode() && clock.running && cue >= 1 && cue <= 3 && lastCue !== `${p.index}:${cue}`) { lastCue = `${p.index}:${cue}`; tone(600, .09); }
 }
 $('toggle').onclick = toggle; $('previous').onclick = () => jump(currentIndex === -1 ? selected.intervals.length - 1 : currentIndex - 1); $('next').onclick = () => jump(currentIndex + 1);
-$('restart').onclick = async () => { if (!clock) return; clock.pause(); render(); releaseWake(); if (await ask('Restart this ride?', 'Return to the beginning? Your current progress will be replaced.')) { document.body.classList.remove('workout-completed'); bikePanel.end(); clock.seek(0); currentIndex = -1; completed = false; render(); saveSession(); } };
-$('back').onclick = () => { bikePanel.end().then(() => rideHistory.refresh()); clock?.pause(); saveSession(); releaseWake(); if ('speechSynthesis' in window) speechSynthesis.cancel(); $('player').hidden = true; $('library').hidden = false; document.body.classList.remove('workout-open','workout-completed'); document.title = 'PelotonicReaction · Workout player'; };
+$('restart').onclick = async () => { if (!clock) return; clock.pause(); render(); releaseWake(); if (await ask('Restart this ride?', 'Return to the beginning? Your current progress will be replaced.')) { document.body.classList.remove('workout-completed'); bikePanel.end(); resetDistance(); clock.seek(0); currentIndex = -1; completed = false; render(); saveSession(); } };
+$('back').onclick = () => { terrainView.destroy(); bikePanel.end().then(() => rideHistory.refresh()); clock?.pause(); saveSession(); releaseWake(); if ('speechSynthesis' in window) speechSynthesis.cancel(); $('player').hidden = true; $('library').hidden = false; document.body.classList.remove('workout-open','workout-completed'); document.title = 'PelotonicReaction · Workout player'; };
 $('fullscreen').onclick = async () => { try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); } catch { $('sleep-status').textContent = 'Fullscreen is unavailable in this browser.'; } };
 $('import-open').onclick = () => $('import-file').click();
 $('import-file').onchange = async e => {
   const file = e.target.files[0]; if (!file) return;
-  try { if (file.size > 2 * 1024 * 1024) throw Error('Choose a JSON file smaller than 2 MB.'); const workout = JSON.parse(await file.text()); const checked = compileWorkout(workout); workout.tags = checked.tags; const imported = await tagControls.prepareImport(workout, workoutItems.map(item => item.workout)); workoutItems.unshift({ workout: imported }); selectedTags = []; renderLibrary(); $('notice').textContent = `Imported ${workout.name}. Imported custom tags are your user tags. Admin tags are managed at deployment. To share the Program, put its JSON file in the server’s workouts folder.`; }
+  const isFit=/\.fit$/i.test(file.name);
+  $('import-open').disabled=true;
+  try {
+    let workout, savedFilename;
+    if (isFit) {
+      if(file.size>10*1024*1024)throw Error('Choose a FIT file no larger than 10 MB.');
+      $('notice').textContent='Importing FIT route…';
+      const response=await fetch('/api/workouts/import-fit?'+new URLSearchParams({name:file.name}),{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:file});
+      const result=await response.json();if(!response.ok)throw Error(result.error||'FIT import failed.');
+      if(!result.filename)throw Error('Restart the app/server to enable saved imports, then import this file again.');
+      workout=result.workout;savedFilename=result.filename;
+    } else {
+      if(!/\.json$/i.test(file.name))throw Error('Choose a workout JSON or FIT file. Unzip Garmin exports first.');
+      if(file.size>2*1024*1024)throw Error('Choose a JSON file smaller than 2 MB.');
+      workout=JSON.parse(await file.text());
+    }
+    const checked=compileWorkout(workout);workout.tags=checked.tags;
+    const imported=await tagControls.prepareImport(workout,workoutItems.map(item=>item.workout));
+    // FIT tags are produced by our converter, not supplied by arbitrary imported JSON.
+    if(isFit)imported.tags=checked.tags;
+    else {
+      const response=await fetch('/api/workouts/import-json',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(imported)});
+      const result=await response.json();if(!response.ok)throw Error(result.error||'Could not save the workout.');savedFilename=result.filename;
+    }
+    workoutItems.unshift({filename:savedFilename,workout:imported,imported:true});selectedTags=[];renderLibrary();
+    $('notice').textContent=`Saved ${workout.name} to your local workout library.${isFit?' Imported as a distance-based Spinulator workout. Set your FTP/power zones and review the generated targets before riding.':''} It will remain available after refreshing or restarting the app.`;
+  }
   catch (error) { $('notice').textContent = `Could not import workout: ${error.message}`; }
-  e.target.value = '';
+  finally {e.target.value='';$('import-open').disabled=false;}
 };
 for (const id of ['sound', 'voice']) { const stored = storageGet(`pr-${id}`); if (typeof stored === 'boolean') $(id).checked = stored; $(id).onchange = () => { storageSet(`pr-${id}`, $(id).checked); if (id === 'voice' && !$(id).checked && 'speechSynthesis' in window) speechSynthesis.cancel(); }; }
 window.addEventListener('keydown', e => { if (e.target.closest('input,textarea,select,dialog') || e.altKey || e.metaKey || e.ctrlKey || $('confirm-dialog').open) return; if (e.code === 'KeyF') { e.preventDefault(); $('fullscreen').click(); } if ($('player').hidden) return; if (e.code === 'Space' && !e.target.closest('button,a')) { e.preventDefault(); toggle(); } else if (e.code === 'ArrowRight') { e.preventDefault(); jump(currentIndex + 1); } else if (e.code === 'ArrowLeft') { e.preventDefault(); jump(currentIndex - 1); } });
@@ -245,7 +363,7 @@ async function init() {
   catch (e) { await tagControls.init([]); renderLibrary(); $('notice').textContent = `${e.message} Start the app with npm start, then refresh. You can also import a JSON workout.`; }
   const saved = storageGet(key);
   if (saved && !saved.completed && Number.isFinite(saved.elapsed) && saved.elapsed > 0) {
-    try { compileWorkout(saved.workout); if (await ask('Continue your last ride?', `${saved.workout.name} · ${formatTime(saved.elapsed)} completed. It will reopen paused.`)) await selectWorkout(saved.workout, saved.elapsed, saved.rideId); } catch { /* Ignore invalid or outdated saved sessions. */ }
+    try { compileWorkout(saved.workout); if (await ask('Continue your last ride?', `${saved.workout.name} · ${formatTime(saved.elapsed)} completed. It will reopen paused.`)) await selectWorkout(saved.workout, saved.elapsed, saved.rideId, saved); } catch { /* Ignore invalid or outdated saved sessions. */ }
   }
   if ($('player').hidden) bikePanel.end();
 }

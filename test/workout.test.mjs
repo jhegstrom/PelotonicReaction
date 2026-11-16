@@ -16,7 +16,7 @@ test('invalid imported workouts fail with actionable errors', () => {
   for (const value of [null, {}, { ...sample, schemaVersion: 2 }, { ...sample, steps: [] }, { ...sample, steps: [{ label: 'Bad', durationSeconds: 0 }] }, { ...sample, steps: [{ label: 'Bad', durationSeconds: 10, cadence: '80' }] }, { ...sample, steps: [{ repeat: 1000, steps: sample.steps }] }, { ...sample, steps: [{ label: 'Bad', durationSeconds: 10, resistance: 101 }] }]) assert.throws(() => compileWorkout(value));
 });
 test('the four converted workouts preserve spreadsheet durations and planned targets', async () => {
-  const expected = { '5-minute-hr-power-zone-test.json': [300, 5], '45-minute-hr-zone-3.json': [2700, 23], '3-by-20-5-at-130.json': [5100, 7], 'mt-peloton-90-minute-climb.json': [5400, 23], '90-minute-fat-burn.json': [5400, 17], '45-minute-tabata.json': [2700, 97], 'one-minute-sound-check.json': [60, 8] };
+  const expected = { '5-minute-hr-power-zone-test.json': [300, 5], '45-minute-hr-zone-3.json': [2700, 23], '3-by-20-5-at-130.json': [5100, 7], 'mt-peloton-90-minute-climb.json': [5400, 23], '90-minute-fat-burn.json': [5400, 17], '45-minute-tabata.json': [2700, 97], 'one-minute-sound-check.json': [60, 8], 'creel-creek.json': [3600, 11], 'garmin-25091199791.json': [8400, 13] };
   for (const file of await readdir(new URL('../workouts/', import.meta.url))) {
     const raw = JSON.parse(await readFile(new URL('../workouts/' + file, import.meta.url))); const w = compileWorkout(raw); assert.deepEqual([w.totalSeconds, w.intervals.length], expected[file], file);
     if (file === '45-minute-tabata.json') { assert.equal(w.intervals[3].durationSeconds, 20); assert.equal(w.intervals[4].durationSeconds, 10); assert.equal(w.intervals[3].watts, 161.3); assert.equal(w.intervals[3].cadence, 75); }
@@ -85,4 +85,14 @@ test('45 Minute HR Zone 3 has exact warm-up, spin-ups and alternating zones thro
  const work=w.intervals.filter(s=>s.kind==='work');assert.equal(work.length,8);assert.ok(work.every(s=>s.heartRateZone===3&&s.durationSeconds===240&&s.primaryTargets.includes('heartRate')));
  assert.equal(w.intervals.at(-1).endSeconds,2700);assert.equal(w.intervals.at(-1).startSeconds,2460);
  for(const change of [{heartRateZone:0},{heartRateZone:6},{heartRateZone:2.5},{heartRateZone:3,heartRate:130},{heartRateZone:3,targetRanges:{heartRate:[120,140]}}])assert.throws(()=>compileWorkout({schemaVersion:1,name:'Invalid',steps:[{label:'HR',durationSeconds:60,...change}]}));
+});
+
+test('Creel Creek library ride advances by traveled distance and finishes at the route endpoint',async()=>{
+ const w=compileWorkout(JSON.parse(await readFile(new URL('../workouts/creel-creek.json',import.meta.url))));
+ assert.equal(w.id,'creel-creek-terrain');assert.equal(w.completionMetric,'distance');assert.ok(w.tags.includes('Spinulator'));
+ assert.ok(Math.abs(w.totalDistanceMeters-29129.4)<.001);
+ assert.equal(positionAt(w,99999,3999).index,0);assert.equal(positionAt(w,1,4000).index,1);
+ assert.equal(positionAt(w,1,w.totalDistanceMeters).done,true);
+ assert.ok(w.intervals.every(s=>s.cue && s.primaryTargets.join()==='watts'));
+ assert.ok(w.route.points.every(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon)));
 });

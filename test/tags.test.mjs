@@ -10,8 +10,8 @@ const programs = [
   { name: 'Untagged' },
 ];
 
-test('suggestions contain the eight requested labels without restricting custom tags', () => {
-  assert.deepEqual(PROGRAM_TAGS, ['Climb', 'Intervals', 'Tabata', 'Endurance', 'Heart Rate Zone', 'Power Zone', 'Beginner', 'Low Impact']);
+test('suggestions contain the suggested labels including Spinulator without restricting custom tags', () => {
+  assert.deepEqual(PROGRAM_TAGS, ['Climb', 'Intervals', 'Tabata', 'Endurance', 'Heart Rate Zone', 'Power Zone', 'Beginner', 'Low Impact', 'Spinulator']);
   assert.deepEqual(normalizeTags(['Tempo', 'Recovery day']), ['Tempo', 'Recovery day']);
 });
 test('normalization canonicalizes suggestions, aliases and whitespace and removes duplicate labels', () => {
@@ -41,4 +41,9 @@ test('normalizing a program preserves its intervals and does not mutate source J
   assert.deepEqual(compiled.tags, ['Tabata', 'Intervals']);
   assert.deepEqual(raw.tags, [' tabata', 'TABATA', 'Intervals']);
   assert.equal(compiled.totalSeconds, 30);
+});
+
+test('legacy Map tags migrate to Spinulator without duplicate labels', () => {
+  assert.deepEqual(normalizeTags(['Map', 'map', 'Spinulator']), ['Spinulator']);
+  assert.ok(!PROGRAM_TAGS.includes('Map'));
 });

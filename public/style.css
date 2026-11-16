@@ -172,3 +172,30 @@ body.workout-open{padding-bottom:10vh;padding-bottom:10dvh}
 .ride-metric.has-zone-indicator .metric-actual-row{padding-right:18px}.ride-metric.has-zone-indicator .metric-correction{width:18px}.ride-metric.has-zone-indicator[data-correction=large] .metric-correction{font-size:28px}
 
 .zone-indicator-band.target-zone{opacity:1;box-shadow:inset 0 0 0 2px #ffd17c;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.32) 0 2px,transparent 2px 5px)}.zone-indicator-band.target-zone.current-zone{box-shadow:inset 0 0 0 1px #fff,inset 0 0 0 3px #ffd17c}
+
+/* Written cues remain secondary to the block label. */
+.coaching-cue{font-size:clamp(13px,1.3vw,17px);line-height:1.35;color:#c3d1da;text-align:center;margin:6px 14px;overflow-wrap:anywhere}.coaching-cue:empty{display:none}.schedule-cue{font-weight:400;line-height:1.4}
+.terrain-view{min-height:0;overflow:auto;flex:1}.terrain-view>svg{display:block;width:100%;max-height:180px}.terrain-legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;margin:4px 0}.terrain-status{font-size:12px;color:#bdcbd4;line-height:1.4;margin:7px 0}.terrain-view>.route-trace{max-height:230px;background:#101d26;border-radius:8px}.terrain-controls{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}.terrain-controls button{padding:8px;font-size:12px}.terrain-map{height:280px;min-height:200px;border-radius:8px;overflow:hidden}.terrain-landmark{font-size:14px;line-height:1.4;color:#f6c18f;margin:8px 0}.terrain-map .maplibregl-ctrl-attrib{font-size:10px}.terrain-map button{padding:0}
+@media(min-width:800px) and (min-height:560px){.coaching-cue{font-size:clamp(12px,1.6vh,15px);margin:3px 10px}.stage{flex-shrink:0}.terrain-map{height:240px}.terrain-view>.route-trace{max-height:190px}}
+
+.stage .coaching-cue{font-size:14px;line-height:1.35;white-space:normal;flex-shrink:0}.terrain-view svg[hidden]{display:none!important}
+@media(max-height:700px) and (min-width:800px){.stage .coaching-cue{font-size:12px}}
+
+.distance-progress{text-align:center;font-size:13px;line-height:1.3;color:#b5e0d0;margin:3px 8px}.stage .countdown{white-space:nowrap}.schedule button:disabled{opacity:1;cursor:default}
+
+.terrain-controls label,.preview-controls label{display:inline-flex;align-items:center;gap:5px;color:#c3d1da;font-size:12px}.terrain-controls select,.preview-controls select{font:inherit;background:#162630;color:#fff;border:1px solid #52636f;border-radius:6px;padding:6px}.preview-controls{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:8px 0;padding:10px 0;border-top:1px solid var(--line)}.preview-controls button{padding:8px;font-size:13px}.preview-controls input[type=range]{width:100%;accent-color:var(--accent)}.preview-status{width:100%;font-size:12px;color:#f6c18f;margin:0}.terrain-expanded{position:fixed;inset:16px;z-index:1000;display:flex;flex-direction:column;padding:20px;background:#111b22;border:1px solid #52636f;border-radius:14px;box-shadow:0 0 0 40px #000b;overflow:auto}.terrain-expanded>svg{height:130px;flex-shrink:0}.terrain-expanded .terrain-map{flex:1;min-height:250px;height:auto}.terrain-expanded .route-trace{flex:1;max-height:none}.terrain-expanded .terrain-status,.terrain-expanded .terrain-landmark{margin:4px 0}.terrain-expanded .terrain-controls,.terrain-expanded .preview-controls{margin:4px 0}.terrain-map{min-height:260px}
+
+/* The same terrain view stays live in native fullscreen or an embedded-browser fallback. */
+.terrain-view:fullscreen,.terrain-view.terrain-expanded{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;box-sizing:border-box;width:100%;height:100%;padding:16px;background:#111b22;border:0;border-radius:0;overflow:auto;gap:4px}
+.terrain-view:fullscreen::backdrop{background:#111b22}
+.terrain-view:fullscreen>svg,.terrain-view.terrain-expanded>svg{height:110px;max-height:110px;flex-shrink:0}
+.terrain-view:fullscreen .terrain-map,.terrain-view.terrain-expanded .terrain-map{flex:1;min-height:180px;height:auto}
+.terrain-view:fullscreen>.route-trace,.terrain-view.terrain-expanded>.route-trace{flex:1;min-height:180px;height:auto;max-height:none}
+.terrain-view:fullscreen .terrain-controls,.terrain-view:fullscreen .preview-controls{margin:4px 0;flex-shrink:0}
+.terrain-view:fullscreen .terrain-status,.terrain-view:fullscreen .terrain-landmark{margin:4px 0;flex-shrink:0}
+@media(max-height:600px){.terrain-view:fullscreen>svg:not(.route-trace),.terrain-view.terrain-expanded>svg:not(.route-trace){height:70px;max-height:70px}.terrain-view:fullscreen,.terrain-view.terrain-expanded{padding:8px;gap:0}}
+
+
+.terrain-controls button[aria-pressed=true]{color:#b5e0d0;background:#25443b}
+
+.saved-workout-actions{display:flex;justify-content:center;gap:12px;border-top:1px solid var(--line);margin-top:8px}#workout-name-input{display:block;width:100%;margin:12px 0;padding:12px;font:inherit;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px}

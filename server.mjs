@@ -8,9 +8,26 @@ import { RideUploads } from './lib/ride-uploads.mjs';
 import { StravaService } from './lib/strava-service.mjs';
 import { BikeService } from './lib/bike-service.mjs';
 import { compileWorkout } from './public/workout.js';
+import { importFitWorkout } from './lib/fit-route.mjs';
+import { WorkoutImports } from './lib/workout-imports.mjs';
+import { programKey } from './public/tag-profile.js';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml' };
 export function createAppServer(base = root, { dataRoot = base, helperPath = null, workoutsRoot = path.join(base, 'workouts'), bike, strava = new StravaService(dataRoot), rides = new RideStore(dataRoot) } = {}) {
+  const imports=new WorkoutImports(dataRoot);
+  async function catalog() {
+    const {workouts,errors}=await imports.list();
+    const files=(await readdir(workoutsRoot)).filter(f=>f.endsWith('.json')).sort();
+    for(const filename of files) {
+      try {const workout=JSON.parse(await readFile(path.join(workoutsRoot,filename),'utf8'));workout.tags=compileWorkout(workout).tags;workouts.push({filename,workout});}
+      catch(e){errors.push({filename,message:e.message});}
+    }
+    return {workouts,errors};
+  }
+  async function saveImport(workout) {
+    if((await catalog()).workouts.some(item=>programKey(item.workout)===programKey(workout)))throw Object.assign(Error('This workout is already saved in the library.'),{status:409});
+    return imports.save(workout);
+  }
   const uploads = new RideUploads(rides, strava);
   bike ??= new BikeService(base, { helperPath, rides, athleteId: () => strava.data?.athleteId || strava.data?.profile?.athleteId || null, onFinish: ride => uploads.complete(ride) });
   if (bike.recorder) bike.recorder.onFinish = ride => uploads.complete(ride);
@@ -18,6 +35,46 @@ export function createAppServer(base = root, { dataRoot = base, helperPath = nul
     const send = (status, text, type = 'application/json; charset=utf-8') => { res.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer' }); res.end(req.method === 'HEAD' ? '' : text); };
     try {
       const url = new URL(req.url, 'http://localhost');
+      const savedWorkout=url.pathname.match(/^\/api\/workouts\/saved\/([^/]+)$/);
+      if(savedWorkout) {
+        if(!['PATCH','DELETE'].includes(req.method))return send(405,'{}');
+        if(!req.headers.origin || new URL(req.headers.origin).host!==req.headers.host)return send(403,'{}');
+        try {
+          if(req.method==='DELETE')return send(200,JSON.stringify(await imports.mutate(savedWorkout[1])));
+          if(!req.headers['content-type']?.startsWith('application/json'))return send(415,'{}');
+          let text='';for await(const chunk of req){text+=chunk;if(text.length>2048)return send(413,'{}');}
+          let body;try{body=JSON.parse(text);}catch{return send(400,'{}');}
+          if(typeof body?.name!=='string')return send(400,JSON.stringify({error:'Enter a workout name.'}));
+          return send(200,JSON.stringify(await imports.mutate(savedWorkout[1],body.name)));
+        }catch(error){return send(error.status||500,JSON.stringify({error:error.status?error.message:'Could not change the saved workout. Check disk permissions.'}));}
+      }
+      if(url.pathname==='/api/workouts/import-json') {
+        if(req.method!=='POST')return send(405,'{}');
+        if(!req.headers.origin || new URL(req.headers.origin).host!==req.headers.host)return send(403,'{}');
+        if(req.headers['content-type']?.split(';')[0]!=='application/json')return send(415,'{}');
+        let size=0;const chunks=[];
+        for await(const chunk of req){size+=chunk.length;if(size>2*1024*1024)return send(413,JSON.stringify({error:'Choose a JSON file smaller than 2 MB.'}));chunks.push(chunk);}
+        try {
+          const input=JSON.parse(Buffer.concat(chunks).toString('utf8'));compileWorkout(input);
+          // User tags stay in the local rider profile; JSON imports cannot create admin tags.
+          const workout={...input,tags:[]};delete workout.userTags;
+          return send(201,JSON.stringify(await saveImport(workout)));
+        } catch(error){return send(error.status||400,JSON.stringify({error:error.message}));}
+      }
+      if (url.pathname === '/api/workouts/import-fit') {
+        if (req.method !== 'POST') return send(405, '{}');
+        if (!req.headers.origin || new URL(req.headers.origin).host !== req.headers.host) return send(403, '{}');
+        if (req.headers['content-type']?.split(';')[0] !== 'application/octet-stream') return send(415, JSON.stringify({error:'Choose a FIT recording.'}));
+        const limit=10*1024*1024;
+        if (Number(req.headers['content-length'])>limit) {req.resume();return send(413,JSON.stringify({error:'Choose a FIT file no larger than 10 MB.'}));}
+        const chunks=[];let size=0;
+        for await (const chunk of req) {size+=chunk.length;if(size>limit)return send(413,JSON.stringify({error:'Choose a FIT file no larger than 10 MB.'}));chunks.push(chunk);}
+        try {
+          // Decode locally, then save only the resulting workout in the user's data directory.
+          const workout=importFitWorkout(Buffer.concat(chunks),url.searchParams.get('name')?.slice(0,160));
+          return send(200,JSON.stringify(await saveImport(workout)));
+        } catch(error) {return send(error.status||400,JSON.stringify({error:error.message}));}
+      }
       if (url.pathname === '/api/rides' && req.method === 'GET') return send(200, JSON.stringify({ rides: rides.list() }));
       const rideRoute = url.pathname.match(/^\/api\/rides\/([a-zA-Z0-9-]{8,80})\/(fit|upload)$/);
       if (rideRoute) {
@@ -79,7 +136,7 @@ export function createAppServer(base = root, { dataRoot = base, helperPath = nul
         if (req.headers.origin && new URL(req.headers.origin).host !== req.headers.host) return send(403, '{}');
         if (!req.headers['content-type']?.startsWith('application/json')) return send(415, '{}');
         let text = '';
-        for await (const chunk of req) { text += chunk; if (text.length > 2048) return send(413, '{}'); }
+        for await (const chunk of req) { text += chunk; if (text.length > 4 * 1024 * 1024) return send(413, '{}'); }
         let body; try { body = JSON.parse(text); } catch { return send(400, '{}'); }
         if (!body || typeof body.client !== 'string' || !/^[a-zA-Z0-9-]{8,80}$/.test(body.client)) return send(400, '{}');
         try {
@@ -93,13 +150,7 @@ export function createAppServer(base = root, { dataRoot = base, helperPath = nul
       }
       if (!['GET', 'HEAD'].includes(req.method)) return send(405, JSON.stringify({ error: 'Read-only server.' }));
       if (url.pathname === '/api/workouts') {
-        const workouts = [], errors = [];
-        const files = (await readdir(workoutsRoot)).filter(f => f.endsWith('.json')).sort();
-        for (const filename of files) {
-          try { const raw = JSON.parse(await readFile(path.join(workoutsRoot, filename), 'utf8')); compileWorkout(raw); workouts.push({ filename, workout: raw }); }
-          catch (e) { errors.push({ filename, message: e.message }); }
-        }
-        return send(200, JSON.stringify({ workouts, errors }));
+        return send(200, JSON.stringify(await catalog()));
       }
       const pathname = decodeURIComponent(url.pathname);
       if (pathname.includes('\0') || pathname.includes('\\')) return send(400, '{}');

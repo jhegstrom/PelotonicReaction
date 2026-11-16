@@ -67,14 +67,14 @@ export class BikePanel {
   async postCommand(action, body) {
     try {
       const response = await fetch('/api/bike/session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: ['stop','timing'].includes(action) });
-      if (!response.ok) { const data = await response.json(); this.snapshot.status = data.error || 'Bike connection retrying…'; if(data.code==='recording-ended'&&action==='start'&&this.rideId===body.rideId){this.rideId=globalThis.crypto?.randomUUID?.()||`ride-${Date.now()}-${Math.random().toString(16).slice(2)}`; document.getElementById('ride-recording-result').dataset.rideId=this.rideId;} return false; }
+      if (!response.ok) { const data = await response.json(); this.snapshot.status = data.error || 'Bike connection retrying…'; if(data.code==='recording-ended'&&action==='start'&&this.rideId===body.rideId){this.routeOffsetKm=this.routeDistanceKm || this.routeOffsetKm || 0;this.rideId=globalThis.crypto?.randomUUID?.()||`ride-${Date.now()}-${Math.random().toString(16).slice(2)}`; document.getElementById('ride-recording-result').dataset.rideId=this.rideId;} return false; }
       return true;
     } catch { this.snapshot.status = 'Bike connection retrying…'; return false; }
   }
   async ensureSession() {
     if (this.posting || !this.desired) return;
     this.posting = true; const rideId=this.rideId;
-    try { if (await this.command('start', {name:this.workoutName,description:this.workoutDescription?.slice(0,800)}) && this.desired && this.rideId===rideId) { await this.command('average', { seconds: this.seconds }); if (this.desired && this.rideId===rideId) await this.command('timing', { recording: this.recording, remainingSeconds:this.remainingSeconds }); } }
+    try { if (await this.command('start', {name:this.workoutName,description:this.workoutDescription?.slice(0,800),virtualRoute:this.virtualRoute,routeOffsetKm:this.routeOffsetKm}) && this.desired && this.rideId===rideId) { await this.command('average', { seconds: this.seconds }); if (this.desired && this.rideId===rideId) await this.command('timing', { recording: this.recording, remainingSeconds:this.remainingSeconds }); } }
     finally { this.posting = false; }
   }
   begin() { if (!this.desired) { this.rideId ||= globalThis.crypto?.randomUUID?.() || `ride-${Date.now()}-${Math.random().toString(16).slice(2)}`; document.getElementById('ride-recording-result').dataset.rideId=this.rideId; this.desired = true; this.noBikeOffered = false; this.ensureSession(); } }

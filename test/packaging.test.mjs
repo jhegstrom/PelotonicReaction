@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,readFile,writeFile,rm,mkdir} from 'node:fs/promises';
+import {mkdtemp,readFile,writeFile,rm,mkdir,readdir} from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import {fileURLToPath} from 'node:url';
@@ -33,6 +33,6 @@ test('server reads user workouts but serves only packaged public resources',asyn
  const server=createAppServer(root,{...paths,bike:new BikeService(root,{platform:'test'})});server.listen(0,'127.0.0.1');await once(server,'listening');
  t.after(()=>{server.closeAllConnections();return new Promise(r=>server.close(r));});
  const base=`http://127.0.0.1:${server.address().port}`;
- const catalog=await(await fetch(base+'/api/workouts')).json();assert.equal(catalog.workouts.length,7);assert.deepEqual(catalog.errors,[]);
+ const catalog=await(await fetch(base+'/api/workouts')).json();assert.equal(catalog.workouts.length,(await readdir(paths.workoutsRoot)).filter(f=>f.endsWith('.json')).length);assert.deepEqual(catalog.errors,[]);
  assert.equal((await fetch(base+'/.env')).status,404);assert.equal((await fetch(base+'/.data/strava.json')).status,404);assert.equal((await fetch(base+'/desktop/main.mjs')).status,404);
 });

@@ -52,6 +52,7 @@ export class ProfileControls {
     $('profile-name').readOnly = Boolean(r?.displayName);
     $('profile-ftp').readOnly = r?.ftpWatts != null;
     $('profile-speed-units').disabled = Boolean(r?.speedUnit);
+    $('profile-speed-units').title = r?.speedUnit ? 'Units follow Strava. Change them in Strava, then refresh.' : 'Local preference for distance, elevation and speed.';
     for (const id of ['profile-age','profile-max','profile-recalculate']) { $(id).disabled = Boolean(r?.heartRateZones.length); if (id !== 'profile-recalculate') $(id).closest('label').hidden = Boolean(r?.heartRateZones.length); else $(id).hidden = Boolean(r?.heartRateZones.length); }
     $('profile-ftp').title = r?.ftpWatts != null ? 'Edit FTP in Strava, then refresh.' : 'Strava did not supply FTP. Enter a local fallback if needed.';
     this.showZones();

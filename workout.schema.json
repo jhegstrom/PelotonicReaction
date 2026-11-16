@@ -67,6 +67,75 @@
         "maxLength": 60,
         "pattern": "\\S"
       }
+    },
+    "route": {
+      "type": "object",
+      "required": [
+        "points"
+      ],
+      "properties": {
+        "points": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 20000,
+          "items": {
+            "type": "object",
+            "required": [
+              "distance",
+              "altitude"
+            ],
+            "properties": {
+              "distance": {
+                "type": "number",
+                "minimum": 0
+              },
+              "altitude": {
+                "type": "number",
+                "minimum": -12000,
+                "maximum": 12000
+              },
+              "lat": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "lon": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              }
+            }
+          }
+        },
+        "landmarks": {
+          "type": "array",
+          "maxItems": 1000,
+          "items": {
+            "type": "object",
+            "required": [
+              "distance",
+              "name"
+            ],
+            "properties": {
+              "distance": {
+                "type": "number",
+                "minimum": 0
+              },
+              "name": {
+                "type": "string",
+                "maxLength": 160
+              }
+            }
+          }
+        }
+      }
+    },
+    "completionMetric": {
+      "enum": [
+        "time",
+        "distance"
+      ],
+      "default": "time"
     }
   },
   "$defs": {
@@ -223,6 +292,16 @@
               "minimum": 1,
               "maximum": 5,
               "description": "HR zone resolved from rider profile (Strava zones first, local fallback). Mutually exclusive with heartRate and targetRanges.heartRate. Use heartRate in primaryTargets for guidance."
+            },
+            "cue": {
+              "type": "string",
+              "maxLength": 500,
+              "description": "Written coaching cue, secondary to label and kind."
+            },
+            "distanceMeters": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1000000
             }
           }
         },
