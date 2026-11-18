@@ -1,6 +1,7 @@
+import { stravaId } from './strava-id.js';
 // Whitelist the portable athlete snapshot. OAuth credentials never belong in a rider profile.
 export function sanitizeStravaProfile(input) {
-  if (!input || !Number.isSafeInteger(input.athleteId) || input.athleteId <= 0) throw Error('Invalid Strava athlete.');
+  if (!input || !stravaId(input.athleteId)) throw Error('Invalid Strava athlete.');
   const zones = list => {
     if (!Array.isArray(list) || !list.length || list.length > 10) return [];
     const result = list.map(({ min, max }, i) => ({ zone: i + 1, min, max: max === -1 ? null : max }));
@@ -8,7 +9,7 @@ export function sanitizeStravaProfile(input) {
     return result;
   };
   const date = value => typeof value === 'string' && Number.isFinite(Date.parse(value)) ? new Date(value).toISOString() : null;
-  return { athleteId: input.athleteId, displayName: typeof input.displayName === 'string' && input.displayName.trim() ? input.displayName.trim().slice(0,80) : null,
+  return { athleteId: stravaId(input.athleteId), displayName: typeof input.displayName === 'string' && input.displayName.trim() ? input.displayName.trim().slice(0,80) : null,
     ftpWatts: Number.isInteger(input.ftpWatts) && input.ftpWatts >= 20 && input.ftpWatts <= 1500 ? input.ftpWatts : null,
     speedUnit: ['mph','km/h'].includes(input.speedUnit) ? input.speedUnit : null,
     weightKg: Number.isFinite(input.weightKg) && input.weightKg > 0 && input.weightKg < 500 ? input.weightKg : null,
