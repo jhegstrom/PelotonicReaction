@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { routePosition, gradeColor, RoutePreview, TerrainView, trackBearing, smoothBearing } from '../public/terrain.js';
+import { routePosition, gradeColor, RoutePreview, TerrainView, trackBearing, smoothBearing, followHeading, previewTurnSpeed } from '../public/terrain.js';
 import { compileWorkout, positionAt, WorkoutClock } from '../public/workout.js';
 import { terrainWorkout } from '../scripts/import_fit_route.mjs';
 const points=[{distance:0,altitude:100,lat:40,lon:-120},{distance:1000,altitude:200,lat:41,lon:-121},{distance:2000,altitude:100,lat:42,lon:-122}];
@@ -106,4 +106,27 @@ test('pause removes the real playback timer and leaves distance unchanged over s
  const distance=preview.distanceKm,count=ticks;
  await new Promise(resolve=>setTimeout(resolve,200));
  assert.equal(preview.distanceKm,distance);assert.equal(ticks,count);
+});
+
+
+test('camera turns at a bounded rate and takes the short path across north',()=>{
+ assert.equal(followHeading(0,180,.05),-2);
+ assert.ok(followHeading(179,-179,.05)>179);
+ let heading=0;
+ for(let i=0;i<60;i++)heading=followHeading(heading,150,1/60);
+ assert.ok(heading>30 && heading<=40.00001,'one second cannot produce a sudden 150-degree turn');
+ let slowTicks=0;for(let i=0;i<20;i++)slowTicks=followHeading(slowTicks,150,.05);
+ assert.ok(Math.abs(heading-slowTicks)<.01,'heading speed is independent of tick frequency');
+});
+
+test('preview anticipates switchbacks, slows smoothly and resumes straight-line speed',()=>{
+ const bend=[{distance:0,altitude:0,lat:40,lon:-120},{distance:1000,altitude:0,lat:40.009,lon:-120},{distance:2000,altitude:0,lat:40,lon:-119.999}];
+ assert.equal(previewTurnSpeed(bend,0,60),1);
+ assert.ok(previewTurnSpeed(bend,800,60)<.3);
+ const preview=new RoutePreview(2000,60,bend);preview.seek(750);preview.start();
+ const before=preview.distanceKm;preview.advance(.5);
+ assert.ok(preview.distanceKm-before<.5*60*25/3600);
+ assert.ok(preview.turnSpeed<1 && preview.turnSpeed>.12);
+ preview.pause();const paused=preview.distanceKm;preview.advance(3);assert.equal(preview.distanceKm,paused);
+ preview.seek(1300);preview.start();preview.advance(1);assert.ok(preview.turnSpeed>.9);
 });
