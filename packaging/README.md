@@ -58,3 +58,11 @@ Uninstalling the application leaves user data in place. Delete that folder yours
 Default local Mac builds use ad-hoc app signatures and an unsigned `.pkg`. They are test artifacts, not a notarized public release. Do not bypass OS security warnings automatically. For distribution, provide Apple Developer ID Application and Developer ID Installer certificates plus notarization credentials, set `PELOTONIC_SIGNED_RELEASE=1`, and follow [electron-builder signing configuration](https://www.electron.build/code-signing.html). Sign Windows installers with an appropriate Authenticode identity before distribution. Signing credentials belong in release secrets, never source files or packaged resources.
 
 `npm audit --omit=dev` currently reports no runtime dependency vulnerabilities. The installed electron-builder toolchain has moderate transitive minimatch denial-of-service advisories; those build tools are not shipped. Review toolchain updates before public release.
+
+## Local Network permission
+
+Before starting the timer, use **Connect now** on the workout screen to discover the bike and trigger macOS Local Network consent. The timer stays stopped and no ride recording is created until Start workout. The same screen shows the Mac’s LAN URL(s) for the bike browser; both devices must be on the same network.
+
+If discovery reports blocked access, enable PelotonicReaction in **System Settings → Privacy & Security → Local Network**. Discovery retries after permission is granted. The app cannot grant this permission itself. The parent app already declares its usage description and Bonjour service; its Chromium renderer permission handler does not control native Network.framework discovery.
+
+Ad-hoc signatures used by local builds do not give macOS a reliable identity across rebuilt applications. For persistent permission identity, distribute a Developer ID signed and notarized build using the existing signed-release configuration. See [Apple TN3179](https://developer.apple.com/documentation/technotes/tn3179-understanding-local-network-privacy). Actual consent and recovery must be verified with an installed application and bike.

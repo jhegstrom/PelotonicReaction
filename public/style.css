@@ -199,3 +199,84 @@ body.workout-open{padding-bottom:10vh;padding-bottom:10dvh}
 .terrain-controls button[aria-pressed=true]{color:#b5e0d0;background:#25443b}
 
 .saved-workout-actions{display:flex;justify-content:center;gap:12px;border-top:1px solid var(--line);margin-top:8px}#workout-name-input{display:block;width:100%;margin:12px 0;padding:12px;font:inherit;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px}
+
+/* Fit the original Bike's landscape browser viewport, including browser chrome.
+   Keep long program lists inside their panel rather than growing the dashboard. */
+@media (min-width:800px) and (min-height:480px) {
+  body.workout-open{--overlay-space:max(80px,10vh);height:100vh;height:100dvh;padding:0 0 var(--overlay-space);overflow:hidden}
+  body.workout-open .topbar{height:44px;padding:0 16px}
+  body.workout-open main{height:calc(100vh - 44px - var(--overlay-space));height:calc(100dvh - 44px - var(--overlay-space));min-height:0;max-width:none;padding:6px 16px 8px}
+  body.workout-open footer{display:none}
+  body.workout-open #player{height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);grid-template-rows:32px minmax(0,1fr);gap:6px 10px}
+  body.workout-open .ride-heading{grid-column:1/-1;min-width:0;margin:0;gap:8px}
+  body.workout-open .ride-heading h1{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  body.workout-open .ride-heading button{padding:6px 10px;min-height:32px}
+  body.workout-open .player-grid{grid-column:1;grid-row:2;min-height:0;min-width:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr) auto;gap:6px}
+  body.workout-open .stage{min-height:0;min-width:0;display:flex;flex-direction:column;justify-content:space-between;flex-shrink:1}
+  body.workout-open .stage-top{padding:4px 10px 0;font-size:10px}
+  body.workout-open .phase{font-size:10px}
+  body.workout-open .stage h2{font-size:clamp(15px,1.6vw,24px);margin:1px 8px 0;min-height:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  body.workout-open .stage .countdown{font-size:clamp(28px,5vh,64px);line-height:1;padding:0 6px;letter-spacing:-1px}
+  body.workout-open .stage .coaching-cue{font-size:clamp(10px,1.25vh,14px);line-height:1.2;margin:1px 8px;flex-shrink:1;min-height:0;overflow:auto}
+  body.workout-open .stage .metrics{margin:0 8px 3px;gap:4px}
+  body.workout-open .stage .metrics>div{padding:2px 0 0;min-width:0}
+  body.workout-open .metric-title{font-size:9px;letter-spacing:0}
+  body.workout-open .stage .metrics strong{font-size:clamp(20px,3vh,36px);line-height:1.1}
+  body.workout-open .stage .metrics strong.range-target{font-size:clamp(16px,2.3vh,28px)}
+  body.workout-open .stage .clock-caption{font-size:8px;margin:0}
+  body.workout-open .stage .block-track{height:3px;margin:0;flex-shrink:0}
+  body.workout-open .segment-instructions,body.workout-open .distance-progress{font-size:10px;line-height:1.2;margin:1px 5px}
+  body.workout-open .posture-cue{margin:1px 5px}
+  body.workout-open .posture-badge img{width:16px;height:16px}
+  body.workout-open .transport{padding:0;gap:5px}
+  body.workout-open .transport button{padding:7px 3px;min-height:44px;font-size:12px}
+  body.workout-open .transport .primary{font-size:15px}
+  body.workout-open .options{padding:0;gap:8px;min-height:32px;font-size:11px;flex-wrap:wrap}
+  body.workout-open .options .quiet{padding:6px;font-size:11px}
+  body.workout-open .ride-side{display:none}
+  body.workout-open .telemetry-panel{grid-column:2;grid-row:2;min-height:0;min-width:0;display:flex;flex-direction:column;padding:8px;margin:0;overflow:hidden;justify-content:flex-start}
+  body.workout-open .telemetry-heading{flex-shrink:0}
+  body.workout-open .telemetry-heading h2{font-size:16px;margin:0 0 3px}
+  body.workout-open .telemetry-heading>span{font-size:10px}
+  body.workout-open .ride-metrics{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1.6fr);gap:6px;margin:6px 0 0}
+  body.workout-open .primary-metrics,body.workout-open .secondary-metrics{min-height:0;margin:0;gap:6px;grid-template-rows:minmax(0,1fr)}
+  body.workout-open .secondary-metrics{grid-template-rows:minmax(0,1fr) minmax(0,.7fr)}
+  body.workout-open .ride-metric{min-height:0;padding:5px 4px;grid-template-rows:12px minmax(25px,1fr) 28px 18px minmax(0,1fr);gap:1px}
+  body.workout-open .ride-metric[data-metric=speed],body.workout-open .ride-metric[data-metric=distance],body.workout-open .ride-metric[data-metric=calories]{grid-template-rows:12px minmax(25px,1fr) 0 18px minmax(0,1fr)}
+  body.workout-open .ride-metric.has-zone-indicator{padding-right:25px}
+  body.workout-open .metric-actual-row,body.workout-open .ride-metric-value{height:100%;min-height:0}
+  body.workout-open .ride-metric-value{font-size:clamp(20px,2.2vw,34px)}
+  body.workout-open .ride-metric h3{font-size:9px;letter-spacing:0;line-height:12px}
+  body.workout-open .metric-target{font-size:10px;line-height:14px;height:28px;min-height:0}
+  body.workout-open .ride-metric-unit{height:18px;font-size:10px;line-height:9px}
+  body.workout-open .ride-metric-detail{font-size:10px;line-height:11px;margin:0}
+  body.workout-open .metrics-note{font-size:9px;line-height:1.2;margin:5px 0 0;flex-shrink:0}
+  body.workout-open .route-panel{grid-column:3;grid-row:2;display:flex;flex-direction:column;min-height:0;min-width:0}
+  body.workout-open .schedule{flex:1;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain}
+  body.workout-open .schedule button,body.workout-open .schedule .schedule-head{grid-template-columns:minmax(0,1fr) 54px repeat(var(--target-columns,0),minmax(0,.65fr));min-width:0;gap:3px;padding:8px 5px;font-size:11px}
+  body.workout-open .schedule .schedule-head{font-size:8px}
+  body.workout-open .schedule button strong{overflow-wrap:anywhere}
+  body.workout-open .schedule button.active{padding-left:1px}
+  body.workout-open .schedule-target{font-size:10px}
+  body.workout-open .schedule-heading{margin:0 0 5px;gap:5px}
+  body.workout-open .schedule-heading h2{font-size:16px}
+  body.workout-open .route-stats{gap:5px}
+  body.workout-open .route-stats strong{font-size:14px}
+  body.workout-open .timeline{height:28px;flex-shrink:0;margin:2px 0 5px}
+  body.workout-open .terrain-view{min-height:0}
+  body.workout-open #profile-status:empty{display:none}
+  /* A completed ride can contain recording actions; keep those in the viewport. */
+  body.workout-completed #player{display:block;overflow:auto}
+}
+
+.bike-connection{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;margin:0 0 12px;font-size:12px}
+.bike-connection>span:first-child{color:var(--rest);flex:1;min-width:140px}
+.bike-connection button{min-height:40px;padding:8px 12px;font-size:12px}
+.bike-browser-address{flex-basis:100%;color:var(--muted);overflow-wrap:anywhere}
+#bike-browser-url{color:var(--text);font-variant-numeric:tabular-nums}
+@media(min-width:800px) and (min-height:480px){
+  body.workout-open #player{grid-template-rows:32px auto minmax(0,1fr)}
+  body.workout-open .bike-connection{grid-column:1/-1;grid-row:2;margin:0;min-width:0}
+  body.workout-open .bike-browser-address{flex-basis:auto;max-width:55%}
+  body.workout-open .player-grid,body.workout-open .telemetry-panel,body.workout-open .route-panel{grid-row:3}
+}

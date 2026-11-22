@@ -1,4 +1,5 @@
 import http from 'node:http';
+import os from 'node:os';
 import { readFile, readdir } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
@@ -141,7 +142,8 @@ export function createAppServer(base = root, { dataRoot = base, helperPath = nul
         if (!body || typeof body.client !== 'string' || !/^[a-zA-Z0-9-]{8,80}$/.test(body.client)) return send(400, '{}');
         try {
           if (body.rideId != null && !validRideId(body.rideId)) return send(400, '{}');
-          if (body.action === 'start') await bike.start(body.client, body);
+          if (body.action === 'connect') await bike.connect(body.client);
+          else if (body.action === 'start') await bike.start(body.client, body);
           else if (body.action === 'stop') bike.stop(body.client, body);
           else if (['average', 'address', 'timing'].includes(body.action)) bike.configure(body.client, body);
           else return send(400, '{}');
@@ -149,6 +151,12 @@ export function createAppServer(base = root, { dataRoot = base, helperPath = nul
         } catch (error) { return send(error.status || 500, JSON.stringify({ error: error.message, code: error.code })); }
       }
       if (!['GET', 'HEAD'].includes(req.method)) return send(405, JSON.stringify({ error: 'Read-only server.' }));
+      if (url.pathname === '/api/server-addresses') {
+        const address = server.address();
+        const urls = typeof address === 'object' && address ? [...new Set(Object.values(os.networkInterfaces()).flat()
+          .filter(i => i?.family === 'IPv4' && !i.internal).map(i => `http://${i.address}:${address.port}`))] : [];
+        return send(200, JSON.stringify({ urls }));
+      }
       if (url.pathname === '/api/workouts') {
         return send(200, JSON.stringify(await catalog()));
       }

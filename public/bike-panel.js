@@ -22,6 +22,11 @@ export class BikePanel {
     this.profile = this.profileControls.profile;
     this.seconds = this.profile.preferences.powerAverageSeconds; this.unit = this.profile.preferences.speedUnit;
     this.status = document.getElementById('bike-status'); this.cards = [];
+    this.connectButton = document.getElementById('bike-connect-now');
+    this.connectButton.onclick = () => this.connect();
+    fetch('/api/server-addresses').then(r => { if (!r.ok) throw Error(); return r.json(); }).then(({urls}) => {
+      document.getElementById('bike-browser-url').textContent = urls.length ? urls.join(' · ') : 'No LAN address found · connect the Mac to Wi-Fi';
+    }).catch(() => { document.getElementById('bike-browser-url').textContent = 'Address unavailable · check the desktop app'; });
     const grid = document.getElementById('ride-metrics');
     const primary = node('div', null, 'primary-metrics'), secondary = node('div', null, 'secondary-metrics');
     grid.append(primary, secondary);
@@ -74,10 +79,15 @@ export class BikePanel {
   async ensureSession() {
     if (this.posting || !this.desired) return;
     this.posting = true; const rideId=this.rideId;
-    try { if (await this.command('start', {name:this.workoutName,description:this.workoutDescription?.slice(0,800),virtualRoute:this.virtualRoute,routeOffsetKm:this.routeOffsetKm}) && this.desired && this.rideId===rideId) { await this.command('average', { seconds: this.seconds }); if (this.desired && this.rideId===rideId) await this.command('timing', { recording: this.recording, remainingSeconds:this.remainingSeconds }); } }
-    finally { this.posting = false; }
+    try { if (await this.command(this.rideId ? 'start' : 'connect', {name:this.workoutName,description:this.workoutDescription?.slice(0,800),virtualRoute:this.virtualRoute,routeOffsetKm:this.routeOffsetKm}) && this.desired && this.rideId===rideId) { await this.command('average', { seconds: this.seconds }); if (this.desired && this.rideId===rideId) await this.command('timing', { recording: this.recording, remainingSeconds:this.remainingSeconds }); } }
+    finally { this.posting = false; if (this.desired && this.rideId !== rideId) queueMicrotask(() => this.ensureSession()); }
   }
-  begin() { if (!this.desired) { this.rideId ||= globalThis.crypto?.randomUUID?.() || `ride-${Date.now()}-${Math.random().toString(16).slice(2)}`; document.getElementById('ride-recording-result').dataset.rideId=this.rideId; this.desired = true; this.noBikeOffered = false; this.ensureSession(); } }
+  connect() {
+    this.desired = true; this.noBikeOffered = false;
+    this.snapshot.status = 'Looking for bike… Allow Local Network access on the Mac if prompted.';
+    this.render(); this.ensureSession();
+  }
+  begin() { if (!this.desired || !this.rideId) { this.rideId ||= globalThis.crypto?.randomUUID?.() || `ride-${Date.now()}-${Math.random().toString(16).slice(2)}`; document.getElementById('ride-recording-result').dataset.rideId=this.rideId; this.desired = true; this.noBikeOffered = false; this.ensureSession(); } }
   end(reason = 'ended') { this.desired = false; this.recording = false; document.getElementById('bike-dialog').close(); const result=this.command('stop', {reason}); this.rideId=null; return result; }
   setStep(step, index) {
     if (this.step !== step) {
@@ -99,6 +109,9 @@ export class BikePanel {
     const stale = reading => reading.value == null ? 'Waiting for bike data' : reading.fresh ? '' : 'Last reading · reconnecting';
     const diagnostics = this.snapshot.notificationCount;
     this.status.textContent = (this.snapshot.recording?.error || this.snapshot.status) + (Number.isFinite(diagnostics) ? ` · ${diagnostics} bike updates` : '');
+    document.getElementById('timer-bike-status').textContent = this.snapshot.connected ? 'Bike connected' : this.snapshot.status;
+    this.connectButton.disabled = this.snapshot.connected || this.posting;
+    this.connectButton.textContent = this.snapshot.connected ? 'Connected' : this.desired ? 'Retry connection' : 'Connect now';
     const avg = this.snapshot.averagingSeconds === this.seconds && Number.isFinite(this.snapshot.powerAverage) ? this.snapshot.powerAverage : power.value;
     for (const { key, card, value, unit, detail, arrow, targetLabel, indicator } of this.cards) {
       const reading = ({ speed, cadence, power, hr, resistance })[key];
