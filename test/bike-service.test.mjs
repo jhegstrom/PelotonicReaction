@@ -44,3 +44,41 @@ test('SSE sends snapshots and disconnect cleanup removes subscribers', async t =
   assert.match(new TextDecoder().decode((await reader.read()).value), /222/);
   abort.abort();
 });
+
+test('connect preflight does not record and promotes to a workout without disconnecting', async t => {
+  const bike = new BikeService('.', { platform: 'test' });
+  t.after(() => bike.close());
+  const starts = [];
+  bike.recorder = { store: { rides: new Map() }, safe: fn => fn(), begin: (...args) => starts.push(args), status: () => ({}), finish: () => {} };
+  await bike.connect('screen-111');
+  assert.equal(bike.owner, 'screen-111');
+  assert.equal(bike.rideId, undefined);
+  assert.equal(bike.stats.running, false);
+  assert.equal(starts.length, 0);
+  await assert.rejects(bike.connect('screen-222'), /Another screen/);
+  const before = bike.stats;
+  await bike.start('screen-111', { rideId: 'preflight-ride-001', name: 'Low impact' });
+  assert.equal(starts.length, 1);
+  assert.equal(starts[0][0], 'preflight-ride-001');
+  assert.notEqual(bike.stats, before, 'preflight samples must not contribute to workout totals');
+  const stats = bike.stats;
+  await bike.connect('screen-111');
+  assert.equal(bike.rideId, 'preflight-ride-001');
+  assert.equal(bike.stats, stats);
+  assert.equal(starts.length, 1);
+});
+
+test('server exposes LAN URLs with the actual bound port and accepts connection preflight', async t => {
+  const bike = new BikeService('.', { platform: 'test' });
+  const server = createAppServer(undefined, { bike, rides: { rides: new Map(), list: () => [] } });
+  server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  t.after(() => { server.closeAllConnections(); return new Promise(resolve => server.close(resolve)); });
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const { urls } = await (await fetch(base + '/api/server-addresses')).json();
+  for (const url of urls) { assert.equal(new URL(url).port, String(server.address().port)); assert.notEqual(new URL(url).hostname, '127.0.0.1'); }
+  const response = await fetch(base + '/api/bike/session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ client: 'screen-111', action: 'connect' }) });
+  assert.equal(response.status, 200);
+  assert.equal(bike.owner, 'screen-111');
+  assert.equal(bike.rideId, undefined);
+  assert.equal(bike.stats.running, false);
+});

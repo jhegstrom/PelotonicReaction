@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "id": "30-minute-low-impact",
+  "name": "30-minute low impact",
+  "description": "Exactly 30 minutes, seated throughout. Five-minute warm-up: 1 minute in power zone 1, three 30-second spin-ups to 110 RPM each followed by 30 seconds easy, then 1 minute building to power zone 3. Repeat 5 minutes in HR zone 2 and 1 minute in HR zone 3 four times, then finish with 1 minute in HR zone 2. HR targets use the rider profile zones. No separate cooldown.",
+  "tags": [
+    "Low Impact",
+    "Heart Rate Zone"
+  ],
+  "steps": [
+    {
+      "label": "Easy start · Power Zone 1",
+      "kind": "warmup",
+      "durationSeconds": 60,
+      "posture": "seated",
+      "powerZone": 1,
+      "primaryTargets": [
+        "watts"
+      ]
+    },
+    {
+      "label": "Spin-up",
+      "repeat": 3,
+      "steps": [
+        {
+          "label": "Spin up to 110 RPM",
+          "kind": "warmup",
+          "durationSeconds": 30,
+          "posture": "seated",
+          "cadence": 110,
+          "primaryTargets": [
+            "cadence"
+          ],
+          "cue": "Use light resistance and stay seated."
+        },
+        {
+          "label": "Easy spin recovery",
+          "kind": "warmup",
+          "durationSeconds": 30,
+          "posture": "seated",
+          "primaryTargets": null
+        }
+      ]
+    },
+    {
+      "label": "Build to Power Zone 3",
+      "kind": "warmup",
+      "durationSeconds": 60,
+      "posture": "seated",
+      "powerZone": 3,
+      "primaryTargets": [
+        "watts"
+      ],
+      "cue": "Gradually increase effort to reach power zone 3 by the end of the warm-up."
+    },
+    {
+      "label": "HR interval",
+      "repeat": 4,
+      "steps": [
+        {
+          "label": "HR Zone 2",
+          "kind": "work",
+          "durationSeconds": 300,
+          "posture": "seated",
+          "heartRateZone": 2,
+          "primaryTargets": [
+            "heartRate"
+          ]
+        },
+        {
+          "label": "HR Zone 3",
+          "kind": "work",
+          "durationSeconds": 60,
+          "posture": "seated",
+          "heartRateZone": 3,
+          "primaryTargets": [
+            "heartRate"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Final HR Zone 2 · finish at 30:00",
+      "kind": "work",
+      "durationSeconds": 60,
+      "posture": "seated",
+      "heartRateZone": 2,
+      "primaryTargets": [
+        "heartRate"
+      ],
+      "cue": "Shortened final interval to finish at exactly 30 minutes."
+    }
+  ]
+}

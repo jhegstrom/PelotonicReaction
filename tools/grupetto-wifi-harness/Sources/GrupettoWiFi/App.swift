@@ -12,6 +12,7 @@ final class Monitor: ObservableObject {
     @Published var active = false
     @Published var scanning = false
     @Published var showConnectionDialog = false
+    private var networkAccessBlocked = false
     private var wantsConnection = false
     private var target: NWEndpoint?
     private let defaults: UserDefaults
@@ -60,7 +61,7 @@ final class Monitor: ObservableObject {
         guard wantsConnection else { return }
         let now = Date()
         if browser == nil && now >= browserRetryAt { scan() }
-        if connection == nil, now >= retryAt {
+        if !networkAccessBlocked, connection == nil, now >= retryAt {
             if let target { open(target) }
             else { chooseBike() }
         }
@@ -76,7 +77,7 @@ final class Monitor: ObservableObject {
         }
     }
     private func chooseBike() {
-        guard wantsConnection, target == nil, connection == nil, Date() >= retryAt else { return }
+        guard wantsConnection, !networkAccessBlocked, target == nil, connection == nil, Date() >= retryAt else { return }
         let candidate = devices.first { endpoint in
             guard case .service(let name, _, _, _) = endpoint else { return false }
             if let preferredName { return name == preferredName }
@@ -93,6 +94,16 @@ final class Monitor: ObservableObject {
         b.stateUpdateHandler = { [weak self, weak b] state in
             guard let self, self.browser === b else { return }
             self.note("Discovery: \(state)")
+            if case .ready = state { self.networkAccessBlocked = false }
+            // DNSService's PolicyDenied means macOS Local Network privacy blocked discovery.
+            if case .waiting(let error) = state, case .dns(let code) = error, code == -65570 {
+                self.networkAccessBlocked = true
+                self.status = "Local Network access blocked. On the Mac, enable PelotonicReaction in System Settings > Privacy & Security > Local Network."
+                self.note(self.status)
+                // Recreate the browser periodically so granting access works without restarting a ride.
+                self.browser?.cancel(); self.browser = nil; self.scanning = false
+                self.browserRetryAt = Date().addingTimeInterval(5)
+            }
             if case .failed = state {
                 self.browser?.cancel(); self.browser = nil; self.scanning = false
                 self.browserRetryAt = Date().addingTimeInterval(3)
