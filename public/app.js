@@ -1,3 +1,4 @@
+import { segmentStyle, targetVisual } from './workout-visuals.js';
 import { programKey } from './tag-profile.js';
 import { distanceUnit, formatRouteLabel } from './measurement-units.js';
 import { TerrainView } from './terrain.js';
@@ -60,7 +61,9 @@ function announce(interval) {
   const phrase = `${formatRouteLabel(interval.label,bikePanel.unit)}. ${interval.posture ? interval.posture + '.' : ''} ${interval.powerZone != null ? 'Power zone ' + interval.powerZone + '.' : ''} ${interval.cadence == null ? '' : `${displayTarget(interval.cadence)} RPM.`} ${interval.resistance == null ? '' : `Resistance ${displayTarget(interval.resistance)}.`} ${interval.watts == null ? '' : `${Math.round(interval.watts)} watts.`}`;
   $('announcement').textContent = phrase; speak(phrase);
 }
-function height(step) { return `${Math.max(14, Math.min(100, step.powerZone != null ? 20 + step.powerZone * 10 : 14 + (step.watts || 70) / 4))}%`; }
+function height(step) { return `${segmentStyle(step,bikePanel.profile).height*100}%`; }
+function colorStep(node,step){const visual=segmentStyle(step,bikePanel.profile);node.style.background=visual.background;node.style.setProperty('--cue',visual.color);}
+
 function renderLibrary() {
   const programs = workoutItems.map(item => item.workout), entries = tagControls.entries();
   selectedTags = selectedTags.filter(id => entries.some(t => t.id === id));
@@ -101,7 +104,7 @@ function showCards(items) {
     if (!tags.children.length) tags.append(el('span', 'Untagged', 'program-tag untagged'));
     card.append(tags, el('h2', w.name), el('p', raw.description || 'Your next workout, one interval at a time.'));
     const profile = el('div', null, 'mini-profile'); profile.setAttribute('aria-hidden', 'true');
-    for (const step of w.intervals) { const bar = el('span', null, step.kind); bar.style.flexGrow = w.completionMetric === 'distance' ? step.distanceMeters : step.durationSeconds; bar.style.height = height(step); profile.append(bar); }
+    for (const step of w.intervals) { const bar = el('span', null, step.kind); bar.style.flexGrow = w.completionMetric === 'distance' ? step.distanceMeters : step.durationSeconds; bar.style.height = height(step); colorStep(bar,step); profile.append(bar); }
     const stats = el('div', null, 'card-stats'); const duration = el('div'); duration.append(el('strong', w.completionMetric === 'distance' ? formatDistance(w.totalDistanceMeters, bikePanel.unit, 1).split(' ')[0] : Math.round(w.totalSeconds / 60)), el('span', w.completionMetric === 'distance' ? ' '+distanceUnit(bikePanel.unit) : ' min')); const count = el('span', `${w.intervals.length} blocks`); stats.append(duration, count);
     const button = el('button', 'Open workout →', 'outline'); button.onclick = () => selectWorkout(raw); const editTags = el('button', 'Edit my tags', 'quiet'); editTags.setAttribute('aria-label', `Edit my tags for ${w.name}`); editTags.disabled = Boolean(tagControls.error); editTags.onclick = () => tagControls.editProgram(raw); card.append(stats, profile, button, editTags);
     if (item.imported) {
@@ -159,7 +162,7 @@ function buildSchedule() {
   $('schedule').dataset.targetColumns=columns.length;
   const head = el('div', null, 'schedule-head'); for (const label of ['BLOCK', distanceMode() ? 'DISTANCE / LEFT' : 'DURATION / LEFT', ...columns.map(c=>c.label)]) head.append(el('span', label)); $('schedule').append(head);
   selected.intervals.forEach((step, index) => {
-    const bar = el('button'); bar.dataset.kind = step.kind; bar.style.flexGrow = distanceMode() ? step.distanceMeters : step.durationSeconds; bar.style.height = height(step); bar.title = `${formatRouteLabel(step.label,bikePanel.unit)} · ${stepLength(step)}`; bar.setAttribute('aria-label', `Go to ${formatRouteLabel(step.label,bikePanel.unit)}`); bar.onclick = () => jump(index); $('timeline').append(bar);
+    const bar = el('button'); bar.dataset.kind = step.kind; bar.style.flexGrow = distanceMode() ? step.distanceMeters : step.durationSeconds; bar.style.height = height(step); colorStep(bar,step); bar.title = `${formatRouteLabel(step.label,bikePanel.unit)} · ${stepLength(step)}`; bar.setAttribute('aria-label', `Go to ${formatRouteLabel(step.label,bikePanel.unit)}`); bar.onclick = () => jump(index); $('timeline').append(bar);
     if (distanceMode()) { bar.disabled = true; bar.title = 'Segments advance by distance traveled'; }
     const row = el('button'); row.disabled = distanceMode(); row.dataset.index = index; row.setAttribute('aria-label', `Go to ${formatRouteLabel(step.label,bikePanel.unit)}, ${stepLength(step)}`);
     const duration = el('span', stepLength(step), 'block-duration');
@@ -170,6 +173,7 @@ function buildSchedule() {
     for(const column of columns){
       const target=scheduleTarget(step,column), cell=el('span',target.text,'schedule-target');
       cell.classList.toggle('schedule-primary',target.primary);
+      if(target.text!=='—'){const visual=targetVisual(step,column.key,bikePanel.profile);cell.style.setProperty('--target-color',visual.color);cell.style.color=visual.color;cell.style.borderBottom=`2px solid ${visual.color}`;}
       cell.title=`${column.label}: ${target.text}${target.primary?' · Primary target':''}`;
       if(target.primary)cell.setAttribute('aria-label',`${column.label}: ${target.text}, primary target`);
       row.append(cell);
@@ -218,9 +222,9 @@ async function toggle() {
   else { bikePanel.begin(); await enableAudio(); clock.start(clock.read() === 0 ? 10 : 0); holdWake(); const p = ridePosition(); if (!clock.countdownRemaining && !p.done && p.index === currentIndex) announce(selected.intervals[p.index]); }
   render(); saveSession();
 }
-let renderedUnit = null;
+let renderedUnit = null, renderedProfile = null;
 function render() {
-  if (renderedUnit !== bikePanel.unit) {renderedUnit=bikePanel.unit;terrainView.setUnits(bikePanel.unit);renderLibrary();if(selected){buildSchedule();currentIndex=-1;$('total-label').textContent=distanceMode()?formatDistance(selected.totalDistanceMeters,bikePanel.unit):formatTime(selected.totalSeconds);}}
+  if (renderedUnit !== bikePanel.unit || renderedProfile !== bikePanel.profile) {renderedUnit=bikePanel.unit;renderedProfile=bikePanel.profile;terrainView.setUnits(bikePanel.unit);renderLibrary();if(selected){buildSchedule();currentIndex=-1;$('total-label').textContent=distanceMode()?formatDistance(selected.totalDistanceMeters,bikePanel.unit):formatTime(selected.totalSeconds);}}
   if (!selected || !clock) return;
   terrainView.setPreviewAllowed(!clock.running && clock.read() === 0 && !bikePanel.desired);
   const previewing = previewDistanceKm != null;
@@ -278,6 +282,7 @@ function render() {
   }
   const step = selected.intervals[p.index], next = selected.intervals[p.index + 1];
   $('stage').dataset.kind = step?.kind || 'cooldown';
+  $('stage').style.setProperty('--cue',segmentStyle(step,bikePanel.profile).color);
   $('phase').textContent = previewing ? (p.done ? 'PREVIEW COMPLETE' : 'PREVIEW · NOT RECORDING') : p.done ? 'COMPLETE' : clock.running ? ({ warmup: 'WARM UP', work: 'WORK', recovery: 'RECOVERY', cooldown: 'COOL DOWN' }[step.kind]) : clock.read() === 0 ? 'READY TO RIDE' : 'PAUSED';
   $('step-count').textContent = `${p.done ? selected.intervals.length : p.index + 1} / ${selected.intervals.length} BLOCKS`;
   $('interval-label').textContent = p.done ? (previewing ? 'Route preview complete' : 'Workout complete. Nice ride.') : formatRouteLabel(step.label,bikePanel.unit);
@@ -302,6 +307,7 @@ function render() {
   $('next-name').textContent = p.done ? (previewing ? 'Preview finished' : 'Time to recover.') : (next ? formatRouteLabel(next.label,bikePanel.unit) : 'Finish line');
   $('next-duration').textContent = next && !p.done ? stepLength(next) : '—';
   document.querySelector('.upcoming').dataset.kind = next?.kind || 'cooldown';
+  document.querySelector('.upcoming').style.setProperty('--cue',segmentStyle(next,bikePanel.profile).color);
   renderPosture($('next-posture'), !p.done ? next : null);
   $('next-instructions').textContent = !p.done ? segmentInstructions(next) : '';
   $('next-targets').replaceChildren();

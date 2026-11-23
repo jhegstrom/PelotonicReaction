@@ -1,5 +1,5 @@
 import { powerZoneRange } from './power-zones.js';
-const colors=['#7a8c9b','#559fe0','#68c58c','#e2ca54','#eb9853','#dd666c','#b17bd6'];
+import { zoneColor } from './workout-palette.js';
 const clamp=n=>Math.max(0,Math.min(1,n));
 export function indicatorZones(profile,key){
   const imported=key==='hr'?profile.strava?.heartRateZones:profile.strava?.powerZones;
@@ -35,7 +35,7 @@ export class ZoneIndicator {
     const zones=indicatorZones(profile,this.key),signature=JSON.stringify(zones),unit=this.key==='hr'?'BPM':'W';
     if(signature!==this.signature){
       this.signature=signature;this.track.replaceChildren();this.bands=zones.map((zone,i)=>{
-        const band=document.createElement('span');band.className='zone-indicator-band';band.style.bottom=`${i/zones.length*100}%`;band.style.height=`${100/zones.length}%`;band.style.backgroundColor=colors[i]||colors.at(-1);
+        const band=document.createElement('span');band.className='zone-indicator-band';band.style.bottom=`${i/zones.length*100}%`;band.style.height=`${100/zones.length}%`;band.style.backgroundColor=zoneColor(i+1,zones.length);
         band.textContent=`${zone.zone}${zone.max===null?'+':''}`;
         band.title=`Zone ${zone.zone}: ${zone.min}${zone.max===null?'+':'–'+(zone.max-1)} ${unit}${zone.max===null?'. Open-ended; the display extends by the previous zone width.':''}`;
         this.track.append(band);return band;
