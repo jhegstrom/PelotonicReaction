@@ -1,3 +1,4 @@
+import { createWorkoutSummary, saveWorkoutSummary } from './workout-summary.js';
 const node=(tag,text)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;return n;};
 const states={local:'Saved on Mac',queued:'Waiting to upload',submitting:'Uploading…',processing:'Processing on Strava…',uploaded:'On Strava',uncertain:'Check Strava before retrying',error:'Upload needs attention',blocked:'Different Strava account'};
 export class RideHistory {
@@ -6,11 +7,48 @@ export class RideHistory {
     try{
       const response=await fetch('/api/rides');if(!response.ok)throw Error();const {rides}=await response.json();
       this.render(document.getElementById('recorded-rides'),rides.slice(0,50));
+      if(this.review)this.updateReview(rides.find(r=>r.id===this.review.id));
       const completed=document.getElementById('ride-recording-result');
       const last=rides.find(r=>r.id===completed.dataset.rideId&&r.state!=='recording');
       completed.hidden=!last;this.render(completed,last?[last]:[]);
       document.getElementById('ride-history-message').textContent='';
     }catch{document.getElementById('ride-history-message').textContent='Saved rides are unavailable. Check the Mac server.';}
+  }
+  updateReview(ride){
+    if(!ride||!this.review)return;
+    const {status,link,waiting}=this.review;
+    status.textContent=states[ride.upload?.state]||'Saved on Mac';
+    const uploaded=ride.upload?.state==='uploaded'&&/^\d+$/.test(ride.upload.activityId);
+    link.hidden=!uploaded;waiting.hidden=uploaded;
+    if(uploaded)link.href=`https://www.strava.com/activities/${ride.upload.activityId}`;
+  }
+  openReview(ride){
+    if(this.review){this.review.dialog.close();}
+    const dialog=node('dialog');dialog.className='ride-share-dialog';
+    const heading=node('h2','Share your ride');heading.id='ride-share-title';dialog.setAttribute('aria-labelledby',heading.id);
+    const close=node('button','Close');close.className='outline';close.onclick=()=>dialog.close();
+    const status=node('p');status.setAttribute('role','status');
+    const preview=node('img');preview.alt='Workout summary with segment targets and recorded heart rate';preview.hidden=true;
+    const label=node('label'),toggle=node('input');toggle.type='checkbox';label.append(toggle,document.createTextNode(' Include power line'));
+    const message=node('p','Preparing your summary…');message.setAttribute('role','status');
+    const save=node('button','1. Download summary PNG');save.disabled=true;
+    const link=node('a','2. Open ride in Strava ↗');link.className='ride-download';link.target='_blank';link.rel='noopener noreferrer';link.hidden=true;
+    const instructions=node('p','After downloading, open the ride in Strava, choose Edit / Add Photos, select the summary PNG from Downloads, and save.');
+    const waiting=node('p','If the ride has not uploaded yet, close this preview and use Upload to Strava on the ride. This link appears when Strava finishes processing.');
+    dialog.append(heading,close,status,preview,label,message,save,link,instructions,waiting);document.body.append(dialog);
+    const review={id:ride.id,dialog,status,link,waiting,url:null,version:0};this.review=review;this.updateReview(ride);
+    dialog.addEventListener('close',()=>{review.version++;if(review.url)URL.revokeObjectURL(review.url);if(this.review===review)this.review=null;dialog.remove();});
+    const render=async()=>{
+      const version=++review.version;save.disabled=true;message.textContent='Preparing your summary…';
+      try{
+        const blob=await createWorkoutSummary(ride.id,{power:toggle.checked});
+        if(version!==review.version)return;
+        const url=URL.createObjectURL(blob);if(review.url)URL.revokeObjectURL(review.url);review.url=url;
+        preview.src=url;preview.hidden=false;save.disabled=false;message.textContent='Your image is ready.';
+        save.onclick=()=>{saveWorkoutSummary(blob,ride.id);message.textContent='Summary downloaded. Open your Strava ride to attach it.';};
+      }catch(e){if(version===review.version)message.textContent=e.message;}
+    };
+    toggle.onchange=render;dialog.showModal();render();
   }
   render(container,rides){
     const expanded=new Set([...container.querySelectorAll('article')].filter(row=>row.querySelector('details')?.open).map(row=>row.dataset.rideId));
@@ -26,6 +64,9 @@ export class RideHistory {
       if(ride.upload?.message)status.append(document.createTextNode(' · '+ride.upload.message));info.append(status);
       if(ride.description){const details=node('details');details.open=expanded.has(ride.id);details.append(node('summary','Strava description'),node('pre',ride.description));info.append(details);}
       row.append(info);
+      if(ride.downloadable){
+        const controls=node('div'),review=node('button','Review & share ride');review.className='outline';review.onclick=()=>this.openReview(ride);controls.append(review,node('p','Preview your summary and add it to Strava.'));row.append(controls);
+      }
       if(ride.downloadable){const link=node('a','Download FIT');link.className='outline ride-download';link.href=`/api/rides/${encodeURIComponent(ride.id)}/fit`;link.setAttribute('download','');row.append(link);}
       if(ride.upload?.state==='uploaded'&&/^\d+$/.test(ride.upload.activityId)){
         const link=node('a','View on Strava ↗');link.href=`https://www.strava.com/activities/${ride.upload.activityId}`;link.target='_blank';link.rel='noopener noreferrer';row.append(link);

@@ -250,3 +250,21 @@ HR and output cards include fixed vertical zone indicators. Colored, equal-heigh
 Zone indicators mark active target zones with gold outlines and diagonal hatching. The current zone retains its white outline and live position line. Numeric targets select their containing profile zone; target ranges can highlight multiple zones. Target highlighting clears when a block has no target or the workout completes.
 
 Imported workouts have **Rename** and **Delete** controls on their library cards. Changes are saved on the host and survive refresh/restart. System workouts are read-only. Renaming preserves workout identity and user tags; deleting a workout keeps completed ride recordings.
+
+### Workout colors and display ranges
+
+Edit `public/workout-palette.js` to change the shared workout palette. Its seven
+`levels` run from silver through blue, cyan, green, yellow, orange, and red.
+`hrLevels` selects the five HR colors from that palette; seven-zone power uses
+all seven. Imported zone sets with other counts select evenly spaced colors.
+`ranges` defines the linear cadence (50–120 rpm) and resistance (25–80) display
+ranges. Values outside these ranges cap visually without changing workout data.
+`traces` defines the fixed HR and power line colors, separate from intensity colors.
+Changes apply after reloading the app and regenerating summary images.
+
+`public/workout-visuals.js` shares target scaling and color selection across the
+library previews, timeline, schedule, live metrics, and post-ride summaries.
+Cadence/resistance colors indicate position in their display range, not measured
+physiological effort. Paired cadence/resistance summary bars share their segment's
+width and retain independent heights and labels. Unknown targets use a neutral
+color. Segment roles remain text labels; they do not override intensity colors.

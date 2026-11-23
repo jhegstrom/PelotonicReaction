@@ -77,10 +77,15 @@ export function createAppServer(base = root, { dataRoot = base, helperPath = nul
         } catch(error) {return send(error.status||400,JSON.stringify({error:error.message}));}
       }
       if (url.pathname === '/api/rides' && req.method === 'GET') return send(200, JSON.stringify({ rides: rides.list() }));
-      const rideRoute = url.pathname.match(/^\/api\/rides\/([a-zA-Z0-9-]{8,80})\/(fit|upload)$/);
+      const rideRoute = url.pathname.match(/^\/api\/rides\/([a-zA-Z0-9-]{8,80})\/(fit|upload|summary)$/);
       if (rideRoute) {
         const [,id,action] = rideRoute;
         try {
+          if(action === 'summary' && req.method === 'GET') {
+            const ride=rides.get(id);
+            if(ride.state==='recording') return send(409,JSON.stringify({error:'Finish the ride first.'}));
+            return send(200,JSON.stringify({ride,entries:rides.entries(id)}));
+          }
           if(action === 'fit' && ['GET','HEAD'].includes(req.method)) {
             res.setHeader('Content-Disposition', `attachment; filename="pelotonic-${id}.fit"`);
             return send(200,rides.fit(id),'application/octet-stream');

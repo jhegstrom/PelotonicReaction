@@ -1,3 +1,4 @@
+import { valueVisual, targetVisual } from './workout-visuals.js';
 import { ZoneIndicator } from './zone-indicator.js';
 import { ProfileControls } from './profile-controls.js';
 import { decimalZoneAt, zoneRangeLabel } from './rider-profile.js';
@@ -79,7 +80,7 @@ export class BikePanel {
   async ensureSession() {
     if (this.posting || !this.desired) return;
     this.posting = true; const rideId=this.rideId;
-    try { if (await this.command(this.rideId ? 'start' : 'connect', {name:this.workoutName,description:this.workoutDescription?.slice(0,800),virtualRoute:this.virtualRoute,routeOffsetKm:this.routeOffsetKm}) && this.desired && this.rideId===rideId) { await this.command('average', { seconds: this.seconds }); if (this.desired && this.rideId===rideId) await this.command('timing', { recording: this.recording, remainingSeconds:this.remainingSeconds }); } }
+    try { if (await this.command(this.rideId ? 'start' : 'connect', {summaryProfile:this.profile,name:this.workoutName,description:this.workoutDescription?.slice(0,800),virtualRoute:this.virtualRoute,routeOffsetKm:this.routeOffsetKm}) && this.desired && this.rideId===rideId) { await this.command('average', { seconds: this.seconds }); if (this.desired && this.rideId===rideId) await this.command('timing', { recording: this.recording, remainingSeconds:this.remainingSeconds }); } }
     finally { this.posting = false; if (this.desired && this.rideId !== rideId) queueMicrotask(() => this.ensureSession()); }
   }
   connect() {
@@ -91,7 +92,7 @@ export class BikePanel {
   end(reason = 'ended') { this.desired = false; this.recording = false; document.getElementById('bike-dialog').close(); const result=this.command('stop', {reason}); this.rideId=null; return result; }
   setStep(step, index) {
     if (this.step !== step) {
-      this.step = step; this.block=step?{index,label:step.label.slice(0,320)}:null;this.corrections.clear();
+      this.step = step; this.block=step?{...step,index,label:step.label.slice(0,320)}:null;this.corrections.clear();
       if(this.desired)this.command('timing',{recording:this.recording,remainingSeconds:this.remainingSeconds});
     }
   }
@@ -152,6 +153,9 @@ export class BikePanel {
         const targetText = target && key === 'hr' && this.profile.preferences.heartRateDisplay === 'zone' ? zoneRangeLabel([target.low, target.high], this.profile) : numericTarget;
         targetLabel.textContent = target ? `/ ${target?.zone ? `Z${target.zone} · ` : ''}${targetText} ${primary ? 'primary' : 'reference'}` : key === 'power' && this.step?.powerZone != null ? `/ Z${this.step.powerZone} · ${this.profile.strava?.powerZones?.length ? 'zone unavailable' : 'set FTP'}` : key === 'hr' && this.step?.heartRateZone != null ? `/ Z${this.step.heartRateZone} · zone unavailable` : 'No target';
         card.dataset.primary = String(primary);
+        const visual=valueVisual(actual,key,this.profile);
+        card.style.setProperty('--metric-zone',reading.fresh?visual.color:'var(--muted)');
+        targetLabel.style.color=targetVisual(this.step,key,this.profile).color;
         targetLabel.title = target && key === 'hr' ? `${numericTarget} BPM target` : '';
         // HR comparisons always use BPM, even when the displayed number is a zone.
         if (target && key === 'hr' && this.profile.preferences.heartRateDisplay === 'zone') detail.textContent += ` · target ${numericTarget} BPM`;
