@@ -268,3 +268,24 @@ Cadence/resistance colors indicate position in their display range, not measured
 physiological effort. Paired cadence/resistance summary bars share their segment's
 width and retain independent heights and labels. Unknown targets use a neutral
 color. Segment roles remain text labels; they do not override intensity colors.
+
+### Recording continuity
+
+A ride keeps one recording ID, journal, and server-side `.fit` path across pauses,
+bike disconnects, browser-session timeouts, and server restarts. An interrupted
+local ride can resume by its original ID; the recorder appends to its journal and
+rebuilds the same FIT file, restoring cumulative distance, energy, coverage, and
+segment history. Missing sensor intervals contribute no estimated distance or
+calories, and paused time contributes no active time.
+
+The server atomically replaces a complete FIT checkpoint after the first sample,
+every 15 seconds while recording, on pause, and when the bike disconnects. Browser
+timeouts and server shutdown finalize interrupted rides; startup recovery rebuilds
+the FIT from the journal after an unclean shutdown. Checkpoints close the exported
+FIT timer without stopping the live recording journal. A ride that never resumes
+therefore still has a valid partial FIT. Valid file structure does not guarantee
+Strava will accept a ride with insufficient sensor data.
+
+Completed/explicitly ended rides and rides already queued or submitted to Strava
+cannot be automatically reopened. Reconnect errors never create a new recording
+ID. Cancellation with save/post/discard choices is not implemented yet.

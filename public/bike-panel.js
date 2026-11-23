@@ -73,7 +73,7 @@ export class BikePanel {
   async postCommand(action, body) {
     try {
       const response = await fetch('/api/bike/session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: ['stop','timing'].includes(action) });
-      if (!response.ok) { const data = await response.json(); this.snapshot.status = data.error || 'Bike connection retrying…'; if(data.code==='recording-ended'&&action==='start'&&this.rideId===body.rideId){this.routeOffsetKm=this.routeDistanceKm || this.routeOffsetKm || 0;this.rideId=globalThis.crypto?.randomUUID?.()||`ride-${Date.now()}-${Math.random().toString(16).slice(2)}`; document.getElementById('ride-recording-result').dataset.rideId=this.rideId;} return false; }
+      if (!response.ok) { const data = await response.json(); this.snapshot.status = data.error || 'Bike connection retrying…'; if(data.code==='recording-ended'&&action==='start'&&this.rideId===body.rideId){this.desired=false;this.recording=false;this.snapshot.recording={...this.snapshot.recording,error:data.error};} return false; }
       return true;
     } catch { this.snapshot.status = 'Bike connection retrying…'; return false; }
   }
