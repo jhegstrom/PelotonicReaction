@@ -1,6 +1,9 @@
 const $=id=>document.getElementById(id);
 function render(state){
   if(!state)return;
+  const build=state.buildInfo;
+  $('version').textContent=build?`Version ${build.version} · Build ${build.buildNumber||'development'} · ${build.commit?.slice(0,8)||'commit unavailable'}${build.dirty?' · modified':''}`:'';
+  if(build?.builtAt)$('version').title=`Built ${build.builtAt}`;
   $('status').textContent=state.message;$('open').disabled=!state.ready;
   $('addresses').replaceChildren();
   for(const url of state.urls.slice(1)){const item=document.createElement('li');item.textContent=url;$('addresses').append(item);}

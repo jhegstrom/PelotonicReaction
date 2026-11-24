@@ -66,3 +66,31 @@ Before starting the timer, use **Connect now** on the workout screen to discover
 If discovery reports blocked access, enable PelotonicReaction in **System Settings → Privacy & Security → Local Network**. Discovery retries after permission is granted. The app cannot grant this permission itself. The parent app already declares its usage description and Bonjour service; its Chromium renderer permission handler does not control native Network.framework discovery.
 
 Ad-hoc signatures used by local builds do not give macOS a reliable identity across rebuilt applications. For persistent permission identity, distribute a Developer ID signed and notarized build using the existing signed-release configuration. See [Apple TN3179](https://developer.apple.com/documentation/technotes/tn3179-understanding-local-network-privacy). Actual consent and recovery must be verified with an installed application and bike.
+
+## Release version and build identity
+
+`package.json` is the source of truth for the release version; `package-lock.json`
+tracks the same value. A Git tag or GitHub Release title does not change these
+files. Before the next release, bump the repository version, commit and merge it,
+then create the matching `v<version>` tag. For example:
+
+```sh
+npm version patch --no-git-tag-version
+```
+
+This updates both package files without making a commit or Git tag. Tagged GitHub
+builds now fail early if the tag and package version differ.
+
+Packaging generates `build-info.json` in the staging directory and includes it
+in the app. It contains the release version, Git commit, modified-source flag,
+UTC build time, and numeric build number. GitHub Actions uses `GITHUB_RUN_NUMBER`;
+local builds use the Git commit count. Commit and build time distinguish builds
+when those counters differ between environments. The numeric build number is also
+passed to Electron's native bundle build-version setting.
+
+The running server reports this metadata at `/api/version` (for example,
+`http://localhost:8080/api/version`). The browser footer, Mac launcher, About panel,
+and `server.started` log event also display it. An installed build reads its
+embedded metadata, not the current checkout or rider-data folder. Source runs
+report the current commit/modified state without claiming a packaged build time.
+Version/build display changes require rebuilding and reinstalling the app.

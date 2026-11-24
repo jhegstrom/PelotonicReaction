@@ -1,3 +1,4 @@
+import { readBuildInfo } from './lib/build-info.mjs';
 import { RideSummaries } from './lib/ride-summaries.mjs';
 import { EventLogger } from './lib/event-log.mjs';
 import http from 'node:http';
@@ -17,6 +18,7 @@ import { programKey } from './public/tag-profile.js';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml' };
 export function createAppServer(base = root, { dataRoot = base, helperPath = null, workoutsRoot = path.join(base, 'workouts'), bike, logger = new EventLogger(dataRoot), strava = new StravaService(dataRoot,{logger}), rides = new RideStore(dataRoot,{logger}) } = {}) {
+  const buildInfo=readBuildInfo(base);
   const imports=new WorkoutImports(dataRoot,{logger});
   async function catalog() {
     const {workouts,errors}=await imports.list();
@@ -169,6 +171,7 @@ export function createAppServer(base = root, { dataRoot = base, helperPath = nul
         } catch (error) {logger.event(error.status&&error.status<500?'WARN':'ERROR','bike.command_failed',{action:body.action,rideId:body.rideId,error});return send(error.status || 500, JSON.stringify({ error: error.message, code: error.code })); }
       }
       if (!['GET', 'HEAD'].includes(req.method)) return send(405, JSON.stringify({ error: 'Read-only server.' }));
+      if(url.pathname==='/api/version')return send(200,JSON.stringify(buildInfo));
       if (url.pathname === '/api/server-addresses') {
         const address = server.address();
         const urls = typeof address === 'object' && address ? [...new Set(Object.values(os.networkInterfaces()).flat()
@@ -188,7 +191,7 @@ export function createAppServer(base = root, { dataRoot = base, helperPath = nul
     } catch(error) { logger.event('ERROR','server.request_failed',{method:req.method,path:route,error});return send(500, JSON.stringify({ error: 'Unable to load this request.' })); }
   });
   server.logger=logger;server.summaries=summaries;summaries.recover();
-  server.on('listening',()=>logger.event('INFO','server.started',{address:server.address(),logFile:logger.file}));
+  server.on('listening',()=>logger.event('INFO','server.started',{address:server.address(),logFile:logger.file,buildInfo}));
   server.on('error',error=>logger.event('ERROR','server.error',{error}));
   server.on('close', () => { bike.close(); uploads.close();logger.event('INFO','server.stopped'); });
   return server;
