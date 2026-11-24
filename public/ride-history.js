@@ -1,4 +1,4 @@
-import { createWorkoutSummary, saveWorkoutSummary } from './workout-summary.js';
+import { workoutSummaryUrl } from './workout-summary.js';
 const node=(tag,text)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;return n;};
 const states={local:'Saved on Mac',queued:'Waiting to upload',submitting:'Uploading…',processing:'Processing on Strava…',uploaded:'On Strava',uncertain:'Check Strava before retrying',error:'Upload needs attention',blocked:'Different Strava account'};
 export class RideHistory {
@@ -28,27 +28,23 @@ export class RideHistory {
     const heading=node('h2','Share your ride');heading.id='ride-share-title';dialog.setAttribute('aria-labelledby',heading.id);
     const close=node('button','Close');close.className='outline';close.onclick=()=>dialog.close();
     const status=node('p');status.setAttribute('role','status');
-    const preview=node('img');preview.alt='Workout summary with segment targets and recorded heart rate';preview.hidden=true;
-    const label=node('label'),toggle=node('input');toggle.type='checkbox';label.append(toggle,document.createTextNode(' Include power line'));
+    const preview=node('img');preview.alt='Workout summary with segment targets and recorded heart rate and power';preview.hidden=true;
     const message=node('p','Preparing your summary…');message.setAttribute('role','status');
-    const save=node('button','1. Download summary PNG');save.disabled=true;
+    const save=node('a','1. Download summary PNG');save.className='ride-download';save.setAttribute('download','');save.hidden=true;
     const link=node('a','2. Open ride in Strava ↗');link.className='ride-download';link.target='_blank';link.rel='noopener noreferrer';link.hidden=true;
     const instructions=node('p','After downloading, open the ride in Strava, choose Edit / Add Photos, select the summary PNG from Downloads, and save.');
     const waiting=node('p','If the ride has not uploaded yet, close this preview and use Upload to Strava on the ride. This link appears when Strava finishes processing.');
-    dialog.append(heading,close,status,preview,label,message,save,link,instructions,waiting);document.body.append(dialog);
-    const review={id:ride.id,dialog,status,link,waiting,url:null,version:0};this.review=review;this.updateReview(ride);
-    dialog.addEventListener('close',()=>{review.version++;if(review.url)URL.revokeObjectURL(review.url);if(this.review===review)this.review=null;dialog.remove();});
-    const render=async()=>{
-      const version=++review.version;save.disabled=true;message.textContent='Preparing your summary…';
-      try{
-        const blob=await createWorkoutSummary(ride.id,{power:toggle.checked});
-        if(version!==review.version)return;
-        const url=URL.createObjectURL(blob);if(review.url)URL.revokeObjectURL(review.url);review.url=url;
-        preview.src=url;preview.hidden=false;save.disabled=false;message.textContent='Your image is ready.';
-        save.onclick=()=>{saveWorkoutSummary(blob,ride.id);message.textContent='Summary downloaded. Open your Strava ride to attach it.';};
-      }catch(e){if(version===review.version)message.textContent=e.message;}
+    dialog.append(heading,close,status,preview,message,save,link,instructions,waiting);document.body.append(dialog);
+    const review={id:ride.id,dialog,status,link,waiting,version:0};this.review=review;this.updateReview(ride);
+    dialog.addEventListener('close',()=>{review.version++;if(this.review===review)this.review=null;dialog.remove();});
+    const render=()=>{
+      const version=++review.version;save.hidden=true;message.textContent='Loading your server-saved summary…';
+      preview.onload=()=>{if(version!==review.version)return;preview.hidden=false;save.hidden=false;message.textContent='Image saved on the server. Download here or open this app on your Mac to share it.';};
+      preview.onerror=()=>{if(version===review.version){preview.hidden=true;message.textContent='Summary could not be loaded. Try again; your ride files remain on the server.';}};
+      preview.src=workoutSummaryUrl(ride.id);
+      save.href=workoutSummaryUrl(ride.id,{download:true});
     };
-    toggle.onchange=render;dialog.showModal();render();
+    dialog.showModal();render();
   }
   render(container,rides){
     const expanded=new Set([...container.querySelectorAll('article')].filter(row=>row.querySelector('details')?.open).map(row=>row.dataset.rideId));

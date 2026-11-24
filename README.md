@@ -289,3 +289,116 @@ Strava will accept a ride with insufficient sensor data.
 Completed/explicitly ended rides and rides already queued or submitted to Strava
 cannot be automatically reopened. Reconnect errors never create a new recording
 ID. Cancellation with save/post/discard choices is not implemented yet.
+
+### Server event logs
+
+The server uses Node's built-in filesystem APIs (no logging service or extra
+package) to write structured **JSON Lines**: one complete JSON object per line,
+with UTC `timestamp`, `level`, `event`, `service`, `pid`, `schemaVersion`, and
+relevant fields such as `rideId`, retry attempt, or OS error code.
+
+Configuration is `event-log.config.json` in the server's data root. For a checkout
+started with `npm start`, that is the repository root. The installed desktop app
+seeds an editable copy in its user-data folder (on macOS, normally
+`~/Library/Application Support/PelotonicReaction`); use the desktop app's data-folder
+button to locate it. Logs are in `.data/logs/events.jsonl` under that same root.
+
+```json
+{
+  "level": "INFO",
+  "maxFileBytes": 5242880,
+  "retainedFiles": 5,
+  "console": false,
+  "disabledEvents": []
+}
+```
+
+| Level | Included events |
+| --- | --- |
+| `OFF` | No event-file output |
+| `ERROR` | File-write failures, recovery failures, server/recording/queue errors |
+| `WARN` | ERROR plus unexpected disconnections, stale telemetry, session timeouts, upload failures and conflicts |
+| `INFO` | WARN plus connection/reconnection, actual transport attempts, ride start/pause/resume/finalization, upload progress, server start/stop |
+| `DEBUG` | INFO plus FIT checkpoints, segment changes, bridge status/diagnostics, browser connections, upload polling |
+| `FULL` | DEBUG plus successful HTTP request traces and bridge command names; **no raw sensor streams or request bodies** |
+
+Configuration is checked on the next event, at most once every five seconds; no
+restart is needed to change verbosity. Invalid edits retain the last valid settings
+(or safe INFO defaults on startup) and report a throttled error to stderr.
+`disabledEvents` suppresses exact event names. `console: true` also sends emitted
+JSON Lines to stderr. Rotation keeps the active file plus up to four older files
+by default: `events.1.jsonl` is the newest archive. Each file rolls over at roughly
+5 MiB (an individual event remains intact). If logging itself fails, the server
+reports to stderr at most once per minute and continues recording.
+
+Recorded events include:
+
+- `bike.connected`, `bike.connection_lost`, `bike.reconnected`,
+  `bike.reconnect_attempt`, bridge build/exit failures, discovery failures, and
+  blocked Local Network permission. Actual transport attempts are supplied by the
+  updated native bridge; bridge launches and command retries have separate `source`
+  fields.
+- `ride.started`, `ride.paused`, `ride.resumed`, `ride.finalized`,
+  `ride.recording_restored`, `ride.recovered`, `ride.fit_checkpoint`, and failures.
+- `browser.session_timeout`, DEBUG browser connections/disconnections,
+  `telemetry.stale` and `telemetry.restored` (metric names, not sensor values).
+- `fs.write_failed` for ride metadata/journals/FIT exports, workout imports/edits,
+  temporary-file cleanup, and Strava credential persistence.
+- Strava upload queue/start/result/failure, retry scheduling, account mismatch,
+  missing authorization, network errors and HTTP errors.
+- Server lifecycle/errors and HTTP failures; successful requests appear at FULL.
+
+Credentials and sensitive keyed fields are redacted; HTTP query strings, cookies,
+headers, bodies, rider profiles, and raw telemetry are not captured. Logs still
+contain local file paths and ride IDs, so review them before sharing.
+
+Inspect the file in a text editor or, from the data-root directory:
+
+```sh
+tail -f .data/logs/events.jsonl
+# With jq installed, inspect errors or filter for a particular ride:
+jq 'select(.level == "ERROR" or .level == "WARN")' .data/logs/events.jsonl
+jq 'select(.rideId == "YOUR-RIDE-ID")' .data/logs/events*.jsonl
+```
+
+Any log manager accepting JSON Lines can ingest these files. Files are local to
+the Mac/server and are not exposed through the bike's web server. Restart the
+server/app once after installing this change to activate event logging.
+
+### Server-side post-ride summaries
+
+The Mac/server now renders and saves summaries automatically when a recording
+finishes, including interrupted and early-ended rides. It uses `@napi-rs/canvas`
+without launching a browser. The files live beside the FIT and journal:
+
+- `<ride-id>.summary.png`: HR and power traces, always included.
+- `<ride-id>.summary-power.png`: identical compatibility alias for older links.
+- `<ride-id>.summary-cache.json`: cache signature and renderer version.
+
+Recovered recordings are processed on startup. Older rides generate their PNGs
+when first requested. The server invalidates cached images when ride data or the
+shared palette changes. The PNG and its compatibility alias are written atomically; failed image generation
+is logged and does not prevent the separate server-side FIT upload queue from
+running. Images from a resumed ride cannot be published over its newer recording.
+
+`GET /api/rides/<ride-id>/summary.png` displays the server-saved image;
+`?download=1` downloads it. Older `?power=1` links remain supported; both traces are always included. The post-ride
+preview and download links use this endpoint, so the bike does not process the
+recording, render a canvas, or create a local temporary image. The original
+summary JSON endpoint remains available for compatibility.
+
+The FIT upload to Strava remains fully server-side. Attaching the PNG to Strava
+still requires the rider's manual Add Photos step; the app does not have partner
+media-upload access. The saved PNG can be viewed/downloaded from another device
+connected to the same server if tablet file permissions prevent downloads.
+
+### Bike screen activity reminder
+
+Once a ride starts, the timer screen shows a reminder after 15 minutes of wall
+time, including time paused. It does not pause or resume the workout. A physical
+tap, touch, wheel/scroll gesture, or key press acknowledges the visible reminder
+and schedules the next reminder 15 minutes later. Programmatic scrolling cannot
+dismiss it. The schedule is saved with the existing browser session and checked
+immediately when returning to the page; overdue reminders appear once instead of
+stacking multiple alerts. Finishing or leaving a ride clears it. This requests
+rider input; it does not simulate input or disable the bike's inactivity policy.

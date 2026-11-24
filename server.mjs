@@ -1,3 +1,5 @@
+import { RideSummaries } from './lib/ride-summaries.mjs';
+import { EventLogger } from './lib/event-log.mjs';
 import http from 'node:http';
 import os from 'node:os';
 import { readFile, readdir } from 'node:fs/promises';
@@ -14,8 +16,8 @@ import { WorkoutImports } from './lib/workout-imports.mjs';
 import { programKey } from './public/tag-profile.js';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml' };
-export function createAppServer(base = root, { dataRoot = base, helperPath = null, workoutsRoot = path.join(base, 'workouts'), bike, strava = new StravaService(dataRoot), rides = new RideStore(dataRoot) } = {}) {
-  const imports=new WorkoutImports(dataRoot);
+export function createAppServer(base = root, { dataRoot = base, helperPath = null, workoutsRoot = path.join(base, 'workouts'), bike, logger = new EventLogger(dataRoot), strava = new StravaService(dataRoot,{logger}), rides = new RideStore(dataRoot,{logger}) } = {}) {
+  const imports=new WorkoutImports(dataRoot,{logger});
   async function catalog() {
     const {workouts,errors}=await imports.list();
     const files=(await readdir(workoutsRoot)).filter(f=>f.endsWith('.json')).sort();
@@ -29,10 +31,16 @@ export function createAppServer(base = root, { dataRoot = base, helperPath = nul
     if((await catalog()).workouts.some(item=>programKey(item.workout)===programKey(workout)))throw Object.assign(Error('This workout is already saved in the library.'),{status:409});
     return imports.save(workout);
   }
-  const uploads = new RideUploads(rides, strava);
-  bike ??= new BikeService(base, { helperPath, rides, athleteId: () => strava.data?.athleteId || strava.data?.profile?.athleteId || null, onFinish: ride => uploads.complete(ride) });
-  if (bike.recorder) bike.recorder.onFinish = ride => uploads.complete(ride);
+  const uploads = new RideUploads(rides, strava,{logger});
+  const summaries=new RideSummaries(rides,{assetsRoot:path.join(base,'public','assets'),logger});
+  const finishRide=ride=>{summaries.complete(ride);uploads.complete(ride);};
+  bike ??= new BikeService(base, { logger, helperPath, rides, athleteId: () => strava.data?.athleteId || strava.data?.profile?.athleteId || null, onFinish: finishRide });
+  bike.logger=logger;strava.logger=logger;if(bike.recorder)bike.recorder.logger=logger;rides.logger=logger;
+  if (bike.recorder) bike.recorder.onFinish = finishRide;
   const server = http.createServer(async (req, res) => {
+    const started=performance.now();
+    const route=req.url?.split('?')[0].replace(/[^a-zA-Z0-9/_.-]/g,'').slice(0,200);
+    res.on('finish',()=>logger.event(res.statusCode>=500?'ERROR':res.statusCode>=400?'WARN':'FULL','http.request',{method:req.method,path:route,status:res.statusCode,durationMs:Math.round(performance.now()-started)}));
     const send = (status, text, type = 'application/json; charset=utf-8') => { res.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer' }); res.end(req.method === 'HEAD' ? '' : text); };
     try {
       const url = new URL(req.url, 'http://localhost');
@@ -77,10 +85,15 @@ export function createAppServer(base = root, { dataRoot = base, helperPath = nul
         } catch(error) {return send(error.status||400,JSON.stringify({error:error.message}));}
       }
       if (url.pathname === '/api/rides' && req.method === 'GET') return send(200, JSON.stringify({ rides: rides.list() }));
-      const rideRoute = url.pathname.match(/^\/api\/rides\/([a-zA-Z0-9-]{8,80})\/(fit|upload|summary)$/);
+      const rideRoute = url.pathname.match(/^\/api\/rides\/([a-zA-Z0-9-]{8,80})\/(fit|upload|summary|summary\.png)$/);
       if (rideRoute) {
         const [,id,action] = rideRoute;
         try {
+          if(action==='summary.png'&&['GET','HEAD'].includes(req.method)){
+            const image=await summaries.png(id,{power:url.searchParams.get('power')==='1'});
+            if(url.searchParams.get('download')==='1')res.setHeader('Content-Disposition',`attachment; filename="pelotonic-${id}-summary${url.searchParams.get('power')==='1'?'-power':''}.png"`);
+            return send(200,image,'image/png');
+          }
           if(action === 'summary' && req.method === 'GET') {
             const ride=rides.get(id);
             if(ride.state==='recording') return send(409,JSON.stringify({error:'Finish the ride first.'}));
@@ -100,7 +113,7 @@ export function createAppServer(base = root, { dataRoot = base, helperPath = nul
             uploads.queue(ride,true);return send(202,JSON.stringify({ride}));
           }
           return send(405,'{}');
-        }catch(error){return send(error.status||500,JSON.stringify({error:error.status?error.message:'Unable to load the saved ride.'}));}
+        }catch(error){if(!error.status||error.status>=500)logger.event('ERROR','ride.request_failed',{rideId:id,action,error});return send(error.status||500,JSON.stringify({error:error.status?error.message:'Unable to load the saved ride.'}));}
       }
       if (url.pathname.startsWith('/api/strava/')) {
         if (url.pathname === '/api/strava/callback' && req.method === 'GET') {
@@ -132,9 +145,9 @@ export function createAppServer(base = root, { dataRoot = base, helperPath = nul
         if (!client || !/^[a-zA-Z0-9-]{8,80}$/.test(client)) return send(400, '{}');
         res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no' });
         const unsubscribe = bike.subscribe(value => res.write(`data: ${JSON.stringify(value)}\n\n`));
-        bike.touch(client);
+        bike.touch(client);logger.event('DEBUG','browser.connected',{clientId:client});
         const heartbeat = setInterval(() => { bike.touch(client); res.write(': heartbeat\n\n'); }, 15000);
-        res.on('close', () => { clearInterval(heartbeat); unsubscribe(); });
+        res.on('close', () => { clearInterval(heartbeat); unsubscribe();logger.event('DEBUG','browser.disconnected',{clientId:client}); });
         return;
       }
       if (url.pathname === '/api/bike/session' && req.method === 'POST') {
@@ -153,7 +166,7 @@ export function createAppServer(base = root, { dataRoot = base, helperPath = nul
           else if (['average', 'address', 'timing'].includes(body.action)) bike.configure(body.client, body);
           else return send(400, '{}');
           return send(200, JSON.stringify({ ok: true }));
-        } catch (error) { return send(error.status || 500, JSON.stringify({ error: error.message, code: error.code })); }
+        } catch (error) {logger.event(error.status&&error.status<500?'WARN':'ERROR','bike.command_failed',{action:body.action,rideId:body.rideId,error});return send(error.status || 500, JSON.stringify({ error: error.message, code: error.code })); }
       }
       if (!['GET', 'HEAD'].includes(req.method)) return send(405, JSON.stringify({ error: 'Read-only server.' }));
       if (url.pathname === '/api/server-addresses') {
@@ -172,18 +185,22 @@ export function createAppServer(base = root, { dataRoot = base, helperPath = nul
       if (!target.startsWith(publicRoot + path.sep)) return send(403, '{}');
       try { return send(200, await readFile(target), mime[path.extname(target)] || 'application/octet-stream'); }
       catch (e) { if (['ENOENT', 'EISDIR', 'ENOTDIR'].includes(e.code)) return send(404, JSON.stringify({ error: 'Not found.' })); throw e; }
-    } catch { return send(500, JSON.stringify({ error: 'Unable to load this request.' })); }
+    } catch(error) { logger.event('ERROR','server.request_failed',{method:req.method,path:route,error});return send(500, JSON.stringify({ error: 'Unable to load this request.' })); }
   });
-  server.on('close', () => { bike.close(); uploads.close(); });
+  server.logger=logger;server.summaries=summaries;summaries.recover();
+  server.on('listening',()=>logger.event('INFO','server.started',{address:server.address(),logFile:logger.file}));
+  server.on('error',error=>logger.event('ERROR','server.error',{error}));
+  server.on('close', () => { bike.close(); uploads.close();logger.event('INFO','server.stopped'); });
   return server;
 }
 if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
   const value = (flag, fallback) => { const i = process.argv.indexOf(flag); return i === -1 ? fallback : process.argv[i + 1]; };
   const port = Number(value('--port', process.env.PORT || 8080));
   const host = value('--host', '127.0.0.1');
-  if (!Number.isInteger(port) || port < 1 || port > 65535) { console.error('Choose a port from 1 to 65535.'); process.exit(1); }
-  const strava = new StravaService(root, { env: { ...await stravaEnvironment(root), PORT: String(port) } });
-  const server = createAppServer(root, { strava });
+  const logger=new EventLogger(root);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {logger.event('ERROR','server.startup_failed',{message:'Invalid server port.'});console.error('Choose a port from 1 to 65535.'); process.exit(1); }
+  const strava = new StravaService(root, {logger, env: { ...await stravaEnvironment(root), PORT: String(port) } });
+  const server = createAppServer(root, { strava,logger });
   void strava.refresh();
   server.on('error', e => { console.error(`Cannot start server: ${e.message}`); process.exitCode = 1; });
   server.listen(port, host, () => console.log(`PelotonicReaction: http://${host === '0.0.0.0' ? 'localhost' : host}:${port}\n${host === '0.0.0.0' ? 'LAN sharing enabled. Open this computer’s LAN IP and port on another device.' : 'Local access. Use --host 0.0.0.0 to allow other devices on your network.'}`));

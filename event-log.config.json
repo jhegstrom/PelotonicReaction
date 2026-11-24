@@ -1,0 +1,7 @@
+{
+  "level": "INFO",
+  "maxFileBytes": 5242880,
+  "retainedFiles": 5,
+  "console": false,
+  "disabledEvents": []
+}

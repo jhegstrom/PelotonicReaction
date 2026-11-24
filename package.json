@@ -18,7 +18,8 @@
     "package:verify": "node scripts/verify-package.mjs"
   },
   "dependencies": {
-    "@garmin/fitsdk": "^21.221.0"
+    "@garmin/fitsdk": "^21.221.0",
+    "@napi-rs/canvas": "^1.2.0"
   },
   "devDependencies": {
     "electron": "45.3.2",

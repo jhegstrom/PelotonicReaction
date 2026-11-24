@@ -32,7 +32,7 @@ const project=path.join(staging,'project'),output=path.join(staging,'artifacts')
 try {
   mkdirSync(project,{recursive:true});
   // pkg XML also embeds resource paths, so stage both input and output paths.
-  for(const name of ['desktop','lib','public','workouts','server.mjs','package.json','package-lock.json','.env.example','README.md','packaging'])cpSync(path.join(root,name),path.join(project,name),{recursive:true});
+  for(const name of ['desktop','lib','public','workouts','server.mjs','event-log.config.json','package.json','package-lock.json','.env.example','README.md','packaging'])cpSync(path.join(root,name),path.join(project,name),{recursive:true});
   if(platform==='mac')cpSync(path.join(root,'.packaging/helper'),path.join(project,'.packaging/helper'),{recursive:true});
   symlinkSync(path.join(root,'node_modules'),path.join(project,'node_modules'),process.platform==='win32'?'junction':'dir');
   execFileSync(process.execPath,[builder,'--projectDir',project,'--config','packaging/electron-builder.cjs','--config.directories.output='+output,'--'+platform,'--'+arch,...(process.argv.includes('--dir')?['--dir']:[]),'--publish','never'],{cwd:project,stdio:'inherit'});

@@ -1,3 +1,4 @@
+import { EventLogger } from '../lib/event-log.mjs';
 import { app, BrowserWindow, ipcMain, Menu, shell } from 'electron';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -9,7 +10,7 @@ import { prepareUserData, desktopPort } from './paths.mjs';
 const appRoot=fileURLToPath(new URL('..',import.meta.url));
 app.setName('PelotonicReaction');
 if(process.env.PELOTONIC_DATA_DIR)app.setPath('userData',path.resolve(process.env.PELOTONIC_DATA_DIR));
-let window,server,quitting=false;
+let window,server,logger,quitting=false;
 let state={ready:false,message:'Starting workout server…',urls:[],dataRoot:app.getPath('userData'),platform:process.platform};
 const push=()=>window?.webContents.send('server-state',state);
 if(!app.requestSingleInstanceLock())app.quit();
@@ -30,17 +31,19 @@ else {
     window.once('ready-to-show',()=>window.show());
     await window.loadFile(path.join(appRoot,'desktop/index.html'));
     try {
+      logger=new EventLogger(state.dataRoot);
       const {dataRoot,workoutsRoot}=await prepareUserData(appRoot,state.dataRoot);
       const port=desktopPort(process.env);
-      const strava=new StravaService(dataRoot,{env:{...await stravaEnvironment(dataRoot),PORT:String(port)}});
+      const strava=new StravaService(dataRoot,{logger,env:{...await stravaEnvironment(dataRoot),PORT:String(port)}});
       const helperPath=app.isPackaged&&process.platform==='darwin'?path.join(process.resourcesPath,'bike-helper','Grupetto Bridge.app','Contents','MacOS','GrupettoWiFi'):null;
-      server=createAppServer(appRoot,{dataRoot,workoutsRoot,helperPath,strava});
+      server=createAppServer(appRoot,{dataRoot,workoutsRoot,helperPath,strava,logger});
       await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,'0.0.0.0',resolve);});
       const addresses=[...new Set(Object.values(os.networkInterfaces()).flat().filter(i=>i?.family==='IPv4'&&!i.internal).map(i=>i.address))];
       state={...state,ready:true,message:'Workout server is running.',urls:[`http://localhost:${port}`,...addresses.map(ip=>`http://${ip}:${port}`)]};push();
       void strava.refresh();
       server.on('error',()=>{state={...state,ready:false,message:'The workout server stopped. Quit and reopen the app.'};push();});
     } catch(e) {
+      logger?.event('ERROR','server.startup_failed',{error:e});
       state={...state,ready:false,message:e.code==='EADDRINUSE'?'Port is already in use. Stop the command-line workout server, then quit and reopen this app.':'The workout server could not start. Check the data-folder permissions and configuration.'};
       server?.close();push();
     }

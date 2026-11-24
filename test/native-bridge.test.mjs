@@ -20,6 +20,7 @@ test('native bridge runs headlessly, accepts commands, and exits on parent EOF',
   await ready;
   assert.equal(snapshots.at(-1).connected, false);
   assert.deepEqual(snapshots.at(-1).metrics, {});
+  assert.equal(snapshots.at(-1).connectionAttempts,0);
   const exit = new Promise(resolve => child.once('exit', resolve));
   child.stdin.end();
   assert.equal(await exit, 0);
