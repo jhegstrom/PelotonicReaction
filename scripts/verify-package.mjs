@@ -4,7 +4,7 @@ import path from 'node:path';
 const archive=process.argv[2];if(!archive)throw Error('Pass the path to app.asar.');
 const entries=listPackage(archive).map(n=>n.replace(/^\//,''));
 for(const n of entries)if(/(^|\/)(\.env|\.git|\.data|\.build)(\/|$)/.test(n)||/\.(xlsx|p12|pfx|key)$/.test(n))throw Error('Private/build file in package: '+n);
-for(const required of ['server.mjs','desktop/main.mjs','public/index.html','node_modules/@garmin/fitsdk/src/index.js'])if(!entries.includes(required))throw Error('Missing packaged file: '+required);
+for(const required of ['event-log.config.json','server.mjs','desktop/main.mjs','public/index.html','node_modules/@garmin/fitsdk/src/index.js','node_modules/@napi-rs/canvas/index.js'])if(!entries.includes(required))throw Error('Missing packaged file: '+required);
 // Refuse an installer containing this checkout's configured secret.
 let secret;
 try{secret=(await readFile('.env','utf8')).match(/^\s*STRAVA_CLIENT_SECRET\s*=\s*["']?([^\s"']+)/m)?.[1];}catch{}

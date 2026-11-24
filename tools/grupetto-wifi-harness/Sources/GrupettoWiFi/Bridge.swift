@@ -12,7 +12,7 @@ enum TelemetryBridge {
         var value: [String: Any] = ["status": monitor.status, "connected": monitor.active,
             "epoch": epoch, "noBike": monitor.showConnectionDialog, "metrics": readings,
             "powerAverage": NSNull(), "averagingSeconds": averagingSeconds,
-            "notificationCount": monitor.packets]
+            "notificationCount": monitor.packets, "connectionAttempts": monitor.connectionAttempts]
         if let average = monitor.displayReading("Power", averagingSeconds: averagingSeconds) { value["powerAverage"] = average.value }
         return value
     }

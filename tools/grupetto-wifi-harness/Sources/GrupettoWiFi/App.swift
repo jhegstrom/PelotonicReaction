@@ -23,6 +23,7 @@ final class Monitor: ObservableObject {
     }
     private var retryAt = Date.distantPast
     private var failures = 0
+    private(set) var connectionAttempts = 0
     private var housekeeping: Timer?
     private var searchStarted = Date()
     private var attemptedConnection = false
@@ -145,7 +146,7 @@ final class Monitor: ObservableObject {
     }
     private func open(_ endpoint: NWEndpoint) {
         closeTransport()
-        attemptedConnection = true; showConnectionDialog = false
+        attemptedConnection = true; showConnectionDialog = false; connectionAttempts += 1
         sequence = 0; attemptStarted = Date()
         let token = generation
         status = failures == 0 ? "Connecting…" : "Reconnecting…"

@@ -1,3 +1,4 @@
+import { RideScreenReminder } from './screen-reminder.js';
 import { segmentStyle, targetVisual } from './workout-visuals.js';
 import { programKey } from './tag-profile.js';
 import { distanceUnit, formatRouteLabel } from './measurement-units.js';
@@ -13,6 +14,8 @@ import { TagControls } from './tag-controls.js';
 const $ = id => document.getElementById(id);
 const key = 'pelotonic-reaction-session-v1';
 const bikePanel = new BikePanel();
+const screenReminder=new RideScreenReminder($('screen-reminder'),{onShow:()=>{if($('sound').checked)tone(660,.2);}});
+for(const type of ['pointerdown','touchstart','wheel','keydown'])document.addEventListener(type,event=>screenReminder.handleInteraction(event),{capture:true,passive:true});
 let previewDistanceKm = null;
 const terrainView = new TerrainView($('terrain-view'), { onPreview: distance => { previewDistanceKm = distance; } });
 let mapWorkout = false, lastRouteDistance = null, distanceSessionId = null, distanceOffsetKm = 0;
@@ -37,7 +40,7 @@ function ask(title, message, action = 'Continue') {
     $('dialog-ok').onclick = () => done(true); $('dialog-cancel').onclick = () => done(false); dialog.oncancel = event => { event.preventDefault(); done(false); }; dialog.showModal();
   });
 }
-function saveSession() { if (clock && selected) storageSet(key, { workout: rawSelected, elapsed: clock.read(), completed, rideId: bikePanel.rideId, routeDistance: lastRouteDistance, distanceSessionId, distanceOffsetKm }); }
+function saveSession() { if (clock && selected) storageSet(key, { workout: rawSelected, elapsed: clock.read(), completed, rideId: bikePanel.rideId, routeDistance: lastRouteDistance, distanceSessionId, distanceOffsetKm,screenReminder:screenReminder.snapshot() }); }
 async function releaseWake() { try { await wake?.release(); } catch {} wake = null; $('sleep-status').textContent = ''; }
 async function holdWake() {
   if (!clock?.running || document.visibilityState !== 'visible') return;
@@ -202,8 +205,9 @@ async function selectWorkout(raw, elapsed = 0, rideId = null, savedDistance = nu
   $('route-heading').textContent = mapWorkout ? 'Explore the route' : 'The route ahead';
   $('route-table-toggle').hidden = !mapWorkout; $('route-table-toggle').textContent = 'Show workout blocks';
   $('timeline').hidden = mapWorkout; $('schedule').hidden = mapWorkout;
-  buildSchedule(); render(); saveSession();
+  buildSchedule();
   if (elapsed > 0 && !completed) bikePanel.begin();
+  screenReminder.restore(savedDistance?.screenReminder);render();saveSession();
   window.scrollTo({ top: 0 });
 }
 async function jump(index) {
@@ -224,6 +228,7 @@ async function toggle() {
 }
 let renderedUnit = null, renderedProfile = null;
 function render() {
+  screenReminder.update({rideId:bikePanel.rideId,started:!!selected&&!completed&&bikePanel.desired&&!!clock&&(clock.running||clock.read()>0)});
   if (renderedUnit !== bikePanel.unit || renderedProfile !== bikePanel.profile) {renderedUnit=bikePanel.unit;renderedProfile=bikePanel.profile;terrainView.setUnits(bikePanel.unit);renderLibrary();if(selected){buildSchedule();currentIndex=-1;$('total-label').textContent=distanceMode()?formatDistance(selected.totalDistanceMeters,bikePanel.unit):formatTime(selected.totalSeconds);}}
   if (!selected || !clock) return;
   terrainView.setPreviewAllowed(!clock.running && clock.read() === 0 && !bikePanel.desired);
