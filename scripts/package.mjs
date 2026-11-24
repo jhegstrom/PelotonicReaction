@@ -1,3 +1,4 @@
+import { createBuildInfo } from '../lib/build-info.mjs';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync, copyFileSync, mkdtempSync, cpSync, rmSync, readdirSync, symlinkSync } from 'node:fs';
 import path from 'node:path';
@@ -5,6 +6,8 @@ import { createHash } from 'node:crypto';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('..', import.meta.url));
+const buildInfo=createBuildInfo(root);
+if(process.env.GITHUB_REF_TYPE==='tag'&&process.env.GITHUB_REF_NAME!==`v${buildInfo.version}`)throw Error(`Release tag ${process.env.GITHUB_REF_NAME} does not match package.json version ${buildInfo.version}.`);
 process.chdir(root);
 const platform = process.argv[2] || ({ darwin: 'mac', win32: 'win', linux: 'linux' }[process.platform]);
 if (!['mac', 'win', 'linux'].includes(platform)) throw Error('Choose mac, win or linux.');
@@ -33,9 +36,10 @@ try {
   mkdirSync(project,{recursive:true});
   // pkg XML also embeds resource paths, so stage both input and output paths.
   for(const name of ['desktop','lib','public','workouts','server.mjs','event-log.config.json','package.json','package-lock.json','.env.example','README.md','packaging'])cpSync(path.join(root,name),path.join(project,name),{recursive:true});
+  writeFileSync(path.join(project,'build-info.json'),JSON.stringify(buildInfo,null,2)+'\n');
   if(platform==='mac')cpSync(path.join(root,'.packaging/helper'),path.join(project,'.packaging/helper'),{recursive:true});
   symlinkSync(path.join(root,'node_modules'),path.join(project,'node_modules'),process.platform==='win32'?'junction':'dir');
-  execFileSync(process.execPath,[builder,'--projectDir',project,'--config','packaging/electron-builder.cjs','--config.directories.output='+output,'--'+platform,'--'+arch,...(process.argv.includes('--dir')?['--dir']:[]),'--publish','never'],{cwd:project,stdio:'inherit'});
+  execFileSync(process.execPath,[builder,'--projectDir',project,'--config','packaging/electron-builder.cjs','--config.directories.output='+output,...(buildInfo.buildNumber?['--config.buildVersion='+buildInfo.buildNumber]:[]),'--'+platform,'--'+arch,...(process.argv.includes('--dir')?['--dir']:[]),'--publish','never'],{cwd:project,stdio:'inherit'});
   function verify(dir){for(const entry of readdirSync(dir,{withFileTypes:true})){const file=path.join(dir,entry.name);if(entry.isDirectory()){if(platform==='mac'&&entry.name.endsWith('.app'))run('codesign',['--verify','--deep','--strict',file]);verify(file);}else if(entry.name==='app.asar')run(process.execPath,[path.join(root,'scripts/verify-package.mjs'),file]);}}
   verify(output);
   const destination=path.join(root,'dist');mkdirSync(destination,{recursive:true});

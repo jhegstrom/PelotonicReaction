@@ -3,7 +3,7 @@ module.exports={
   appId:'com.pelotonicreaction.desktop',productName:'PelotonicReaction',asar:true,
   directories:{output:'dist',buildResources:'packaging'},
   artifactName:'${productName}-${version}-${os}-${arch}.${ext}',
-  files:['desktop/**','lib/**','public/**','workouts/*.json','server.mjs','event-log.config.json','package.json','.env.example','README.md',
+  files:['desktop/**','lib/**','public/**','workouts/*.json','server.mjs','event-log.config.json','build-info.json','package.json','.env.example','README.md',
     '!**/.env','!**/.data/**','!**/.git/**','!**/.build/**','!**/*.log'],
   asarUnpack:['node_modules/@napi-rs/canvas-*/**'],
   npmRebuild:false,

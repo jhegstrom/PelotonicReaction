@@ -1,3 +1,4 @@
+import { readBuildInfo } from '../lib/build-info.mjs';
 import { EventLogger } from '../lib/event-log.mjs';
 import { app, BrowserWindow, ipcMain, Menu, shell } from 'electron';
 import { fileURLToPath } from 'node:url';
@@ -8,15 +9,17 @@ import { StravaService } from '../lib/strava-service.mjs';
 import { stravaEnvironment } from '../lib/strava-config.mjs';
 import { prepareUserData, desktopPort } from './paths.mjs';
 const appRoot=fileURLToPath(new URL('..',import.meta.url));
+const buildInfo=readBuildInfo(appRoot);
 app.setName('PelotonicReaction');
 if(process.env.PELOTONIC_DATA_DIR)app.setPath('userData',path.resolve(process.env.PELOTONIC_DATA_DIR));
 let window,server,logger,quitting=false;
-let state={ready:false,message:'Starting workout server…',urls:[],dataRoot:app.getPath('userData'),platform:process.platform};
+let state={ready:false,message:'Starting workout server…',urls:[],dataRoot:app.getPath('userData'),platform:process.platform,buildInfo};
 const push=()=>window?.webContents.send('server-state',state);
 if(!app.requestSingleInstanceLock())app.quit();
 else {
   app.on('second-instance',()=>{window?.show();window?.focus();});
   app.whenReady().then(async()=>{
+    app.setAboutPanelOptions({applicationName:'PelotonicReaction',applicationVersion:buildInfo.version,version:buildInfo.buildNumber||'development',credits:`Commit: ${buildInfo.commit?.slice(0,8)||'unavailable'}${buildInfo.dirty?' (modified)':''}${buildInfo.builtAt?' · Built '+buildInfo.builtAt:''}`});
     Menu.setApplicationMenu(Menu.buildFromTemplate([{label:'PelotonicReaction',submenu:[{role:'about'},{type:'separator'},{role:'quit'}]},{role:'editMenu'},{role:'windowMenu'}]));
     window=new BrowserWindow({width:670,height:640,minWidth:540,minHeight:520,title:'PelotonicReaction',backgroundColor:'#11171c',show:false,
       icon:path.join(appRoot,'public/assets/pelotonicreaction-logo-512.png'),

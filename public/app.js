@@ -1,3 +1,4 @@
+import { startWorkout } from './workout-start.js';
 import { RideScreenReminder } from './screen-reminder.js';
 import { segmentStyle, targetVisual } from './workout-visuals.js';
 import { programKey } from './tag-profile.js';
@@ -12,6 +13,7 @@ import { normalizeTags } from './tags.js';
 import { BikePanel } from './bike-panel.js';
 import { TagControls } from './tag-controls.js';
 const $ = id => document.getElementById(id);
+fetch('/api/version').then(response=>{if(!response.ok)throw Error();return response.json();}).then(build=>{const label=$('server-version');label.textContent=`Server v${build.version} · Build ${build.buildNumber||'development'}${build.commit?' · '+build.commit.slice(0,8):''}${build.dirty?' · modified':''}`;label.title=build.builtAt?`Built ${build.builtAt}`:'';}).catch(()=>{$('server-version').textContent='Server version unavailable';});
 const key = 'pelotonic-reaction-session-v1';
 const bikePanel = new BikePanel();
 const screenReminder=new RideScreenReminder($('screen-reminder'),{onShow:()=>{if($('sound').checked)tone(660,.2);}});
@@ -223,7 +225,7 @@ async function toggle() {
   terrainView.stopPreview();
   if (completed) { resetDistance(); document.body.classList.remove('workout-completed'); clock.seek(0); completed = false; currentIndex = -1; lastCue = ''; render(); }
   if (clock.running) { clock.pause(); if ('speechSynthesis' in window) speechSynthesis.cancel(); await releaseWake(); }
-  else { bikePanel.begin(); await enableAudio(); clock.start(clock.read() === 0 ? 10 : 0); holdWake(); const p = ridePosition(); if (!clock.countdownRemaining && !p.done && p.index === currentIndex) announce(selected.intervals[p.index]); }
+  else { startWorkout(clock,{begin:()=>bikePanel.begin(),enableAudio}); holdWake(); const p = ridePosition(); if (!clock.countdownRemaining && !p.done && p.index === currentIndex) announce(selected.intervals[p.index]); }
   render(); saveSession();
 }
 let renderedUnit = null, renderedProfile = null;
